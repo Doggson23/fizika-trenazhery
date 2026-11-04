@@ -260,6 +260,13 @@
           }
         }
       }
+    },
+    "grading": {
+      "enum": [
+        "client",
+        "server"
+      ],
+      "description": "server — ключей и решений на странице нет, их держит Code_v2.gs (собирает build_v2.py из kit/tren_site/tests_private/)"
     }
   },
   "description": "Решения — отдельным файлом tests/<id>.solutions.json: {id, solutions: {\"<n>\": {answer, html}}}; движок загружает его только после финальной попытки (Т2/Т3). Формулы в решениях — $…$ (KaTeX из assets/katex)."

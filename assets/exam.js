@@ -56,12 +56,15 @@
     // второй приём (Code_v2.gs: финальная попытка, работа над ошибками, рейтинг); пусто — прежний приём
     const V2 = (window.TR_ENDPOINT_V2 || '').trim(), ENDPOINT = V2 || (window.TR_ENDPOINT || '').trim();
     const EXAM = !T1;                                      // Т2/Т3: финальная попытка и решения
+    // grading: server — ключей на странице нет: баллы, вердикты и (после финальной) решения присылает Code_v2.gs
+    const SERVER = X.grading === 'server';
+    const gr = (t, a) => SERVER ? ((st.res && st.res[t.n]) || {pts: 0, status: String(a == null ? '' : a).trim() ? 'wait' : 'none', note: 'Проверка — после отправки учителю.'}) : check(t, a);
     const TYPE_LABEL = {'exam-topic': 'Т1 · тренажёр по темам', 'exam-section': 'Т2 · тест по разделу', 'exam-mock': 'Т3 · пробник', 'dz': 'ДЗ'};
     document.title = X.title;
 
     // final — ученик назвал попытку финальной; closed — попытки закончены, открыты решения; fix — «работа над ошибками» по номерам
     let st = {name: '', a: {}, chk: {}, photos: {}, attempt: 1, id: uid(), done: false, sentOk: false, limit: false, sent: [], t0: null,
-      final: false, closed: false, fix: {}, rating: null, finalId: ''};
+      final: false, closed: false, fix: {}, rating: null, finalId: '', res: null, sol: null};
     try { const s = localStorage.getItem(KEY); if (s) st = Object.assign(st, JSON.parse(s)); } catch (e) {}
     const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { flash('Не хватает места на устройстве: удалите лишние фото.', 'bad'); } };
 
@@ -70,12 +73,12 @@
     function statusOf(t){
       const a = st.a[t.n], ph = (st.photos[t.n] || []).length;
       if (!shown(t)) return (a && String(a).trim()) || ph ? 'filled' : 'none';
-      const r = check(t, T1 ? st.chk[t.n] : a);
+      const r = gr(t, T1 ? st.chk[t.n] : a);
       if (t.kind === 'text' && (a || ph)) return 'wait';
       if (r.status === 'none' && ph) return 'wait';
       return r.status;
     }
-    function rows(){ return T.map(t => { const r = check(t, st.a[t.n]);
+    function rows(){ return T.map(t => { const r = gr(t, st.a[t.n]);
       return {t, n: t.n, topic: t.topic, max: t.pts, ans: st.a[t.n] || '', auto: isAuto(t), pts: isAuto(t) ? r.pts : (r.ok ? t.pts : 0), ok: r.ok, status: st.done || !T1 ? statusOf(t) : statusOf(t), photos: (st.photos[t.n] || []).length}; }); }
     function totals(rs){ const p1 = rs.filter(r => r.auto).reduce((a, r) => a + r.pts, 0), p2 = rs.filter(r => !r.auto).reduce((a, r) => a + r.pts, 0); return {p1, p2, pt: p1 + p2}; }
     const maxAuto = T.filter(isAuto).reduce((a, t) => a + t.pts, 0), maxMan = MAXPTS - maxAuto;
@@ -127,8 +130,8 @@
 
     // ---------- решения после финальной попытки + «Выполнил работу над ошибками»
     let SOL = null;
-    const keyText = t => t.kind === 'text' ? 'см. решение' : String(t.key) + (t.unit ? ' ' + t.unit : '');
-    const needsFix = t => { const r = check(t, st.a[t.n]); return !(r.status === 'ok' || r.ok === true); };
+    const keyText = t => t.kind === 'text' || t.key == null ? 'см. решение' : String(t.key) + (t.unit ? ' ' + t.unit : '');
+    const needsFix = t => { const r = gr(t, st.a[t.n]); return !(r.status === 'ok' || r.ok === true); };
     function renderSol(t){
       const box = $('sol-' + t.n); if (!box) return;
       const s = SOL && SOL[t.n];
@@ -138,7 +141,8 @@
       box.innerHTML = h; box.hidden = false;
     }
     async function openSolutions(){
-      try { const r = await fetch('tests/' + X.id + '.solutions.json', {cache: 'no-cache'}); SOL = r.ok ? (await r.json()).solutions : {}; } catch (e) { SOL = {}; }
+      if (SERVER) SOL = st.sol || {};
+      else try { const r = await fetch('tests/' + X.id + '.solutions.json', {cache: 'no-cache'}); SOL = r.ok ? (await r.json()).solutions : {}; } catch (e) { SOL = {}; }
       T.forEach(renderSol); renderRes(); typeset();
     }
     function typeset(){
@@ -159,7 +163,7 @@
     function showMsg(t){
       const m = $('msg-' + t.n); if (!m) return;
       if (!shown(t)) { m.className = 'msg'; return; }
-      const a = T1 ? st.chk[t.n] : st.a[t.n], r = check(t, a), ph = (st.photos[t.n] || []).length;
+      const a = T1 ? st.chk[t.n] : st.a[t.n], r = gr(t, a), ph = (st.photos[t.n] || []).length;
       if (T1 && String(st.a[t.n] || '') !== String(st.chk[t.n] || '')) { m.className = 'msg info'; m.textContent = 'Ответ изменён после проверки — нажмите «Проверить» ещё раз.'; return; }
       if (!a && !ph) { m.className = 'msg'; return; }
       if (t.kind === 'text') { m.className = 'msg info'; m.textContent = 'Сохранено. Объяснение проверит учитель по фото (до ' + balls(t.pts) + ').'; return; }
@@ -245,9 +249,17 @@
       if (c) doCheck([+c]);
       if (cb != null) doCheck(X.blocks[+cb].tasks.map(t => t.n));
     });
-    function doCheck(ns){
-      let empty = 0;
-      ns.forEach(n => { const v = st.a[n] || ''; if (!String(v).trim() && !(st.photos[n] || []).length) { empty++; return; } st.chk[n] = v; showMsg(byN(n)); });
+    async function doCheck(ns){
+      let empty = 0; const go = [];
+      ns.forEach(n => { const v = st.a[n] || ''; if (!String(v).trim() && !(st.photos[n] || []).length) { empty++; return; } go.push(n); });
+      if (SERVER && go.length) {                         // ключей на странице нет — спрашиваем сервер, он ничего не записывает
+        if (!V2) { flash('Проверка ответов работает через сервер учителя, а он пока не подключён.', 'bad'); return; }
+        go.forEach(n => { const m = $('msg-' + n); if (m) { m.className = 'msg info'; m.textContent = 'Проверяю…'; } });
+        try { const r = await (await fetch(V2, {method: 'POST', body: JSON.stringify({v: 2, kind: 'check', trainer: X.trainer || X.id, answers: Object.fromEntries(go.map(n => [n, st.a[n] || '']))}), redirect: 'follow'})).json();
+          if (!r.ok) throw new Error(r.error); st.res = Object.assign(st.res || {}, r.results);
+        } catch (e) { go.forEach(n => { const m = $('msg-' + n); if (m) { m.className = 'msg bad'; m.textContent = 'Нет связи с сервером — проверьте интернет и нажмите «Проверить» ещё раз.'; } }); return; }
+      }
+      go.forEach(n => { st.chk[n] = st.a[n] || ''; showMsg(byN(n)); });
       save(); refresh();
       if (ns.length === 1 && empty) { const m = $('msg-' + ns[0]); m.className = 'msg info'; m.textContent = 'Сначала введите ответ.'; }
     }
@@ -286,7 +298,7 @@
       rs.forEach(r => cols.push(['№' + r.n, (r.ans || '—') + (r.auto ? ' · ' + r.pts + '/' + r.max : (r.ans && (r.t.kind === 'calc' || r.t.kind === 'exp') ? (r.ok ? ' · ответ верный' : ' · ответ не совпал') : '')) + (r.photos ? ' · фото ' + r.photos : '')]));
       const photos = {}; T.filter(hasPhoto).forEach(t => { if ((st.photos[t.n] || []).length) photos[t.n] = st.photos[t.n]; });
       return {v: 1, id: st.id, trainer: X.trainer || X.id, sheet: X.sheet || X.title, name: st.name.trim(), client_attempt: st.attempt,
-        type: X.type, check_mode: MODE, max_attempts: MAXATT, final: !!st.final,
+        type: X.type, check_mode: MODE, max_attempts: MAXATT, final: !!st.final, test: X.id, answers: st.a,
         cols: cols.map(c => ({h: c[0], v: c[1]})), autoCol: 'Часть 1 (авто)', prelimCol: 'Предв. итог',
         teacher: T.filter(t => !isAuto(t)).map(t => ({h: '№' + t.n + ' учитель', max: t.pts})),
         scale: thr.map(x => x[0]).sort((a, b) => a - b), photos};
@@ -306,11 +318,13 @@
         st.done = true; st.doneAt = Date.now(); save(); renderAll();
         $('resCard').scrollIntoView({behavior: 'smooth', block: 'start'});
       } else if (T1 && !confirm('Отправить учителю текущие ответы?')) return;
-      if (!ENDPOINT) { flash('Отправка пока не настроена. Нажмите «Скачать отчёт» и пришлите файл учителю.', 'info'); if (st.final) closeAttempts(); return; }
+      if (!ENDPOINT) { flash('Отправка пока не настроена. Нажмите «Скачать отчёт» и пришлите файл учителю.', 'info'); if (st.final && !SERVER) closeAttempts(); return; }
       const btn = $('send'); btn.disabled = true; btn.textContent = 'Отправляю…'; flash('Отправляю ответы' + (Object.keys(st.photos).some(k => st.photos[k].length) ? ' и фото' : '') + '…', 'info');
       const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 90000);
       try {
         const res = await fetch(ENDPOINT, {method: 'POST', body: JSON.stringify(payload()), signal: ctl.signal, redirect: 'follow'}), r = await res.json();
+        if (r.results) st.res = r.results; if (r.solutions) st.sol = r.solutions;
+        if (SERVER && r.ok && !r.results) flash('Ответы отправлены, но проверка на сервере не подключена — баллы посчитает учитель.', 'info');
         if (r.ok) {
           st.attempt = r.attempt || st.attempt; st.sent.push({attempt: st.attempt, at: new Date().toISOString(), pt: totals(rows()).pt});
           if (MAXATT && r.max && r.attempt >= r.max) st.limit = true;
@@ -327,7 +341,7 @@
     $('again').addEventListener('click', () => {
       if (st.limit || (MAXATT && st.attempt >= MAXATT)) return;
       if (!confirm('Начать попытку ' + (st.attempt + 1) + (MAXATT ? ' из ' + MAXATT : '') + '? Ответы и фото прошлой попытки сотрутся с этого устройства (у учителя они сохранены).')) return;
-      st = Object.assign(st, {a: {}, chk: {}, photos: {}, attempt: st.attempt + 1, id: uid(), done: false, sentOk: false, t0: null, doneAt: null}); save(); $('xMsg').className = 'msg'; renderAll(); window.scrollTo({top: 0});
+      st = Object.assign(st, {a: {}, chk: {}, photos: {}, attempt: st.attempt + 1, id: uid(), done: false, sentOk: false, t0: null, doneAt: null, res: null}); save(); $('xMsg').className = 'msg'; renderAll(); window.scrollTo({top: 0});
     });
 
     renderAll();
