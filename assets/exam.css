@@ -1,0 +1,54 @@
+:root{--paper:#F3F7FA;--sheet:#FFFFFF;--ink:#0B3C5D;--ink-2:#5B6B7A;--rule:#BFD7E6;--acc:#1F77B4;--acc-soft:#E3F0FA;--green:#2E9C6B;--green-soft:#E5F4EB;
+  --orange:#E8833A;--orange-soft:#FDEBDD;--bad:#B23A2E;--bad-soft:#F9E3E0;--body:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0F1519;--sheet:#171F26;--ink:#E6EEF4;--ink-2:#9FB0BE;--rule:#2C3A46;--acc:#6FB3E6;--acc-soft:#17304A;
+  --green:#6CCB97;--green-soft:#15301F;--orange:#F3A061;--orange-soft:#3A2814;--bad:#FF9C8F;--bad-soft:#3A1D1D;color-scheme:dark}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 var(--body);padding:14px max(12px,env(safe-area-inset-right,0px)) 48px max(12px,env(safe-area-inset-left,0px))}
+.wrap{max-width:900px;margin:0 auto;display:grid;gap:14px}
+h1{font:700 clamp(21px,4vw,30px)/1.15 var(--body);margin:0}h2{font:700 17px var(--body);margin:0}
+.eyebrow{font:600 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.sub,.foot{color:var(--ink-2);font-size:14px;margin:0}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:14px;display:grid;gap:10px}
+.nav{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+.nav button{font:600 14px var(--mono);padding:9px 0;border-radius:8px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer}
+.nav button[aria-current="true"]{outline:2px solid var(--acc);outline-offset:1px}
+.nav button.ok{background:var(--green-soft);border-color:var(--green)}.nav button.part{background:var(--orange-soft);border-color:var(--orange)}.nav button.bad{background:var(--bad-soft);border-color:var(--bad)}.nav button.wait{background:var(--acc-soft);border-color:var(--acc)}
+.task p{margin:0 0 6px}.task .fig{display:flex;justify-content:center;margin:6px 0}.task .fig svg{border:1px solid var(--rule);border-radius:8px}.task img{max-width:min(100%,420px);display:block;margin:6px auto;border:1px solid var(--rule);border-radius:8px;background:#fff}
+table.mt,table.dt{border-collapse:collapse;font-size:14.5px;margin:6px 0}table.mt td,table.mt th{padding:3px 10px 3px 0;text-align:left;vertical-align:top}table.dt td,table.dt th{border:1px solid var(--rule);padding:4px 8px;text-align:center}
+ol.opts{margin:4px 0 8px;padding-left:22px}ol.opts li{margin:2px 0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:15px}
+.field input,.field textarea{font:500 16px var(--mono);padding:9px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+textarea{font:15px var(--body)!important;min-height:70px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 15px var(--body);padding:10px 14px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}button.b:disabled{opacity:.45}
+.msg{font-size:14.5px;padding:10px 12px;border-radius:8px;display:none}.msg.ok{display:block;background:var(--green-soft);color:var(--green)}.msg.part{display:block;background:var(--orange-soft);color:var(--orange)}.msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}.msg.info{display:block;background:var(--acc-soft);color:var(--acc)}
+.photos{display:flex;gap:8px;flex-wrap:wrap}.photos figure{margin:0;position:relative}.photos img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--rule)}
+.photos button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:var(--bad);color:#fff;font-weight:700;cursor:pointer;line-height:22px;padding:0}
+.upload{display:inline-flex;align-items:center;gap:8px;font:600 15px var(--body);padding:10px 14px;border-radius:8px;border:1px dashed var(--acc);color:var(--acc);cursor:pointer;background:var(--acc-soft)}
+.upload input{display:none}
+table.res{border-collapse:collapse;width:100%;font-size:14px}table.res th,table.res td{border-bottom:1px solid var(--rule);padding:5px 6px;text-align:left;vertical-align:top}table.res td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+.total{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:15px}.total b{font-size:20px}
+details.ref{font-size:14px;color:var(--ink-2)}details.ref summary{cursor:pointer;color:var(--ink);font-weight:600}
+.pts{font:600 13px var(--mono);color:var(--ink-2)}
+.att{margin:0;font:600 14px var(--mono);color:var(--acc)}
+.field input:disabled,.field textarea:disabled{opacity:.75}
+.bar{height:8px;background:var(--rule);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--green);width:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* --- движок exam.html: прокрутка, липкая панель, таймер --- */
+.sticky{position:sticky;top:0;z-index:5;background:var(--paper);padding:8px 0 6px;display:grid;gap:6px;border-bottom:1px solid var(--rule)}
+.sticky .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.nav button.filled{background:var(--acc-soft)}
+.nav button.edited{border-style:dashed}
+.blockhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:6px}
+.blockhead h2{font-size:19px}
+.task{scroll-margin-top:170px}
+.badge{display:inline-block;font:600 12px var(--mono);padding:3px 8px;border-radius:999px;background:var(--acc-soft);color:var(--acc)}
+.timer{font:700 15px var(--mono);color:var(--ink)}.timer.over{color:var(--orange)}
+.src{font-size:12.5px;color:var(--ink-2);margin:0}
+.src a{color:inherit}
+.err{padding:24px;font-size:16px}
+.task .fig img{width:100%;height:auto}
+/* sticky не работает внутри grid-ячейки: обёртка движка — обычный поток */
+#app.wrap{display:block}#app.wrap>*+*{margin-top:14px}
+@media (max-width:560px){.sticky .nav{grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:4px}.sticky .nav button{padding:5px 0;font-size:13px}.task{scroll-margin-top:130px}}

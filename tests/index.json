@@ -1,0 +1,18 @@
+{
+ "tests": [
+  {
+   "id": "oge-kin-t2",
+   "type": "exam-section",
+   "title": "ОГЭ · Кинематика · комплексный тест",
+   "class": 9,
+   "exam": "oge"
+  },
+  {
+   "id": "oge-kin-t1",
+   "type": "exam-topic",
+   "title": "ОГЭ · Кинематика · тренажёр по темам",
+   "class": 9,
+   "exam": "oge"
+  }
+ ]
+}
