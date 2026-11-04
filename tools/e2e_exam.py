@@ -16,16 +16,18 @@ def mock(page, store, resp=None):
         store.append(json.loads(route.request.post_data))
         route.fulfill(status=200, content_type='application/json', body=json.dumps(resp or {'ok': True, 'attempt': len(store), 'max': 5}))
     page.route(EP + '**', h)
-# Полная версия Т2 (с ключами, проверка в браузере) и решения — не на сайте, а в kit/tren_site/tests_private/ на ПК учителя.
+# Полные версии Т1/Т2 (с ключами, проверка в браузере — режим client) и решения — не на сайте, а в kit/tren_site/tests_private/ на ПК учителя.
 PRIV = sys.argv[1] if len(sys.argv) > 1 else r'D:\Работа\AI\kit\tren_site\tests_private'
 FULL = open(os.path.join(PRIV, 'oge-kin-t2.json'), encoding='utf-8').read()
 SOLS = open(os.path.join(PRIV, 'oge-kin-t2.solutions.json'), encoding='utf-8').read()
+FULL1 = open(os.path.join(PRIV, 'oge-kin-t1.json'), encoding='utf-8').read()
 with sync_playwright() as p:
     b0 = p.chromium.launch()
     class _B:   # у каждой страницы свой контекст (свой localStorage) и подмена Т2 на полную версию
         def new_page(self, **kw):
             c = b0.new_context(**kw)
             c.route('**/tests/oge-kin-t2.json', lambda r: r.fulfill(status=200, content_type='application/json', body=FULL))
+            c.route('**/tests/oge-kin-t1.json', lambda r: r.fulfill(status=200, content_type='application/json', body=FULL1))
             c.route('**/tests/oge-kin-t2.solutions.json', lambda r: r.fulfill(status=200, content_type='application/json', body=SOLS))
             return c.new_page()
     b = _B()
