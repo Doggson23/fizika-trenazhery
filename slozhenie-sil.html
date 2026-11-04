@@ -1,0 +1,479 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><link rel="icon" href="data:,"><script src="config.js"></script></head><body><title>Сложение сил: проекции</title>
+<style>
+/* Тренажёр «Сложение сил через проекции», 9 класс (база). Палитра s79: синий, зелёный, оранжевый, тёмно-синий. */
+:root{
+  --paper:#F3F7FA; --sheet:#FFFFFF; --ink:#0B3C5D; --ink-2:#5B6B7A; --rule:#BFD7E6;
+  --grid:#E3EDF4; --grid-major:#C3D6E3; --f1:#1F77B4; --f2:#2E9C6B; --f3:#8E5EA2; --res:#E8833A; --res-soft:#FDEBDD;
+  --mark:#2E9C6B; --mark-soft:#E5F4EB; --ok:#1E7A4C; --ok-soft:#E3F2E8; --bad:#B23A2E; --bad-soft:#F9E3E0;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0F1519; --sheet:#171F26; --ink:#E6EEF4; --ink-2:#9FB0BE; --rule:#2C3A46;
+  --grid:#1E2A33; --grid-major:#2F4150; --f1:#6FB3E6; --f2:#6CCB97; --f3:#C39BD8; --res:#F3A061; --res-soft:#3A2814;
+  --mark:#6CCB97; --mark-soft:#15301F; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.5 var(--body);
+  padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px));padding-block:16px 44px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:14px}
+h1{font:700 clamp(22px,4vw,32px)/1.15 var(--body);margin:0}
+.sub{color:var(--ink-2);margin:4px 0 0}
+.eyebrow{font:600 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:600 14px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--f1);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start}
+@media (max-width:900px){.lab{grid-template-columns:1fr}}
+.stage{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:8px;min-width:0}
+canvas{display:block;width:100%;aspect-ratio:4/3;max-width:100%;border-radius:6px;touch-action:manipulation}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2);padding:8px 4px 2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:14px;display:grid;gap:12px;min-width:0}
+.panel h2{font:700 16px var(--body);margin:0}
+.panel h3{font:700 14px var(--body);margin:6px 0 0;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em}
+.ctl{display:grid;gap:3px}
+.ctl label{display:flex;justify-content:space-between;font-size:14px;gap:8px}
+.ctl output,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--f1)}
+.checks{display:grid;gap:6px;font-size:14px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 14px var(--body);padding:9px 14px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+.read{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:14px;border-top:1px solid var(--rule);padding-top:10px;margin:0}
+.read dt{color:var(--ink-2)} .read dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.task{display:grid;gap:10px}
+.task p{margin:0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:14px}
+.field input,.field select{font:500 15px var(--mono);padding:7px 9px;border:1px solid var(--rule);border-radius:7px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.msg{font-size:14px;padding:10px 12px;border-radius:7px;display:none}
+.msg.ok{display:block;background:var(--ok-soft);color:var(--ok)} .msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}
+.hint{font-size:14px;background:var(--mark-soft);border-left:3px solid var(--mark);padding:8px 10px;border-radius:0 7px 7px 0}
+.svo{font-size:14px;border:1px solid var(--res);background:var(--res-soft);padding:10px 12px;border-radius:7px}
+.score{display:flex;gap:14px;font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.score span b{font-size:18px}
+.f{font-family:var(--mono);font-size:.95em;white-space:nowrap}
+sub,sup{font-size:.72em}
+.foot{font-size:13px;color:var(--ink-2)}
+.theory{display:grid;gap:10px;font-size:14.5px}
+.theory p,.theory li{margin:0}
+.theory ol,.theory ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.rule{border:1px solid var(--rule);border-left:4px solid var(--f1);border-radius:0 8px 8px 0;padding:8px 10px;background:var(--paper)}
+.rule b{color:var(--ink)}
+.ex{font-family:var(--mono);font-size:13.5px;background:var(--paper);border-radius:7px;padding:8px 10px;white-space:pre-wrap}
+.sendbox{max-width:620px}
+.sendbox .field{grid-template-columns:auto 1fr}
+.msg.info{display:block;background:var(--grid);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">физика · 9 класс · динамика</div>
+    <h1>Сложение сил: проекции</h1>
+    <p class="sub">Равнодействующая сил на одной прямой и на плоскости. Клетка — 10 Н, если в задаче не сказано иначе. Силы приложены к одной точке.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Режим">
+    <button class="tab" role="tab" id="t-theory" aria-selected="true" data-mode="theory">Теория</button>
+    <button class="tab" role="tab" id="t-axis" aria-selected="false" data-mode="axis">Одна ось</button>
+    <button class="tab" role="tab" id="t-plane" aria-selected="false" data-mode="plane">Плоскость</button>
+    <button class="tab" role="tab" id="t-game" aria-selected="false" data-mode="game">Тренировка</button>
+  </div>
+
+  <div class="lab">
+    <div class="stage">
+      <canvas id="cv" width="960" height="720" aria-label="Клетчатое поле с осями x и y: силы, их проекции и равнодействующая"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--f1)"></i>F<sub>1</sub></span>
+        <span><i style="background:var(--f2)"></i>F<sub>2</sub></span>
+        <span><i style="background:var(--f3)"></i>F<sub>3</sub></span>
+        <span><i style="background:var(--res)"></i>равнодействующая R</span>
+        <span><i style="background:var(--grid-major)"></i>проекции (пунктир)</span>
+      </div>
+    </div>
+
+    <aside class="panel" id="panel">
+      <!-- Теория -->
+      <section id="p-theory" class="theory">
+        <h2>Что нужно знать</h2>
+        <p><b>Сила</b> — векторная величина: у неё есть модуль (сколько ньютонов), направление и точка приложения. На рисунке сила — стрелка.</p>
+        <p><b>Равнодействующая</b> <span class="f">R</span> — одна сила, которая действует на тело так же, как все приложенные силы вместе. Найти равнодействующую — значит сложить силы <em>как векторы</em>.</p>
+        <div class="rule"><b>Проекция силы на ось.</b> Выберите ось (например, <span class="f">x</span> вправо). Проекция <span class="f">F<sub>x</sub></span> — это «тень» стрелки на оси: число со знаком. Если стрелка смотрит <em>по оси</em> — проекция положительная, <em>против оси</em> — отрицательная, <em>перпендикулярно</em> оси — нулевая. На клетчатом поле проекция — это просто число клеток вдоль оси, со знаком.</div>
+        <div class="rule"><b>Силы на одной прямой.</b> Направьте ось вдоль прямой. Проекция равнодействующей — сумма проекций: <span class="f">R<sub>x</sub> = F<sub>1x</sub> + F<sub>2x</sub> + …</span> Знак <span class="f">R<sub>x</sub></span> говорит, куда направлена <span class="f">R</span>; модуль <span class="f">R = |R<sub>x</sub>|</span>.<br>Пример: <span class="f">F<sub>1</sub> = 50 Н</span> вправо, <span class="f">F<sub>2</sub> = 30 Н</span> влево: <span class="f">R<sub>x</sub> = +50 + (−30) = +20 Н</span> — 20 Н вправо. Силы в одну сторону складываются, навстречу — вычитаются (из большей меньшую), а <span class="f">R</span> смотрит туда же, куда большая.</div>
+        <div class="rule"><b>Силы на плоскости.</b> Две оси: <span class="f">x</span> и <span class="f">y</span>. Считаем две суммы: <span class="f">R<sub>x</sub> = F<sub>1x</sub> + F<sub>2x</sub> + …</span> и <span class="f">R<sub>y</sub> = F<sub>1y</sub> + F<sub>2y</sub> + …</span> Модуль — по теореме Пифагора: <span class="f">R = √(R<sub>x</sub>² + R<sub>y</sub>²)</span>. Направление: стрелка из начала в точку <span class="f">(R<sub>x</sub>; R<sub>y</sub>)</span>; угол с осью <span class="f">x</span> находят из <span class="f">tg α = R<sub>y</sub> / R<sub>x</sub></span>.</div>
+        <div class="rule"><b>Если сила дана модулем и углом α к оси x:</b> <span class="f">F<sub>x</sub> = F·cos α</span>, <span class="f">F<sub>y</sub> = F·sin α</span>. Проверка: при α = 0° вся сила «ложится» на ось x, при α = 90° — на ось y. Частный случай — две <em>перпендикулярные</em> силы: <span class="f">R = √(F<sub>1</sub>² + F<sub>2</sub>²)</span> (диагональ прямоугольника, стороны 3 и 4 → диагональ 5).</div>
+        <p><b>Геометрически</b> то же самое — правило параллелограмма: отложите обе силы из одной точки, достройте до параллелограмма, его диагональ из этой точки и есть <span class="f">R</span>. На рисунке справа (или сверху на телефоне) параллелограмм показан пунктиром — подвигайте силы на вкладке «Плоскость» и проверьте.</p>
+        <div class="ex">Порядок действий в любой задаче:
+1) выбрать оси (одну или две);
+2) для каждой силы записать проекции со знаком;
+3) сложить проекции по каждой оси → Rx, Ry;
+4) R = √(Rx² + Ry²); куда смотрит — по знакам Rx, Ry.
+Если Rx = 0 и Ry = 0 — силы скомпенсированы, R = 0: тело
+покоится или движется равномерно и прямолинейно.</div>
+        <div class="btns"><button class="b" id="toAxis">К тренировке: одна ось</button></div>
+      </section>
+
+      <!-- Одна ось -->
+      <section id="p-axis" class="task" hidden>
+        <h2>Одна ось</h2>
+        <h3>Задача</h3>
+        <p class="foot">На рисунке — силы задачи. Равнодействующая появится после верного ответа.</p>
+        <p id="aText"></p>
+        <div class="field"><label for="aAns">R =</label><input id="aAns" inputmode="decimal" placeholder="модуль, Н" autocomplete="off"><span>Н</span></div>
+        <div class="field"><label for="aSel">куда</label><select id="aSel"><option value="">выберите…</option><option value="1">вправо (по оси x)</option><option value="-1">влево (против оси x)</option><option value="0">R = 0, никуда</option></select><span></span></div>
+        <div class="btns"><button class="b" id="aCheck">Проверить</button><button class="b ghost" id="aHint">Подсказка (0/3)</button><button class="b ghost" id="aNew">Другая задача</button></div>
+        <div class="msg" id="aMsg" role="status" aria-live="polite"></div>
+        <div id="aHints" class="task"></div>
+        <div class="svo" id="aSvo" hidden><b>Свойство.</b> На одной прямой равнодействующая — алгебраическая сумма проекций: силы по оси берём с «+», против оси — с «−». Знак суммы показывает направление R.</div>
+      
+        <h3>Исследовать</h3>
+        <p class="foot">Подвиньте ползунок — на рисунке появятся ваши силы и их равнодействующая.</p>
+        <div class="ctl"><label for="a1"><span>F<sub>1x</sub></span> <output id="a1O" class="num"></output></label><input id="a1" type="range" min="-8" max="8" step="1" value="5"></div>
+        <div class="ctl"><label for="a2"><span>F<sub>2x</sub></span> <output id="a2O" class="num"></output></label><input id="a2" type="range" min="-8" max="8" step="1" value="-3"></div>
+        <div class="checks"><label><input type="checkbox" id="a3on"> третья сила</label></div>
+        <div class="ctl" id="a3ctl" hidden><label for="a3"><span>F<sub>3x</sub></span> <output id="a3O" class="num"></output></label><input id="a3" type="range" min="-8" max="8" step="1" value="2"></div>
+        <div class="checks"><label><input type="checkbox" id="aR" checked> показать равнодействующую</label></div>
+        <dl class="read">
+          <dt>R<sub>x</sub> = сумма проекций</dt><dd id="aRx"></dd>
+          <dt>Модуль R</dt><dd id="aRm"></dd>
+          <dt>Направление</dt><dd id="aDir"></dd>
+        </dl>
+        <p class="foot">Попробуйте: подберите силы так, чтобы R = 0. Что при этом видно на рисунке?</p>
+        </section>
+
+      <!-- Плоскость -->
+      <section id="p-plane" class="task" hidden>
+        <h2>Плоскость</h2>
+        <h3>Задача</h3>
+        <p class="foot">На рисунке — силы задачи. Проекции, параллелограмм и R появятся после верного ответа.</p>
+        <p id="pText"></p>
+        <div class="field"><label for="pRx">R<sub>x</sub> =</label><input id="pRx" inputmode="decimal" placeholder="со знаком, Н" autocomplete="off"><span>Н</span></div>
+        <div class="field"><label for="pRy">R<sub>y</sub> =</label><input id="pRy" inputmode="decimal" placeholder="со знаком, Н" autocomplete="off"><span>Н</span></div>
+        <div class="field"><label for="pAns">R =</label><input id="pAns" inputmode="decimal" placeholder="модуль, Н" autocomplete="off"><span>Н</span></div>
+        <div class="btns"><button class="b" id="pCheck">Проверить</button><button class="b ghost" id="pHint">Подсказка (0/3)</button><button class="b ghost" id="pNew">Другая задача</button></div>
+        <div class="msg" id="pMsg" role="status" aria-live="polite"></div>
+        <div id="pHints" class="task"></div>
+        <div class="svo" id="pSvo" hidden><b>Свойство.</b> На плоскости силы складывают по осям: R<sub>x</sub> — сумма проекций на x, R<sub>y</sub> — на y, а модуль R = √(R<sub>x</sub>² + R<sub>y</sub>²). Параллелограмм даёт тот же вектор.</div>
+      
+        <h3>Исследовать</h3>
+        <p class="foot">Задайте силы модулем и углом — на рисунке появятся проекции и равнодействующая.</p>
+        <div class="ctl"><label for="f1"><span>F<sub>1</sub></span> <output id="f1O" class="num"></output></label><input id="f1" type="range" min="10" max="80" step="10" value="40"></div>
+        <div class="ctl"><label for="g1"><span>угол α<sub>1</sub> к оси x</span> <output id="g1O" class="num"></output></label><input id="g1" type="range" min="0" max="345" step="15" value="0"></div>
+        <div class="ctl"><label for="f2"><span>F<sub>2</sub></span> <output id="f2O" class="num"></output></label><input id="f2" type="range" min="10" max="80" step="10" value="30"></div>
+        <div class="ctl"><label for="g2"><span>угол α<sub>2</sub> к оси x</span> <output id="g2O" class="num"></output></label><input id="g2" type="range" min="0" max="345" step="15" value="90"></div>
+        <div class="checks">
+          <label><input type="checkbox" id="pProj" checked> показать проекции</label>
+          <label><input type="checkbox" id="pPar" checked> параллелограмм</label>
+          <label><input type="checkbox" id="pR" checked> показать равнодействующую</label>
+        </div>
+        <dl class="read">
+          <dt>F<sub>1x</sub>; F<sub>1y</sub></dt><dd id="p1"></dd>
+          <dt>F<sub>2x</sub>; F<sub>2y</sub></dt><dd id="p2"></dd>
+          <dt>R<sub>x</sub>; R<sub>y</sub></dt><dd id="pR12"></dd>
+          <dt>Модуль R</dt><dd id="pRm"></dd>
+          <dt>Угол R к оси x</dt><dd id="pAng"></dd>
+        </dl>
+        <p class="foot">Попробуйте: поставьте угол между силами 90° — сравните R с теоремой Пифагора. Потом 180° — что стало с R?</p>
+        </section>
+
+      <!-- Тренировка -->
+      <section id="p-game" class="task" hidden>
+        <h2>Тренировка</h2>
+        <p id="gText"></p>
+        <div class="field"><label for="gAns">R =</label><input id="gAns" inputmode="decimal" placeholder="модуль, Н" autocomplete="off"><span>Н</span></div>
+        <div class="field" id="gDirRow"><label for="gSel">куда</label><select id="gSel"><option value="">выберите…</option><option value="1">вправо</option><option value="-1">влево</option><option value="0">R = 0</option></select><span></span></div>
+        <div class="btns"><button class="b" id="gCheck">Проверить</button><button class="b ghost" id="gNext">Следующая</button></div>
+        <div class="msg" id="gMsg" role="status" aria-live="polite"></div>
+        <div class="score"><span>верно <b id="sOk">0</b></span><span>всего <b id="sAll">0</b></span><span>серия <b id="sStreak">0</b></span></div>
+        <p class="foot">Задачи трёх типов вперемешку: силы на прямой, перпендикулярные силы, силы по клеткам. Бывает и R = 0 — не пугайтесь.</p>
+      </section>
+    </aside>
+  </div>
+  <section class="panel sendbox" aria-labelledby="sendH">
+    <h2 id="sendH">Отправить результат учителю</h2>
+    <div class="field"><label for="who">Фамилия, имя</label><input id="who" autocomplete="name" placeholder="обязательно"></div>
+    <dl class="read" id="stats"></dl>
+    <div class="btns"><button class="b" id="send">Отправить учителю</button></div>
+    <div class="msg" id="sMsg" role="status" aria-live="polite"></div>
+    <p class="foot">Отправляется только фамилия, имя и счёт с этой страницы. Отправлять можно несколько раз — учитель увидит все отправки.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  const RAD = Math.PI/180, SCALE = 10;            // Н на клетку
+  const $ = id => document.getElementById(id);
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  let C = {}, U = 1;
+  function resize(){ const dpr = window.devicePixelRatio || 1, w = Math.max(280, cv.clientWidth || 640);
+    const W = Math.round(w*dpr), H = Math.round(w*0.75*dpr); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; U = dpr * Math.max(0.85, Math.min(1.15, w/700)); }
+  resize();
+  new ResizeObserver(() => { const old = cv.width; resize(); if (cv.width !== old) draw(); }).observe(cv);
+  function readColors(){ const s = getComputedStyle(document.documentElement);
+    ['sheet','ink','ink-2','grid','grid-major','f1','f2','f3','res','ok','bad'].forEach(k => C[k] = s.getPropertyValue('--'+k).trim()); }
+  readColors();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+  new MutationObserver(() => { readColors(); draw(); }).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+
+  const fmt = (x, d=0) => { const r = Math.round(x*Math.pow(10,d))/Math.pow(10,d); return (Object.is(r, -0) ? 0 : r).toFixed(d).replace('.', ','); };
+  const sgn = x => (x > 0 ? '+' : (x < 0 ? '−' : '')) + fmt(Math.abs(x));
+  const parse = s => { if (s == null) return NaN; s = String(s).trim().replace(',', '.').replace(/\s+/g,'').replace('−', '-');
+    const m = s.match(/^(-?\d*\.?\d+)\/(\d*\.?\d+)$/); if (m) return parseFloat(m[1])/parseFloat(m[2]); return parseFloat(s); };
+  const rnd = (a, b) => a + Math.floor(Math.random()*(b - a + 1));
+  const pick = arr => arr[rnd(0, arr.length - 1)];
+
+  // ---------- состояние. Силы — в клетках (1 клетка = SCALE Н): {x, y, c (цвет), name}
+  const S = { mode:'theory', axis:{f:[5,-3,2], three:false, showR:true, task:null, hints:0, solved:false},
+              plane:{F:[40,0,30,90], proj:true, par:true, showR:true, task:null, hints:0, solved:false},
+              game:{task:null, score:{ok:0, all:0, streak:0}} };
+
+  const SKEY = 'sily_site_v1'; let ST = {who:'', axis:0, plane:0, ok:0, all:0, best:0};
+  try { const z = localStorage.getItem(SKEY); if (z) ST = Object.assign(ST, JSON.parse(z)); } catch(e){}
+  const ssave = () => { try { localStorage.setItem(SKEY, JSON.stringify(ST)); } catch(e){} renderStats(); };
+  function renderStats(){ const el = document.getElementById('stats'); if (!el) return;
+    el.innerHTML = '<dt>«Одна ось»: решено задач</dt><dd>' + ST.axis + '</dd><dt>«Плоскость»: решено задач</dt><dd>' + ST.plane + '</dd>' +
+      '<dt>«Тренировка»: верно / всего</dt><dd>' + ST.ok + ' / ' + ST.all + '</dd><dt>Лучшая серия подряд</dt><dd>' + ST.best + '</dd>'; }
+
+  // ---------- холст: клетки в одном масштабе, начало — в центре
+  let view = {sc:30, ox:0, oy:0, W:16, H:12};
+  function fit(mx, my){ const padX = 30*U, padY = 22*U; const cw = cv.width - 2*padX, ch = cv.height - 2*padY;
+    const nx = Math.max(16, 2*Math.ceil(mx || 0) + 3), ny = Math.max(12, 2*Math.ceil(my || 0) + 4);
+    const sc = Math.min(cw/nx, ch/ny); view = {sc, ox: cv.width/2, oy: cv.height/2, W: cw/sc/2, H: ch/sc/2}; }
+  const X = x => view.ox + x*view.sc, Y = y => view.oy - y*view.sc;
+  function grid(axesLabel){
+    ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.lineWidth = 1;
+    for (let x = -Math.floor(view.W); x <= view.W; x++){ ctx.strokeStyle = x % 5 === 0 ? C['grid-major'] : C.grid;
+      ctx.beginPath(); ctx.moveTo(X(x)+.5, Y(-view.H)); ctx.lineTo(X(x)+.5, Y(view.H)); ctx.stroke(); }
+    for (let y = -Math.floor(view.H); y <= view.H; y++){ ctx.strokeStyle = y % 5 === 0 ? C['grid-major'] : C.grid;
+      ctx.beginPath(); ctx.moveTo(X(-view.W), Y(y)+.5); ctx.lineTo(X(view.W), Y(y)+.5); ctx.stroke(); }
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.4*U;
+    ctx.beginPath(); ctx.moveTo(X(-view.W), Y(0)); ctx.lineTo(X(view.W), Y(0)); ctx.stroke();
+    arrowHead(X(view.W), Y(0), 0, C.ink);
+    ctx.fillStyle = C['ink-2']; ctx.font = '600 ' + (12*U) + 'px system-ui, sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText('x', X(view.W) - 4*U, Y(0) - 5*U);
+    if (axesLabel){ ctx.strokeStyle = C.ink; ctx.beginPath(); ctx.moveTo(X(0), Y(-view.H)); ctx.lineTo(X(0), Y(view.H)); ctx.stroke();
+      arrowHead(X(0), Y(view.H), -90, C.ink); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('y', X(0) + 6*U, Y(view.H) + 2*U); }
+    ctx.fillStyle = C['ink-2']; ctx.font = (10.5*U) + 'px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let x = -Math.floor(view.W); x <= view.W; x++) if (x && x % 5 === 0) ctx.fillText(String(x*SCALE), X(x), Y(0) + 4*U);
+    if (axesLabel){ ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      for (let y = -Math.floor(view.H); y <= view.H; y++) if (y && y % 5 === 0) ctx.fillText(String(y*SCALE), X(0) - 5*U, Y(y)); }
+    ctx.fillStyle = C['ink-2']; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = (11*U) + 'px ui-monospace, monospace';
+    ctx.fillText('клетка — ' + SCALE + ' Н', X(-view.W) + 4*U, Y(view.H) + 2*U);
+    dot(0, 0, 5, C.ink);
+  }
+  function arrowHead(x1, y1, angDeg, color){ const ang = angDeg*RAD, hl = 9*U; ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(x1, y1);
+    ctx.lineTo(x1 - hl*Math.cos(ang - .5), y1 - hl*Math.sin(ang - .5)); ctx.lineTo(x1 - hl*Math.cos(ang + .5), y1 - hl*Math.sin(ang + .5)); ctx.closePath(); ctx.fill(); }
+  function arrow(x0, y0, x1, y1, color, w, dash){ const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy); if (L < 2*U) return;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = w*U; ctx.setLineDash((dash || []).map(d => d*U));
+    const ang = Math.atan2(dy, dx), hl = Math.min(11*U, L*0.5);
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - hl*0.7*Math.cos(ang), y1 - hl*0.7*Math.sin(ang)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - hl*Math.cos(ang - .42), y1 - hl*Math.sin(ang - .42)); ctx.lineTo(x1 - hl*Math.cos(ang + .42), y1 - hl*Math.sin(ang + .42)); ctx.closePath(); ctx.fill(); }
+  function dot(x, y, r, color){ ctx.beginPath(); ctx.arc(X(x), Y(y), r*U*0.6, 0, 2*Math.PI); ctx.fillStyle = color; ctx.fill(); }
+  function text(t, px, py, color, align, base, size){ ctx.fillStyle = color; ctx.font = '600 ' + ((size || 13)*U) + 'px system-ui, sans-serif';
+    ctx.textAlign = align || 'center'; ctx.textBaseline = base || 'bottom'; ctx.fillText(t, px, py); }
+  function dashed(x0, y0, x1, y1, color){ ctx.strokeStyle = color; ctx.lineWidth = 1.2*U; ctx.setLineDash([4*U, 4*U]);
+    ctx.beginPath(); ctx.moveTo(X(x0), Y(y0)); ctx.lineTo(X(x1), Y(y1)); ctx.stroke(); ctx.setLineDash([]); }
+
+  // сила из начала координат, в клетках; подпись у конца; offset (клетки) — чтобы стрелки на одной прямой не слипались
+  function force(f, label, color, dy){ dy = dy || 0; const x0 = 0, y0 = dy;
+    arrow(X(x0), Y(y0), X(f.x), Y(f.y + dy), color, 3);
+    const L = Math.hypot(f.x, f.y); if (L === 0) return;
+    const nx = -f.y/L, ny = f.x/L;   // нормаль к стрелке
+    text(label, X(f.x*0.55 + nx*0.45), Y(f.y*0.55 + dy + ny*0.45), color, 'center', 'middle'); }
+  function projections(f, color){ if (f.x) { dashed(f.x, f.y, f.x, 0, color); text(sgn(f.x*SCALE), X(f.x), Y(0) + (f.y >= 0 ? 16 : -6)*U, color, 'center', f.y >= 0 ? 'top' : 'bottom', 11.5); }
+    if (f.y) { dashed(f.x, f.y, 0, f.y, color); text(sgn(f.y*SCALE), X(0) + (f.x >= 0 ? -6 : 6)*U, Y(f.y), color, f.x >= 0 ? 'right' : 'left', 'middle', 11.5); } }
+  const polar = (F, a) => ({x: F*Math.cos(a*RAD)/SCALE, y: F*Math.sin(a*RAD)/SCALE});
+  const sum = fs => fs.reduce((r, f) => ({x: r.x + f.x, y: r.y + f.y}), {x:0, y:0});
+
+  function extent(){ let fs = [];
+    if (S.mode === 'axis'){ const A = S.axis, f = (A.task && !A.task.solved && A.taskShown) ? A.task.f : A.f.slice(0, A.three ? 3 : 2); fs = f.map(x => ({x, y:2})); fs.push({x: f.reduce((a, b) => a + b, 0), y:2}); }
+    else if (S.mode === 'game'){ const g = S.game.task; if (g) fs = g.type === 'axis' ? g.f.map(x => ({x, y:2})).concat([{x: g.f.reduce((a, b) => a + b, 0), y:2}]) : g.f.concat([sum(g.f)]); }
+    else { const P = S.plane; fs = (P.taskShown && P.task) ? P.task.f.slice() : [polar(P.F[0], P.F[1]), polar(P.F[2], P.F[3])]; fs.push(sum(fs)); }
+    return fs.reduce((e, f) => ({x: Math.max(e.x, Math.abs(f.x)), y: Math.max(e.y, Math.abs(f.y))}), {x:0, y:0}); }
+  function draw(){
+    const ex = extent(); fit(ex.x, ex.y);
+    if (S.mode === 'axis') drawAxis();
+    else if (S.mode === 'plane' || S.mode === 'theory') drawPlane();
+    else drawGame();
+  }
+  function drawAxis(){
+    grid(false);
+    const A = S.axis, fs = (A.task && !A.task.solved && A.taskShown) ? A.task.f : A.f.slice(0, A.three ? 3 : 2);
+    const cols = [C.f1, C.f2, C.f3], offs = [1.4, 0.7, 0];
+    fs.forEach((fx, i) => { force({x:fx, y:0}, 'F' + (i+1) + ' = ' + fmt(Math.abs(fx)*SCALE) + ' Н', cols[i], offs[i] + 1); });
+    const R = fs.reduce((a, b) => a + b, 0);
+    const show = A.taskShown ? A.task.solved : A.showR;
+    if (show){ if (R !== 0) { force({x:R, y:0}, 'R = ' + fmt(Math.abs(R)*SCALE) + ' Н', C.res, -1.2); }
+      else text('R = 0: силы скомпенсированы', X(0), Y(-1.2), C.res, 'center', 'middle'); }
+  }
+  function drawPlane(){
+    grid(true);
+    const P = S.plane; let fs, labels;
+    if (P.taskShown && P.task){ fs = P.task.f; labels = fs.map((f, i) => 'F' + (i+1)); }
+    else { fs = [polar(P.F[0], P.F[1]), polar(P.F[2], P.F[3])]; labels = ['F1 = ' + P.F[0] + ' Н', 'F2 = ' + P.F[2] + ' Н']; }
+    const cols = [C.f1, C.f2, C.f3];
+    const R = sum(fs);
+    const showProj = P.taskShown ? P.task.solved : P.proj, showPar = P.taskShown ? P.task.solved : P.par, showR = P.taskShown ? P.task.solved : P.showR;
+    if (showPar && fs.length === 2){ dashed(fs[0].x, fs[0].y, R.x, R.y, C['grid-major']); dashed(fs[1].x, fs[1].y, R.x, R.y, C['grid-major']); }
+    if (showProj) fs.forEach((f, i) => projections(f, cols[i]));
+    fs.forEach((f, i) => force(f, labels[i], cols[i]));
+    if (showR){ if (Math.hypot(R.x, R.y) > 1e-9) force(R, 'R = ' + fmt(Math.hypot(R.x, R.y)*SCALE, 1) + ' Н', C.res);
+      else text('R = 0', X(0) + 10*U, Y(0) - 10*U, C.res, 'left', 'bottom'); }
+  }
+  function drawGame(){
+    const g = S.game.task; if (!g){ grid(true); return; }
+    if (g.type === 'axis'){ grid(false); const cols = [C.f1, C.f2, C.f3], offs = [1.4, 0.7, 0];
+      g.f.forEach((fx, i) => force({x:fx, y:0}, 'F' + (i+1) + ' = ' + fmt(Math.abs(fx)*SCALE) + ' Н', cols[i], offs[i] + 1));
+      if (g.done){ const R = g.f.reduce((a, b) => a + b, 0); if (R) force({x:R, y:0}, 'R = ' + fmt(Math.abs(R)*SCALE) + ' Н', C.res, -1.2); else text('R = 0', X(0), Y(-1.2), C.res, 'center', 'middle'); } }
+    else { grid(true); const cols = [C.f1, C.f2, C.f3]; const R = sum(g.f);
+      if (g.done){ if (g.f.length === 2){ dashed(g.f[0].x, g.f[0].y, R.x, R.y, C['grid-major']); dashed(g.f[1].x, g.f[1].y, R.x, R.y, C['grid-major']); } g.f.forEach((f, i) => projections(f, cols[i])); }
+      g.f.forEach((f, i) => force(f, 'F' + (i+1), cols[i]));
+      if (g.done){ if (Math.hypot(R.x, R.y) > 1e-9) force(R, 'R = ' + fmt(Math.hypot(R.x, R.y)*SCALE) + ' Н', C.res); else text('R = 0', X(0) + 10*U, Y(0) - 10*U, C.res, 'left', 'bottom'); } }
+  }
+
+  // ---------- Одна ось: пульт
+  const dirWord = x => x > 0 ? 'вправо (по оси x)' : (x < 0 ? 'влево (против оси x)' : '—');
+  function syncAxis(){ const A = S.axis; A.f = [+$('a1').value, +$('a2').value, +$('a3').value]; A.three = $('a3on').checked; A.showR = $('aR').checked;
+    $('a3ctl').hidden = !A.three;
+    ['a1','a2','a3'].forEach((id, i) => $(id + 'O').textContent = sgn(A.f[i]*SCALE) + ' Н');
+    const R = A.f.slice(0, A.three ? 3 : 2).reduce((a, b) => a + b, 0);
+    $('aRx').textContent = A.f.slice(0, A.three ? 3 : 2).map(x => '(' + sgn(x*SCALE) + ')').join(' + ') + ' = ' + sgn(R*SCALE) + ' Н';
+    $('aRm').textContent = fmt(Math.abs(R)*SCALE) + ' Н'; $('aDir').textContent = R === 0 ? 'R = 0 (скомпенсированы)' : dirWord(R);
+    A.taskShown = false; draw(); }
+  ['a1','a2','a3','a3on','aR'].forEach(id => $(id).addEventListener('input', syncAxis));
+
+  // ---------- Одна ось: задача (силы в Н, знак = направление)
+  const AX_WORDS = [['Санки тянут за верёвку', 'толкают сзади', 'тормозит трение'], ['На тележку действуют: тяга', 'ещё одна тяга', 'сопротивление'], ['Ящик двигают: сила', 'сила', 'сила']];
+  function newAxisTask(){ const A = S.axis; const n = rnd(2, 3); let f;
+    do { f = Array.from({length:n}, () => rnd(1, 8)*pick([1, -1])); } while (f.every(x => x > 0) && n === 2 && Math.random() < 0.5);
+    if (Math.random() < 0.15 && n === 3) f[2] = -(f[0] + f[1]);            // иногда R = 0
+    if (Math.abs(f.reduce((a, b) => a + b, 0)) > 8) f[0] = -f[0];
+    A.task = {f, solved:false}; A.hints = 0; A.taskShown = true; $('aHints').innerHTML = ''; $('aHint').disabled = false; $('aHint').textContent = 'Подсказка (0/3)';
+    $('aMsg').className = 'msg'; $('aSvo').hidden = true; $('aAns').value = ''; $('aSel').value = '';
+    const w = pick(AX_WORDS);
+    $('aText').innerHTML = 'К телу приложены силы вдоль одной прямой (смотрите рисунок, ось x — вправо): ' +
+      f.map((x, i) => '<b>F<sub>' + (i+1) + '</sub> = ' + fmt(Math.abs(x)*SCALE) + ' Н</b> ' + (x > 0 ? 'вправо' : 'влево')).join(', ') + '. Найдите модуль и направление равнодействующей.';
+    draw(); }
+  $('aNew').addEventListener('click', newAxisTask);
+  $('aHint').addEventListener('click', () => { const A = S.axis; if (!A.task || A.hints >= 3) return; const f = A.task.f, R = f.reduce((a, b) => a + b, 0);
+    const H = ['Направьте ось x вправо. Для каждой силы запишите проекцию со знаком: вправо — «+», влево — «−».',
+      'Сложите проекции: R<sub>x</sub> = ' + f.map(x => '(' + sgn(x*SCALE) + ')').join(' + ') + '.',
+      'R<sub>x</sub> = ' + sgn(R*SCALE) + ' Н. Модуль R — это число без знака, направление — по знаку: «+» — вправо, «−» — влево, 0 — силы скомпенсированы.'];
+    const d = document.createElement('div'); d.className = 'hint'; d.innerHTML = (A.hints + 1) + '. ' + H[A.hints]; $('aHints').appendChild(d); A.hints++;
+    $('aHint').textContent = 'Подсказка (' + A.hints + '/3)'; if (A.hints >= 3) $('aHint').disabled = true; });
+  $('aCheck').addEventListener('click', () => { const A = S.axis; if (!A.task) return; const f = A.task.f, R = f.reduce((a, b) => a + b, 0)*SCALE;
+    const v = parse($('aAns').value), d = $('aSel').value, m = $('aMsg');
+    if (isNaN(v)){ m.className = 'msg bad'; m.textContent = 'Введите модуль R числом (в ньютонах).'; return; }
+    if (d === ''){ m.className = 'msg bad'; m.textContent = 'Выберите направление.'; return; }
+    const mOk = Math.abs(Math.abs(v) - Math.abs(R)) < 0.5, dOk = (+d) === Math.sign(R);
+    if (mOk && dOk){ if (!A.task.solved){ ST.axis++; ssave(); } A.task.solved = true; m.className = 'msg ok'; m.textContent = 'Верно: R' + (R ? ' = ' + fmt(Math.abs(R)) + ' Н, ' + dirWord(R) : ' = 0 — силы скомпенсированы') + '.'; $('aSvo').hidden = false; draw(); return; }
+    m.className = 'msg bad';
+    const same = f.filter(x => x > 0).reduce((a, b) => a + b, 0)*SCALE, opp = -f.filter(x => x < 0).reduce((a, b) => a + b, 0)*SCALE;
+    if (Math.abs(Math.abs(v) - (same + opp)) < 0.5) m.textContent = 'Вы сложили все модули: ' + fmt(same + opp) + ' Н. Так получилось бы, если бы все силы смотрели в одну сторону. Силы навстречу вычитаются.';
+    else if (mOk && !dOk) m.textContent = 'Модуль верный, направление — нет. R направлена туда, куда «перевешивает»: сумма вправо ' + fmt(same) + ' Н, влево ' + fmt(opp) + ' Н.';
+    else m.textContent = 'Пока неверно. Сумма сил вправо: ' + fmt(same) + ' Н, влево: ' + fmt(opp) + ' Н. Что останется, если они частично уравновесят друг друга?'; });
+
+  // ---------- Плоскость: пульт
+  function syncPlane(){ const P = S.plane; P.F = [+$('f1').value, +$('g1').value, +$('f2').value, +$('g2').value];
+    P.proj = $('pProj').checked; P.par = $('pPar').checked; P.showR = $('pR').checked;
+    $('f1O').textContent = P.F[0] + ' Н'; $('g1O').textContent = P.F[1] + '°'; $('f2O').textContent = P.F[2] + ' Н'; $('g2O').textContent = P.F[3] + '°';
+    const a = polar(P.F[0], P.F[1]), b = polar(P.F[2], P.F[3]), R = sum([a, b]);
+    $('p1').textContent = fmt(a.x*SCALE, 1) + '; ' + fmt(a.y*SCALE, 1) + ' Н'; $('p2').textContent = fmt(b.x*SCALE, 1) + '; ' + fmt(b.y*SCALE, 1) + ' Н';
+    $('pR12').textContent = fmt(R.x*SCALE, 1) + '; ' + fmt(R.y*SCALE, 1) + ' Н'; const Rm = Math.hypot(R.x, R.y)*SCALE; $('pRm').textContent = fmt(Rm, 1) + ' Н';
+    $('pAng').textContent = Rm < 0.05 ? '—' : fmt(((Math.atan2(R.y, R.x)/RAD) + 360) % 360, 0) + '°';
+    P.taskShown = false; draw(); }
+  ['f1','g1','f2','g2','pProj','pPar','pR'].forEach(id => $(id).addEventListener('input', syncPlane));
+
+  // ---------- Плоскость: задача по клеткам — целая равнодействующая
+  const NICE = [[3,4],[4,3],[6,8],[8,6],[5,12],[12,5],[0,5],[5,0],[0,4],[4,0],[0,6],[6,0],[3,4],[4,3],[0,0]];
+  function newPlaneTask(){ const P = S.plane; let f, R;
+    for (let tries = 0; tries < 50; tries++){ const n = pick(NICE); R = {x: n[0]*pick([1,-1]), y: n[1]*pick([1,-1])};
+      const a = {x: rnd(-5, 5), y: rnd(-5, 5)}; const b = {x: R.x - a.x, y: R.y - a.y};
+      if ((a.x || a.y) && (b.x || b.y) && Math.abs(b.x) <= 6 && Math.abs(b.y) <= 5 && !(a.x*b.y === a.y*b.x && Math.random() < 0.7)){ f = [a, b]; break; } }
+    if (!f) f = [{x:3, y:0}, {x:0, y:4}];
+    P.task = {f, solved:false}; P.hints = 0; P.taskShown = true; $('pHints').innerHTML = ''; $('pHint').disabled = false; $('pHint').textContent = 'Подсказка (0/3)';
+    $('pMsg').className = 'msg'; $('pSvo').hidden = true; ['pRx','pRy','pAns'].forEach(id => $(id).value = '');
+    $('pText').innerHTML = 'К точке приложены две силы, показанные на рисунке (клетка — ' + SCALE + ' Н). Найдите проекции равнодействующей R<sub>x</sub>, R<sub>y</sub> и её модуль R. Проекции — со знаком.';
+    draw(); }
+  $('pNew').addEventListener('click', newPlaneTask);
+  $('pHint').addEventListener('click', () => { const P = S.plane; if (!P.task || P.hints >= 3) return; const [a, b] = P.task.f, R = sum(P.task.f);
+    const H = ['Посчитайте по клеткам проекции каждой силы: сколько клеток вправо/влево (это F<sub>x</sub>) и вверх/вниз (F<sub>y</sub>). Влево и вниз — со знаком «−». Умножьте на ' + SCALE + ' Н.',
+      'F<sub>1</sub>: (' + sgn(a.x*SCALE) + '; ' + sgn(a.y*SCALE) + ') Н, F<sub>2</sub>: (' + sgn(b.x*SCALE) + '; ' + sgn(b.y*SCALE) + ') Н. Сложите отдельно x и отдельно y.',
+      'R<sub>x</sub> = ' + sgn(R.x*SCALE) + ' Н, R<sub>y</sub> = ' + sgn(R.y*SCALE) + ' Н. Модуль: R = √(R<sub>x</sub>² + R<sub>y</sub>²) = √(' + fmt(R.x*R.x*SCALE*SCALE) + ' + ' + fmt(R.y*R.y*SCALE*SCALE) + ').'];
+    const d = document.createElement('div'); d.className = 'hint'; d.innerHTML = (P.hints + 1) + '. ' + H[P.hints]; $('pHints').appendChild(d); P.hints++;
+    $('pHint').textContent = 'Подсказка (' + P.hints + '/3)'; if (P.hints >= 3) $('pHint').disabled = true; });
+  $('pCheck').addEventListener('click', () => { const P = S.plane; if (!P.task) return; const R = sum(P.task.f), Rx = R.x*SCALE, Ry = R.y*SCALE, Rm = Math.hypot(Rx, Ry);
+    const vx = parse($('pRx').value), vy = parse($('pRy').value), vm = parse($('pAns').value), m = $('pMsg');
+    if (isNaN(vx) || isNaN(vy) || isNaN(vm)){ m.className = 'msg bad'; m.textContent = 'Заполните все три поля числами (проекции — со знаком).'; return; }
+    const xOk = Math.abs(vx - Rx) < 0.5, yOk = Math.abs(vy - Ry) < 0.5, mOk = Math.abs(vm - Rm) <= Math.max(0.5, 0.01*Rm);
+    if (xOk && yOk && mOk){ if (!P.task.solved){ ST.plane++; ssave(); } P.task.solved = true; m.className = 'msg ok'; m.textContent = 'Верно: R = (' + sgn(Rx) + '; ' + sgn(Ry) + ') Н, |R| = ' + fmt(Rm) + ' Н. На рисунке — проекции и параллелограмм.'; $('pSvo').hidden = false; draw(); return; }
+    m.className = 'msg bad';
+    if (!xOk || !yOk){ const sw = Math.abs(vx - Ry) < 0.5 && Math.abs(vy - Rx) < 0.5;
+      m.textContent = sw ? 'Проекции перепутаны местами: x — это вправо/влево, y — вверх/вниз.'
+        : 'Проекции пока не сходятся. Проверьте знаки: влево и вниз — «−». Считайте клетки каждой силы отдельно, потом складывайте.'; }
+    else { const sumMod = (Math.hypot(P.task.f[0].x, P.task.f[0].y) + Math.hypot(P.task.f[1].x, P.task.f[1].y))*SCALE;
+      m.textContent = Math.abs(vm - sumMod) < 0.6 ? 'Проекции верные, но модули сил просто сложили (' + fmt(sumMod) + ' Н). Так можно только для сил вдоль одной прямой в одну сторону. Здесь — теорема Пифагора для Rₓ и Rᵧ.'
+        : (Math.abs(vm - Math.abs(Rx + Ry)) < 0.6 ? 'Проекции верные, но R — не сумма Rₓ и Rᵧ: они перпендикулярны. Нужен корень из суммы квадратов.'
+        : 'Проекции верные, модуль — нет. R = √(Rₓ² + Rᵧ²) = √(' + fmt(Rx*Rx) + ' + ' + fmt(Ry*Ry) + ').'); } });
+
+  // ---------- Тренировка
+  function newGame(){ const G = S.game; const type = pick(['axis','axis','perp','plane','plane']); let t;
+    if (type === 'axis'){ const n = rnd(2, 3); let f = Array.from({length:n}, () => rnd(1, 7)*pick([1, -1]));
+      if (n === 3 && Math.random() < 0.2) f[2] = -(f[0] + f[1]); if (Math.abs(f.reduce((a, b) => a + b, 0)) > 8) f[0] = -f[0];
+      t = {type, f, R: f.reduce((a, b) => a + b, 0)*SCALE};
+      $('gText').innerHTML = 'Силы вдоль одной прямой: ' + f.map((x, i) => '<b>F<sub>' + (i+1) + '</sub> = ' + fmt(Math.abs(x)*SCALE) + ' Н</b> ' + (x > 0 ? 'вправо' : 'влево')).join(', ') + '. Модуль и направление R?'; }
+    else if (type === 'perp'){ const n = pick([[3,4],[4,3],[6,8],[8,6],[5,12],[12,5]]); const f = [{x: n[0]*pick([1,-1]), y:0}, {x:0, y: n[1]*pick([1,-1])}];
+      t = {type, f, R: Math.hypot(n[0], n[1])*SCALE};
+      $('gText').innerHTML = 'Две перпендикулярные силы (рисунок, клетка — ' + SCALE + ' Н): <b>F<sub>1</sub> = ' + n[0]*SCALE + ' Н</b> и <b>F<sub>2</sub> = ' + n[1]*SCALE + ' Н</b>. Модуль R?'; }
+    else { let f; for (let k = 0; k < 50; k++){ const n = pick(NICE); const R = {x: n[0]*pick([1,-1]), y: n[1]*pick([1,-1])}; const a = {x: rnd(-5, 5), y: rnd(-5, 5)}, b = {x: R.x - a.x, y: R.y - a.y};
+        if ((a.x || a.y) && (b.x || b.y) && Math.abs(b.x) <= 6 && Math.abs(b.y) <= 5){ f = [a, b]; break; } } if (!f) f = [{x:3,y:1},{x:0,y:3}];
+      const R = sum(f); t = {type:'plane', f, R: Math.hypot(R.x, R.y)*SCALE};
+      $('gText').innerHTML = 'Две силы по клеткам (клетка — ' + SCALE + ' Н). Найдите модуль равнодействующей. Если силы скомпенсированы, R = 0.'; }
+    G.task = t; $('gDirRow').hidden = type !== 'axis'; $('gAns').value = ''; $('gSel').value = ''; $('gMsg').className = 'msg'; draw(); }
+  function score(ok){ const s = S.game.score; s.all++; if (ok){ s.ok++; s.streak++; } else s.streak = 0;
+    $('sOk').textContent = s.ok; $('sAll').textContent = s.all; $('sStreak').textContent = s.streak;
+    ST.all++; if (ok) ST.ok++; ST.best = Math.max(ST.best, s.streak); ssave(); }
+  $('gCheck').addEventListener('click', () => { const t = S.game.task; if (!t || t.done) return; const v = parse($('gAns').value), m = $('gMsg');
+    if (isNaN(v)){ m.className = 'msg bad'; m.textContent = 'Введите модуль R числом.'; return; }
+    let ok = Math.abs(Math.abs(v) - Math.abs(t.R)) <= Math.max(0.5, 0.01*Math.abs(t.R)), why = '';
+    if (t.type === 'axis'){ const d = $('gSel').value; if (d === ''){ m.className = 'msg bad'; m.textContent = 'Выберите направление.'; return; } ok = ok && (+d) === Math.sign(t.R); }
+    t.done = true; score(ok);
+    if (ok){ m.className = 'msg ok'; m.textContent = 'Верно! R = ' + fmt(Math.abs(t.R)) + ' Н' + (t.type === 'axis' && t.R ? ', ' + dirWord(t.R) : '') + '.'; }
+    else { if (t.type === 'axis'){ const f = t.f, same = f.filter(x => x > 0).reduce((a, b) => a + b, 0)*SCALE, opp = -f.filter(x => x < 0).reduce((a, b) => a + b, 0)*SCALE;
+        why = 'Вправо в сумме ' + fmt(same) + ' Н, влево ' + fmt(opp) + ' Н, значит R = ' + fmt(Math.abs(t.R)) + ' Н' + (t.R ? ', ' + dirWord(t.R) : ' — силы скомпенсированы') + '.'; }
+      else { const R = sum(t.f); why = 'Rₓ = ' + sgn(R.x*SCALE) + ' Н, Rᵧ = ' + sgn(R.y*SCALE) + ' Н, R = √(' + fmt(R.x*R.x*SCALE*SCALE) + ' + ' + fmt(R.y*R.y*SCALE*SCALE) + ') = ' + fmt(t.R) + ' Н.'; }
+      m.className = 'msg bad'; m.textContent = 'Неверно. ' + why; }
+    draw(); });
+  $('gNext').addEventListener('click', newGame);
+
+  // ---------- вкладки
+  function setMode(mode){ document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', String(x.dataset.mode === mode)));
+    S.mode = mode; ['theory','axis','plane','game'].forEach(k => $('p-' + k).hidden = k !== mode);
+    if (mode === 'axis' && !S.axis.task) newAxisTask(); if (mode === 'plane' && !S.plane.task) newPlaneTask(); if (mode === 'game' && !S.game.task) newGame();
+    draw(); }
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  $('toAxis').addEventListener('click', () => setMode('axis'));
+
+  const ENDPOINT = (window.TR_ENDPOINT || '').trim();
+  $('who').value = ST.who; $('who').addEventListener('input', () => { ST.who = $('who').value; ssave(); });
+  $('send').addEventListener('click', async () => { const m = $('sMsg'), who = (ST.who || '').trim();
+    if (who.split(/\s+/).filter(Boolean).length < 2){ m.className = 'msg bad'; m.textContent = 'Впишите фамилию и имя.'; $('who').focus(); return; }
+    if (!ST.axis && !ST.plane && !ST.all){ m.className = 'msg bad'; m.textContent = 'Пока нечего отправлять: решите хотя бы одну задачу.'; return; }
+    if (!ENDPOINT){ m.className = 'msg info'; m.textContent = 'Отправка пока не настроена — сделайте скриншот счёта и пришлите учителю.'; return; }
+    const btn = $('send'); btn.disabled = true; btn.textContent = 'Отправляю…';
+    const id = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+    const cols = [['Одна ось: решено', ST.axis], ['Плоскость: решено', ST.plane], ['Тренировка: верно', ST.ok], ['Тренировка: всего', ST.all], ['Лучшая серия', ST.best]];
+    try { const res = await fetch(ENDPOINT, {method:'POST', body: JSON.stringify({v:1, id, trainer:'sily', sheet:'Сложение сил', name: who, cols: cols.map(c => ({h:c[0], v:c[1]}))})});
+      const r = await res.json(); if (r.ok){ m.className = 'msg ok'; m.textContent = 'Готово: результат отправлен учителю.'; } else { m.className = 'msg bad'; m.textContent = 'Не получилось отправить (' + (r.error || 'ошибка') + '). Попробуйте ещё раз.'; } }
+    catch(e){ m.className = 'msg bad'; m.textContent = 'Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.'; }
+    finally { btn.disabled = false; btn.textContent = 'Отправить учителю'; } });
+  renderStats();
+
+  syncAxis(); syncPlane(); S.mode = 'theory'; draw();
+})();
+</script>
+</body></html>

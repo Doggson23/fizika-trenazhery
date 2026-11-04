@@ -1,0 +1,242 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><link rel="icon" href="data:,"><script src="config.js"></script></head><body><title>Тренажёр ОГЭ по физике · Кинематика</title>
+<style>
+:root{--paper:#F3F7FA;--sheet:#FFFFFF;--ink:#0B3C5D;--ink-2:#5B6B7A;--rule:#BFD7E6;--acc:#1F77B4;--acc-soft:#E3F0FA;--green:#2E9C6B;--green-soft:#E5F4EB;
+  --orange:#E8833A;--orange-soft:#FDEBDD;--bad:#B23A2E;--bad-soft:#F9E3E0;--body:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0F1519;--sheet:#171F26;--ink:#E6EEF4;--ink-2:#9FB0BE;--rule:#2C3A46;--acc:#6FB3E6;--acc-soft:#17304A;
+  --green:#6CCB97;--green-soft:#15301F;--orange:#F3A061;--orange-soft:#3A2814;--bad:#FF9C8F;--bad-soft:#3A1D1D;color-scheme:dark}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 var(--body);padding:14px max(12px,env(safe-area-inset-right,0px)) 48px max(12px,env(safe-area-inset-left,0px))}
+.wrap{max-width:900px;margin:0 auto;display:grid;gap:14px}
+h1{font:700 clamp(21px,4vw,30px)/1.15 var(--body);margin:0}h2{font:700 17px var(--body);margin:0}
+.eyebrow{font:600 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.sub,.foot{color:var(--ink-2);font-size:14px;margin:0}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:14px;display:grid;gap:10px}
+.nav{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+.nav button{font:600 14px var(--mono);padding:9px 0;border-radius:8px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer}
+.nav button[aria-current="true"]{outline:2px solid var(--acc);outline-offset:1px}
+.nav button.ok{background:var(--green-soft);border-color:var(--green)}.nav button.part{background:var(--orange-soft);border-color:var(--orange)}.nav button.bad{background:var(--bad-soft);border-color:var(--bad)}.nav button.wait{background:var(--acc-soft);border-color:var(--acc)}
+.task p{margin:0 0 6px}.task .fig{display:flex;justify-content:center;margin:6px 0}.task .fig svg{border:1px solid var(--rule);border-radius:8px}.task img{max-width:min(100%,420px);display:block;margin:6px auto;border:1px solid var(--rule);border-radius:8px;background:#fff}
+table.mt,table.dt{border-collapse:collapse;font-size:14.5px;margin:6px 0}table.mt td,table.mt th{padding:3px 10px 3px 0;text-align:left;vertical-align:top}table.dt td,table.dt th{border:1px solid var(--rule);padding:4px 8px;text-align:center}
+ol.opts{margin:4px 0 8px;padding-left:22px}ol.opts li{margin:2px 0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:15px}
+.field input,.field textarea{font:500 16px var(--mono);padding:9px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+textarea{font:15px var(--body)!important;min-height:70px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 15px var(--body);padding:10px 14px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}button.b:disabled{opacity:.45}
+.msg{font-size:14.5px;padding:10px 12px;border-radius:8px;display:none}.msg.ok{display:block;background:var(--green-soft);color:var(--green)}.msg.part{display:block;background:var(--orange-soft);color:var(--orange)}.msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}.msg.info{display:block;background:var(--acc-soft);color:var(--acc)}
+.photos{display:flex;gap:8px;flex-wrap:wrap}.photos figure{margin:0;position:relative}.photos img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--rule)}
+.photos button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:var(--bad);color:#fff;font-weight:700;cursor:pointer;line-height:22px;padding:0}
+.upload{display:inline-flex;align-items:center;gap:8px;font:600 15px var(--body);padding:10px 14px;border-radius:8px;border:1px dashed var(--acc);color:var(--acc);cursor:pointer;background:var(--acc-soft)}
+.upload input{display:none}
+table.res{border-collapse:collapse;width:100%;font-size:14px}table.res th,table.res td{border-bottom:1px solid var(--rule);padding:5px 6px;text-align:left;vertical-align:top}table.res td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+.total{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:15px}.total b{font-size:20px}
+details.ref{font-size:14px;color:var(--ink-2)}details.ref summary{cursor:pointer;color:var(--ink);font-weight:600}
+.pts{font:600 13px var(--mono);color:var(--ink-2)}
+.att{margin:0;font:600 14px var(--mono);color:var(--acc)}
+.field input:disabled,.field textarea:disabled{opacity:.75}
+.bar{height:8px;background:var(--rule);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--green);width:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">физика · 9 класс · подготовка к ОГЭ</div>
+    <h1>Тренажёр ОГЭ по физике · Кинематика</h1>
+    <p class="sub">16 заданий по пройденным темам — кинематика, плотность, инерция и инертность — в форматах заданий ОГЭ (29 баллов). Часть 1 (задания 1–12) проверяется сразу, но <b>один раз за попытку</b>: после «Проверить» ответ не меняется. В части 2 (13–16) введите ответ и приложите фото решения — его проверит учитель. Когда закончите, нажмите «Отправить учителю». Всего <b>5 попыток</b>; ответы сохраняются на этом устройстве, пока вы их не отправите.</p>
+  </header>
+  <section class="card">
+    <div class="field"><label for="name">Фамилия, имя</label><input id="name" autocomplete="name" placeholder="обязательно для отправки"><span></span></div>
+    <p class="att" id="att"></p>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="nav" id="nav" aria-label="Выбор задания"></div>
+    <p class="foot">Зелёный — верно, оранжевый — частично, красный — неверно, синий — ждёт проверки учителя. Задания можно решать в любом порядке; ответ части 1 проверяется один раз за попытку, часть 2 можно править до отправки.</p>
+  </section>
+  <section class="card task" id="task"></section>
+  <section class="card">
+    <h2>Результат</h2>
+    <div class="total"><span>часть 1: <b id="p1">0</b>/18</span><span>часть 2 (по ответам): <b id="p2">0</b>/11</span><span>итого: <b id="pt">0</b>/29</span><span>отметка: <b id="gr">—</b></span></div>
+    <p class="foot">Баллы части 2 здесь предварительные (по числовому ответу); окончательные ставит учитель по фото решения: за формулы и «дано» даётся часть баллов даже при ошибке в арифметике. Шкала (пропорционально ФИПИ): «3» от 7, «4» от 15, «5» от 22 баллов.</p>
+    <div class="btns"><button class="b" id="send">Отправить учителю</button><button class="b" id="again" hidden>Начать новую попытку</button><button class="b ghost" id="dlHtml">Скачать отчёт</button></div>
+    <div class="msg" id="xMsg" role="status" aria-live="polite"></div>
+    <table class="res" id="res"></table>
+  </section>
+  <section class="card"><details class="ref"><summary>Справочные данные</summary>
+<p><b>Константы:</b> g = 10 м/с². <b>Плотность, кг/м³:</b> вода 1000, лёд 900, алюминий 2700, сталь/железо 7800, медь 8900, свинец 11 350, латунь 8500. <b>Перевод:</b> 1 км/ч = 1/3,6 м/с; 1 см³ = 10⁻⁶ м³; 1 г = 10⁻³ кг.</p>
+<p><b>Формулы:</b> v = v₀ + at; s = v₀t + at²/2; s = (v² − v₀²)/(2a); ρ = m/V; v<sub>ср</sub> = s<sub>весь</sub>/t<sub>всё</sub>; путь по графику v(t) — площадь под графиком.</p></details></section>
+</div>
+<script>
+(function(){
+  const T = [{"n": 1,"pts": 2,"type": "seq","key": "431","topic": "величина — единица СИ","lab": "А Б В","text": "<p>Установите соответствие между физическими величинами и единицами этих величин в СИ.</p><table class=\"mt\"><tr><th>ФИЗИЧЕСКИЕ ВЕЛИЧИНЫ</th><th>ЕДИНИЦЫ</th></tr><tr><td>А) ускорение</td><td>1) кг/м³</td></tr><tr><td>Б) перемещение</td><td>2) м/с</td></tr><tr><td>В) плотность</td><td>3) м</td></tr><tr><td></td><td>4) м/с²</td></tr><tr><td></td><td>5) кг</td></tr></table><p>Запишите три цифры подряд в порядке А, Б, В.</p>"},{"n": 2,"pts": 2,"type": "seq","key": "241","topic": "величина — формула","lab": "А Б В","text": "<p>Установите соответствие между физическими величинами и формулами. Обозначения: <i>v</i>₀ — начальная скорость, <i>v</i> — скорость в момент <i>t</i>, <i>m</i> — масса, <i>V</i> — объём, <i>R</i> — радиус, <i>T</i> — период.</p><table class=\"mt\"><tr><th>ФИЗИЧЕСКИЕ ВЕЛИЧИНЫ</th><th>ФОРМУЛЫ</th></tr><tr><td>А) ускорение</td><td>1) <i>m</i>/<i>V</i></td></tr><tr><td>Б) путь при равноускоренном движении</td><td>2) (<i>v</i> − <i>v</i>₀)/<i>t</i></td></tr><tr><td>В) плотность</td><td>3) 2π<i>R</i>/<i>T</i></td></tr><tr><td></td><td>4) <i>v</i>₀<i>t</i> + <i>at</i>²/2</td></tr></table><p>Запишите три цифры подряд в порядке А, Б, В.</p>"},{"n": 3,"pts": 1,"type": "one","key": "2","topic": "явление: инерция","text": "<p>Автобус резко затормозил, и стоящие пассажиры наклонились вперёд. Каким явлением это объясняется?</p><ol class=\"opts\"><li>тяготением</li><li>инерцией</li><li>трением</li><li>деформацией</li></ol>"},{"n": 4,"pts": 2,"type": "seq","key": "1235","topic": "пропуски в тексте: инерция и инертность","lab": "А Б В Г","text": "<p>Прочитайте текст и вставьте на места пропусков слова из списка.</p><p><i>Явление сохранения скорости тела при отсутствии действия на него других тел называют <b>(А)</b> ____. Разные тела при одинаковом действии изменяют свою скорость по-разному — это свойство называют <b>(Б)</b> ____. Мерой этого свойства служит <b>(В)</b> ____: чем она больше, тем <b>(Г)</b> ____ тело изменяет скорость.</i></p><p><b>Список:</b> 1) инерцией; 2) инертностью; 3) масса; 4) сила; 5) медленнее; 6) быстрее.</p><p>Запишите четыре цифры подряд в порядке А, Б, В, Г.</p>"},{"n": 5,"pts": 1,"type": "num","key": 2,"unit": "м/с²","topic": "ускорение по графику v(t)","svg": "vt","text": "<p>На рисунке — график зависимости скорости тела от времени при прямолинейном движении. Определите модуль ускорения тела на участке от 2 до 6 с.</p>"},{"n": 6,"pts": 1,"type": "num","key": 20,"unit": "м","topic": "путь по графику v(t)","svg": "vt","text": "<p>По тому же графику найдите путь, пройденный телом за первые 2 с.</p>"},{"n": 7,"pts": 1,"type": "num","key": 2700,"unit": "кг/м³","topic": "плотность по мензурке","svg": "beakers","text": "<p>В мензурку с водой опустили металлический шарик массой 54 г (рисунок: уровень воды до и после). Определите плотность вещества шарика. Ответ дайте в кг/м³.</p>"},{"n": 8,"pts": 1,"type": "num","key": 25,"unit": "м","topic": "путь при равноускоренном движении","text": "<p>Автомобиль трогается с места и движется с постоянным ускорением 2 м/с². Какой путь он пройдёт за первые 5 с?</p>"},{"n": 9,"pts": 2,"type": "seq","key": "23","topic": "изменение величин при торможении","lab": "скорость · ускорение","text": "<p>Самокат катится по прямой и равномерно тормозит: ускорение постоянно и направлено против скорости. Как меняются по модулю скорость самоката и его ускорение?</p><p>1) увеличивается; 2) уменьшается; 3) не изменяется. Запишите две цифры подряд: сначала для скорости, потом для ускорения.</p>"},{"n": 10,"pts": 2,"type": "set","key": "23","topic": "графики x(t): два верных утверждения","svg": "xt","text": "<p>На рисунке — графики зависимости координаты от времени для двух тел, движущихся вдоль оси <i>Ox</i>. Выберите <b>два</b> верных утверждения и запишите их номера.</p><ol class=\"opts\"><li>Тела движутся в одном направлении.</li><li>Модуль скорости тела 1 в 2 раза больше модуля скорости тела 2.</li><li>Тела встретились через 3 с после начала движения в точке с координатой 30 м.</li><li>За первые 4 с тело 2 прошло путь 40 м.</li><li>В момент начала движения расстояние между телами было 30 м.</li></ol>"},{"n": 11,"pts": 1,"type": "one","key": "1","topic": "измерение линейкой с погрешностью","svg": "ruler","text": "<p>Длину бруска измерили линейкой (рисунок). Погрешность измерения равна цене деления. Запишите результат с учётом погрешности.</p><ol class=\"opts\"><li>(5,4 ± 0,1) см</li><li>(6,4 ± 0,1) см</li><li>(5,4 ± 0,5) см</li><li>(5,40 ± 0,01) см</li></ol>"},{"n": 12,"pts": 2,"type": "set","key": "13","topic": "выводы из опыта: масса и ускорение","text": "<p>Ученик разгонял тележки разной массы одной и той же силой (пружинный динамометр показывал 1 Н) и измерял ускорение. Результаты — в таблице.</p><table class=\"dt\"><tr><th>№ опыта</th><th>Масса тележки, кг</th><th>Сила тяги, Н</th><th>Ускорение, м/с²</th></tr><tr><td>1</td><td>0,5</td><td>1</td><td>2</td></tr><tr><td>2</td><td>1</td><td>1</td><td>1</td></tr><tr><td>3</td><td>2</td><td>1</td><td>0,5</td></tr></table><p>Выберите <b>два</b> утверждения, которые соответствуют результатам опытов, и запишите их номера.</p><ol class=\"opts\"><li>При увеличении массы тележки в 2 раза ускорение уменьшается в 2 раза.</li><li>Ускорение тележки не зависит от её массы.</li><li>Ускорение обратно пропорционально массе тележки.</li><li>Тележка массой 4 кг под действием той же силы получит ускорение 2 м/с².</li><li>Чем больше масса тележки, тем быстрее меняется её скорость.</li></ol>"},{"n": 13,"pts": 2,"type": "text","topic": "качественная: инерция в транспорте","text": "<p>Почему при резком торможении автобуса пассажиры наклоняются вперёд, а при резком разгоне — назад? Ответ поясните, используя понятие инерции.</p>"},{"n": 14,"pts": 3,"type": "calc","key": 400,"tol": 4,"unit": "м","topic": "тормозной путь","text": "<p>Поезд, двигаясь со скоростью 72 км/ч, начал тормозить с постоянным ускорением 0,5 м/с². Найдите тормозной путь поезда до полной остановки.</p>"},{"n": 15,"pts": 3,"type": "calc","key": 100,"tol": 1,"unit": "см³","topic": "плотность: полость в шаре","text": "<p>Алюминиевый шар объёмом 300 см³ имеет массу 540 г. Сплошной он или полый? Если полый — найдите объём полости. Плотность алюминия 2700 кг/м³. В поле ответа запишите объём полости в см³ (0 — если шар сплошной).</p>"},{"n": 16,"pts": 3,"type": "calc","key": 16,"tol": 0.2,"unit": "м/с","topic": "средняя скорость на двух участках","text": "<p>Мотоциклист первые 10 с разгонялся из состояния покоя с ускорением 2 м/с², а затем 15 с ехал с набранной скоростью. Найдите среднюю скорость мотоциклиста за всё время движения.</p>"}];
+  const $ = id => document.getElementById(id);
+  const KEY = 'oge_kin_site_v1';
+  // --- рисунки: строятся на лету (SVG), чтобы файл оставался маленьким
+  const FIG = {};
+  function axes(w, h, xmax, ymax, xstep, ystep, xl, yl){ const L = 44, T = 16, R = 34, B = 34, cw = w - L - R, ch = h - T - B;
+    const X = x => Math.round(L + x/xmax*cw), Y = y => Math.round(T + ch - y/ymax*ch); let s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="100%" style="max-width:' + w + 'px;background:#fff;border-radius:8px">';
+    for (let x = 0; x <= xmax; x += xstep) s += '<line x1="' + X(x) + '" y1="' + T + '" x2="' + X(x) + '" y2="' + (T+ch) + '" stroke="#D6E2EC"/>';
+    for (let y = 0; y <= ymax; y += ystep) s += '<line x1="' + L + '" y1="' + Y(y) + '" x2="' + (L+cw) + '" y2="' + Y(y) + '" stroke="#D6E2EC"/>';
+    s += '<line x1="' + L + '" y1="' + (T+ch) + '" x2="' + (L+cw+6) + '" y2="' + (T+ch) + '" stroke="#0B3C5D" stroke-width="1.6"/><line x1="' + L + '" y1="' + (T+ch) + '" x2="' + L + '" y2="' + (T-6) + '" stroke="#0B3C5D" stroke-width="1.6"/>';
+    for (let x = 0; x <= xmax; x += xstep) s += '<text x="' + X(x) + '" y="' + (T+ch+16) + '" font-size="12" text-anchor="middle" fill="#0B3C5D" font-family="system-ui">' + x + '</text>';
+    for (let y = ystep; y <= ymax; y += ystep) s += '<text x="' + (L-6) + '" y="' + (Y(y)+4) + '" font-size="12" text-anchor="end" fill="#0B3C5D" font-family="system-ui">' + y + '</text>';
+    s += '<text x="' + (L+cw+8) + '" y="' + (T+ch+4) + '" font-size="13" font-style="italic" fill="#0B3C5D" font-family="system-ui">' + xl + '</text><text x="' + (L+4) + '" y="' + (T-2) + '" font-size="13" font-style="italic" fill="#0B3C5D" font-family="system-ui">' + yl + '</text>';
+    return {s, X, Y}; }
+  function pl(g, pts, color, label){ let s = '<polyline fill="none" stroke="' + color + '" stroke-width="2.6" stroke-linejoin="round" points="' + pts.map(p => g.X(p[0]) + ',' + g.Y(p[1])).join(' ') + '"/>';
+    if (label){ const p = pts[pts.length-1]; s += '<text x="' + (g.X(p[0])-14) + '" y="' + (g.Y(p[1])-8) + '" font-size="13" font-weight="700" fill="' + color + '" font-family="system-ui">' + label + '</text>'; } return s; }
+  FIG.vt = () => { const g = axes(420, 300, 8, 12, 1, 2, 't, с', 'v, м/с'); return g.s + pl(g, [[0,10],[2,10],[6,2],[8,2]], '#1F77B4') + '</svg>'; };
+  FIG.xt = () => { const g = axes(420, 320, 8, 60, 1, 10, 't, с', 'x, м'); return g.s + pl(g, [[0,0],[6,60]], '#1F77B4', '1') + pl(g, [[0,45],[8,5]], '#2E9C6B', '2') + '</svg>'; };
+  function beaker(ox, level, cap){ const bw = 70, bh = 190, top = 20, y = v => Math.round(top + bh - v/100*bh); let s = '<rect x="' + ox + '" y="' + y(level) + '" width="' + bw + '" height="' + (top+bh-y(level)) + '" fill="#BFE3F5"/>';
+    s += '<path d="M' + ox + ',' + top + ' L' + ox + ',' + (top+bh) + ' L' + (ox+bw) + ',' + (top+bh) + ' L' + (ox+bw) + ',' + top + '" fill="none" stroke="#0B3C5D" stroke-width="2"/>';
+    for (let v = 0; v <= 100; v += 5){ const maj = v % 20 === 0, ln = maj ? 18 : 9; s += '<line x1="' + (ox+bw-ln) + '" y1="' + y(v) + '" x2="' + (ox+bw) + '" y2="' + y(v) + '" stroke="#0B3C5D" stroke-width="' + (maj ? 1.4 : 0.8) + '"/>';
+      if (maj) s += '<text x="' + (ox+bw-22) + '" y="' + (y(v)+4) + '" font-size="11" text-anchor="end" fill="#0B3C5D" font-family="system-ui">' + v + '</text>'; }
+    return s + '<text x="' + (ox+bw/2) + '" y="' + (top+bh+18) + '" font-size="12" text-anchor="middle" fill="#5B6B7A" font-family="system-ui">' + cap + '</text><text x="' + (ox+bw-4) + '" y="' + (top-6) + '" font-size="11" text-anchor="end" fill="#5B6B7A" font-family="system-ui">мл</text>'; }
+  FIG.beakers = () => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 250" width="100%" style="max-width:300px;background:#fff;border-radius:8px">' + beaker(40, 40, 'до') + beaker(180, 60, 'после') + '<circle cx="215" cy="190" r="14" fill="#8E8E8E" stroke="#0B3C5D" stroke-width="1.5"/></svg>';
+  FIG.ruler = () => { const L = 20, sc = 40; let s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 120" width="100%" style="max-width:460px;background:#fff;border-radius:8px">';
+    s += '<rect x="' + (L + 1.0*sc) + '" y="14" width="' + (5.4*sc) + '" height="34" fill="#E8833A" opacity="0.85" stroke="#0B3C5D"/><rect x="' + L + '" y="52" width="' + (10*sc+20) + '" height="50" fill="#FFF7D6" stroke="#0B3C5D" stroke-width="1.5"/>';
+    for (let i = 0; i <= 100; i++){ const x = L + i*sc/10, ln = i % 10 === 0 ? 16 : (i % 5 === 0 ? 10 : 6); s += '<line x1="' + x + '" y1="52" x2="' + x + '" y2="' + (52+ln) + '" stroke="#0B3C5D" stroke-width="' + (i % 10 === 0 ? 1.2 : 0.7) + '"/>';
+      if (i % 10 === 0) s += '<text x="' + x + '" y="88" font-size="12" text-anchor="middle" fill="#0B3C5D" font-family="system-ui">' + (i/10) + '</text>'; }
+    return s + '<text x="412" y="98" font-size="12" fill="#5B6B7A" font-family="system-ui">см</text></svg>'; };
+
+  const MAXATT = 5;
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+  let st = {name:'', a:{}, photos:{}, lock:{}, attempt:1, id:'', done:false, limit:false, sent:[]};
+  try { const s = localStorage.getItem(KEY); if (s) st = Object.assign(st, JSON.parse(s)); } catch(e){}
+  if (!st.id) st.id = uid(); st.lock = st.lock || {}; st.sent = st.sent || [];
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e){} };
+  const norm = s => String(s || '').trim().replace(/\s+/g,'').replace(/[.,]/g, ',');
+  const num = s => { s = String(s || '').trim().replace(',', '.').replace(/\s+/g,'').replace('−','-'); const m = s.match(/^(-?\d*\.?\d+)\/(\d*\.?\d+)$/); return m ? parseFloat(m[1])/parseFloat(m[2]) : parseFloat(s); };
+  const GRADE = p => p >= 22 ? '5' : p >= 15 ? '4' : p >= 7 ? '3' : '2';
+
+  // --- проверка одного задания: {pts, status: ok|part|bad|wait, note}
+  function check(t, ans){
+    ans = String(ans == null ? '' : ans);
+    if (ans.trim() === '' ) return {pts:0, status:'none'};
+    if (t.type === 'one') { const a = norm(ans); return a === t.key ? {pts:1, status:'ok'} : {pts:0, status:'bad'}; }
+    if (t.type === 'seq') { const a = norm(ans).replace(/,/g,''); if (a === t.key) return {pts:2, status:'ok'};
+      if (a.length === t.key.length){ let d = 0; for (let i = 0; i < a.length; i++) if (a[i] !== t.key[i]) d++; if (d === 1) return {pts:1, status:'part', note:'Одна позиция неверна — 1 балл из 2.'}; }
+      return {pts:0, status:'bad'}; }
+    if (t.type === 'set') { const a = [...new Set(norm(ans).replace(/,/g,'').split(''))].sort().join(''), k = t.key.split('').sort().join('');
+      if (a === k) return {pts:2, status:'ok'}; if (a.length > 2) return {pts:0, status:'bad', note:'Записано больше двух цифр — 0 баллов.'};
+      const hit = a.split('').filter(c => k.includes(c)).length; return hit === 1 ? {pts:1, status:'part', note:'Одна цифра из двух верна — 1 балл из 2.'} : {pts:0, status:'bad'}; }
+    if (t.type === 'num') { const v = num(ans); if (isNaN(v)) return {pts:0, status:'bad', note:'Нужно число.'}; return Math.abs(v - t.key) <= Math.max(0.005*Math.abs(t.key), 1e-9) ? {pts:1, status:'ok'} : {pts:0, status:'bad'}; }
+    if (t.type === 'calc' || t.type === 'exp') { const v = num(ans); if (isNaN(v)) return {pts:0, status:'wait', note:'Нужно число.'};
+      return Math.abs(v - t.key) <= t.tol ? {pts:t.pts, status:'wait', ok:true, note:'Числовой ответ верный. До ' + t.pts + ' баллов — после проверки решения учителем.'} : {pts:0, status:'wait', ok:false, note:'Числовой ответ не совпал с ключом. Проверьте «дано», перевод единиц и формулы; баллы за верные формулы учитель может поставить и при ошибке в счёте.'}; }
+    return {pts:0, status:'wait'};   // text
+  }
+  const statusOf = t => { const r = check(t, st.a[t.n]); if (t.type === 'text' && (st.a[t.n] || (st.photos[t.n] || []).length)) return 'wait'; if (r.status === 'none' && (st.photos[t.n] || []).length) return 'wait'; return r.status; };
+
+  // --- навигация
+  let cur = 1;
+  function renderNav(){ const nav = $('nav'); nav.innerHTML = ''; let done = 0;
+    T.forEach(t => { const b = document.createElement('button'); b.textContent = t.n; const s = statusOf(t); if (s !== 'none'){ b.className = s; done++; }
+      b.setAttribute('aria-current', String(t.n === cur)); b.addEventListener('click', () => { cur = t.n; renderNav(); renderTask(); }); nav.appendChild(b); });
+    $('bar').style.width = (100*done/T.length) + '%'; }
+
+  // --- задание
+  function renderTask(){ const t = T.find(x => x.n === cur), el = $('task'); const a = st.a[t.n] || '';
+    const part2 = t.n >= 13;
+    let h = '<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><h2>Задание ' + t.n + (part2 ? ' · часть 2' : ' · часть 1') + '</h2><span class="pts">' + t.pts + ' ' + (t.pts === 1 ? 'балл' : 'балла') + ' · ' + t.topic + '</span></div>';
+    h += t.text; if (t.svg) h += '<div class="fig">' + FIG[t.svg]() + '</div>';
+    if (t.type === 'text'){ h += '<div class="field" style="grid-template-columns:1fr"><textarea id="ans" placeholder="Краткий ответ в одну-две фразы (полное объяснение — на листе, фото ниже)">' + a.replace(/</g,'&lt;') + '</textarea></div>'; }
+    else { const ph = t.type === 'seq' ? ('цифры: ' + (t.lab || '')) : t.type === 'set' ? 'две цифры' : t.type === 'one' ? 'номер ответа' : 'число';
+      h += '<div class="field"><label for="ans">Ответ:</label><input id="ans" inputmode="' + ((t.type === 'num' || t.type === 'calc' || t.type === 'exp') ? 'decimal' : 'numeric') + '" autocomplete="off" placeholder="' + ph + '" value="' + a.replace(/"/g,'&quot;') + '"><span>' + (t.unit || '') + '</span></div>'; }
+    if (part2){ h += '<p class="foot">Решение запишите на листе (дано, формулы, вычисления, ответ) и сфотографируйте: можно несколько фото.</p>';
+      h += '<label class="upload">📷 Приложить фото решения<input type="file" id="file" accept="image/*" multiple capture="environment"></label>';
+      h += '<div class="photos" id="photos"></div>'; }
+    h += '<div class="btns"><button class="b" id="chk">' + (part2 ? 'Сохранить' : 'Проверить') + '</button>' + (cur > 1 ? '<button class="b ghost" id="prev">← ' + (cur-1) + '</button>' : '') + (cur < T.length ? '<button class="b ghost" id="next">' + (cur+1) + ' →</button>' : '') + '</div>';
+    h += '<div class="msg" id="msg" role="status" aria-live="polite"></div>';
+    el.innerHTML = h;
+    const frozen = st.done || (!part2 && st.lock[t.n]);
+    if (frozen){ $('ans').disabled = true; $('chk').disabled = true; $('chk').textContent = st.done ? 'Попытка отправлена' : 'Проверено'; if ($('file')) $('file').disabled = true; }
+    if (part2) renderPhotos(t.n);
+    const show = () => { const r = check(t, st.a[t.n]); const m = $('msg'); if (!st.a[t.n] && !(st.photos[t.n] || []).length){ m.className = 'msg'; return; }
+      if (t.type === 'text'){ m.className = 'msg info'; m.textContent = 'Сохранено. Объяснение проверит учитель по фото (до ' + t.pts + ' баллов).'; return; }
+      if (r.status === 'wait'){ m.className = 'msg ' + (r.ok ? 'info' : 'part'); m.textContent = r.note || 'Сохранено, ждёт проверки учителя.'; return; }
+      if (r.status === 'none') { m.className = 'msg'; return; }
+      m.className = 'msg ' + r.status; m.textContent = r.status === 'ok' ? 'Верно! ' + r.pts + ' ' + (r.pts === 1 ? 'балл' : 'балла') + '.' : (r.status === 'part' ? r.note : 'Неверно. ' + (r.note || 'Ещё раз перечитайте условие — ответ можно исправить.')); };
+    $('chk').addEventListener('click', () => { if (frozen) return; const v = $('ans').value;
+      if (!part2 && !v.trim()){ const m = $('msg'); m.className = 'msg info'; m.textContent = 'Сначала введите ответ: проверить можно один раз.'; return; }
+      st.a[t.n] = v; if (!part2) st.lock[t.n] = true; save(); renderNav(); renderRes(); renderTask(); });
+    $('ans').addEventListener('keydown', e => { if (e.key === 'Enter' && t.type !== 'text') $('chk').click(); });
+    if ($('prev')) $('prev').addEventListener('click', () => { cur--; renderNav(); renderTask(); });
+    if ($('next')) $('next').addEventListener('click', () => { cur++; renderNav(); renderTask(); });
+    if (part2 && !st.done) $('file').addEventListener('change', e => addPhotos(t.n, e.target.files));
+    show(); if (renderTask.ready) window.scrollTo({top: el.offsetTop - 8, behavior: 'smooth'}); renderTask.ready = true; }
+
+  // --- фото: сжимаем до 1280 px по длинной стороне, JPEG 0.8
+  function addPhotos(n, files){ const room = 4 - (st.photos[n] || []).length; if (room <= 0){ const m = $('msg'); m.className = 'msg info'; m.textContent = 'К заданию можно приложить не больше 4 фото.'; return; } [...files].slice(0, room).forEach(f => { const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => {
+      const k = Math.min(1, 1280/Math.max(im.width, im.height)); const c = document.createElement('canvas'); c.width = Math.round(im.width*k); c.height = Math.round(im.height*k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); (st.photos[n] = st.photos[n] || []).push(c.toDataURL('image/jpeg', 0.8)); save(); renderPhotos(n); renderNav(); renderRes(); }; im.src = r.result; }; r.readAsDataURL(f); }); }
+  function renderPhotos(n){ const box = $('photos'); if (!box) return; box.innerHTML = ''; (st.photos[n] || []).forEach((src, i) => { const f = document.createElement('figure'); f.innerHTML = '<img src="' + src + '" alt="фото решения ' + (i+1) + '"><button aria-label="удалить фото">×</button>';
+      if (st.done) f.querySelector('button').hidden = true; f.querySelector('button').addEventListener('click', () => { if (st.done) return; st.photos[n].splice(i, 1); save(); renderPhotos(n); renderNav(); renderRes(); }); box.appendChild(f); }); }
+
+  // --- результаты
+  function rows(){ return T.map(t => { const r = check(t, st.a[t.n]); const ph = (st.photos[t.n] || []).length; const s = statusOf(t);
+    return {n:t.n, topic:t.topic, max:t.pts, ans: st.a[t.n] || '', pts: t.n <= 12 ? r.pts : (r.ok ? t.pts : 0), status:s, photos:ph, auto: t.n <= 12}; }); }
+  function totals(rs){ const p1 = rs.filter(r => r.n <= 12).reduce((a, r) => a + r.pts, 0), p2 = rs.filter(r => r.n > 12).reduce((a, r) => a + r.pts, 0); return {p1, p2, pt: p1 + p2}; }
+  const SW = {ok:'верно', part:'частично', bad:'неверно', wait:'к проверке', none:'—'};
+  function renderRes(){ const rs = rows(), tt = totals(rs); $('p1').textContent = tt.p1; $('p2').textContent = tt.p2; $('pt').textContent = tt.pt; $('gr').textContent = GRADE(tt.pt);
+    $('res').innerHTML = '<tr><th>№</th><th>Тема</th><th>Ответ</th><th>Статус</th><th>Баллы</th></tr>' + rs.map(r => '<tr><td class="n">' + r.n + '</td><td>' + r.topic + '</td><td>' + (r.ans ? r.ans.replace(/</g,'&lt;').slice(0, 60) : '—') + (r.photos ? ' 📷' + r.photos : '') + '</td><td>' + SW[r.status] + '</td><td class="n">' + r.pts + '/' + r.max + '</td></tr>').join(''); }
+
+  // --- выгрузка
+  const stamp = () => new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const safe = s => (s || 'ученик').replace(/[^\p{L}\p{N} _-]/gu, '').trim() || 'ученик';
+  function csv(){ const rs = rows(), tt = totals(rs); const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const lines = [['Ученик', st.name, 'Дата', stamp()], ['№', 'Тема', 'Ответ ученика', 'Статус', 'Баллы (авто)', 'Макс', 'Баллы учителя', 'Фото']].concat(rs.map(r => [r.n, r.topic, r.ans, SW[r.status], r.auto ? r.pts : (r.pts ? r.pts + '?' : ''), r.max, '', r.photos]))
+      .concat([[], ['Часть 1', '', '', '', tt.p1, 18], ['Часть 2 (предварительно)', '', '', '', tt.p2, 11], ['Итого (предварительно)', '', '', '', tt.pt, 29, GRADE(tt.pt)]]);
+    return '\ufeff' + lines.map(l => l.map(esc).join(';')).join('\r\n'); }
+  function reportHtml(){ const rs = rows(), tt = totals(rs); const e = s => String(s).replace(/</g, '&lt;');
+    const tr = rs.map(r => '<tr><td>' + r.n + '</td><td>' + e(r.topic) + '</td><td>' + e(r.ans || '—') + '</td><td>' + SW[r.status] + '</td><td>' + (r.auto ? r.pts : (r.pts ? r.pts + ' (по ответу)' : '0')) + '/' + r.max + '</td>' +
+      (r.n > 12 ? '<td><input type="number" min="0" max="' + r.max + '" data-n="' + r.n + '" value="' + (r.pts || '') + '" style="width:3.5em"></td>' : '<td>' + r.pts + '</td>') + '</tr>').join('');
+    const ph = T.filter(t => t.n > 12).map(t => (st.photos[t.n] || []).length ? '<h3>Задание ' + t.n + ' — ' + e(t.topic) + (st.a[t.n] ? ' · ответ: ' + e(st.a[t.n]) : '') + '</h3>' + st.photos[t.n].map(s => '<img src="' + s + '">').join('') : '').join('');
+    return '<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Отчёт ОГЭ · ' + e(st.name) + '</title>' +
+      '<style>body{font:15px/1.45 system-ui,sans-serif;max-width:900px;margin:16px auto;padding:0 12px;color:#0B3C5D}table{border-collapse:collapse;width:100%}td,th{border:1px solid #BFD7E6;padding:4px 7px;font-size:14px;vertical-align:top}th{background:#EAF5FC}img{max-width:100%;border:1px solid #BFD7E6;border-radius:8px;margin:6px 0}h3{margin:18px 0 4px}.tot{font-weight:700}</style></head><body>' +
+      '<h1>Тренажёр ОГЭ · Кинематика · отчёт</h1><p><b>' + e(st.name || 'без имени') + '</b> · ' + stamp() + '</p>' +
+      '<table><tr><th>№</th><th>Тема</th><th>Ответ</th><th>Статус</th><th>Баллы (авто)</th><th>Баллы учителя</th></tr>' + tr +
+      '<tr class="tot"><td colspan="4">Часть 1</td><td id="s1">' + tt.p1 + '/18</td><td>' + tt.p1 + '</td></tr><tr class="tot"><td colspan="4">Часть 2</td><td>' + tt.p2 + '/11 (предв.)</td><td id="s2">' + tt.p2 + '</td></tr>' +
+      '<tr class="tot"><td colspan="4">Итого / отметка</td><td>' + tt.pt + '/29 · «' + GRADE(tt.pt) + '»</td><td id="s3">' + tt.pt + ' · «' + GRADE(tt.pt) + '»</td></tr></table>' +
+      '<p>Учитель: впишите баллы за 13–16 в последний столбец — итог и отметка пересчитаются (шкала: «3» от 7, «4» от 15, «5» от 22 из 29).</p>' +
+      '<script>var P1=' + tt.p1 + ';document.querySelectorAll("input[data-n]").forEach(function(i){i.addEventListener("input",function(){var s=0;document.querySelectorAll("input[data-n]").forEach(function(x){s+=+x.value||0});var t=P1+s;var g=t>=22?"5":t>=15?"4":t>=7?"3":"2";document.getElementById("s2").textContent=s;document.getElementById("s3").textContent=t+" · «"+g+"»"})});<\/script>' +
+      (ph ? '<h2>Фото решений (часть 2)</h2>' + ph : '<p>Фото решений не приложены.</p>') + '</body></html>'; }
+  async function download(name, type, data){ const b = new Blob([data], {type}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(u); a.remove(); }, 1000); }
+  const TL = {а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};
+  const lat = s => (s || 'uchenik').toLowerCase().split('').map(ch => TL[ch] !== undefined ? TL[ch] : ch).join('').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'uchenik';
+  $('dlHtml').addEventListener('click', () => download('oge-kinematika-otchet-' + lat(st.name) + '-p' + st.attempt + '.html', 'text/html;charset=utf-8', reportHtml()));
+
+  // --- отправка учителю: POST JSON в веб-приложение Google Apps Script (адрес — в config.js)
+  const ENDPOINT = (window.TR_ENDPOINT || '').trim();
+  function payload(){ const rs = rows(), tt = totals(rs);
+    const cols = [['Часть 1 (авто)', tt.p1], ['Часть 2 (предв.)', tt.p2], ['Предв. итог', tt.pt], ['Предв. отметка', GRADE(tt.pt)]]
+      .concat(rs.map(r => ['№' + r.n, (r.ans || '—') + (r.auto ? ' · ' + r.pts + '/' + r.max : (r.ans && r.n > 13 ? (r.pts ? ' · ответ верный' : ' · ответ не совпал') : '')) + (r.photos ? ' · фото ' + r.photos : '')]));
+    const photos = {}; T.filter(t => t.n > 12).forEach(t => { if ((st.photos[t.n] || []).length) photos[t.n] = st.photos[t.n]; });
+    return {v:1, id: st.id, trainer:'oge-kin', sheet:'ОГЭ кинематика', name: st.name.trim(), client_attempt: st.attempt,
+      cols: cols.map(c => ({h:c[0], v:c[1]})), autoCol:'Часть 1 (авто)', prelimCol:'Предв. итог',
+      teacher: T.filter(t => t.n > 12).map(t => ({h:'№' + t.n + ' учитель', max:t.pts})), scale:[7, 15, 22], photos}; }
+  function renderAtt(){ const used = st.sent.length;
+    $('att').textContent = st.limit ? 'Все ' + MAXATT + ' попыток использованы' : (st.done ? 'Попытка ' + st.attempt + ' из ' + MAXATT + ' отправлена' : 'Попытка ' + st.attempt + ' из ' + MAXATT);
+    $('send').hidden = st.done; $('again').hidden = !st.done || st.limit || st.attempt >= MAXATT;
+    $('name').disabled = used > 0; }
+  $('send').addEventListener('click', async () => { const m = $('xMsg');
+    if ((st.name || '').trim().split(/\s+/).filter(Boolean).length < 2){ m.className = 'msg bad'; m.textContent = 'Впишите фамилию и имя (вверху страницы) — без них ответы не дойдут до учителя.'; $('name').focus(); return; }
+    if (!Object.keys(st.a).some(k => String(st.a[k]).trim()) && !Object.keys(st.photos).some(k => st.photos[k].length)){ m.className = 'msg bad'; m.textContent = 'Пока нет ни одного ответа.'; return; }
+    if (!ENDPOINT){ m.className = 'msg info'; m.textContent = 'Отправка пока не настроена. Нажмите «Скачать отчёт» и пришлите файл учителю.'; return; }
+    if (!confirm('Отправить попытку ' + st.attempt + ' из ' + MAXATT + '? После отправки ответы этой попытки изменить нельзя.')) return;
+    const btn = $('send'); btn.disabled = true; btn.textContent = 'Отправляю…'; m.className = 'msg info'; m.textContent = 'Отправляю ответы' + (Object.keys(st.photos).length ? ' и фото' : '') + '…';
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 90000);
+    try { const res = await fetch(ENDPOINT, {method:'POST', body: JSON.stringify(payload()), signal: ctl.signal, redirect:'follow'});
+      const r = await res.json();
+      if (r.ok){ st.attempt = r.attempt || st.attempt; st.sent.push({attempt: st.attempt, at: new Date().toISOString(), pt: totals(rows()).pt}); st.done = true; if (r.max && r.attempt >= r.max) st.limit = true; save();
+        m.className = 'msg ok'; m.textContent = 'Готово: попытка ' + st.attempt + ' отправлена учителю.' + (st.limit ? ' Это была последняя попытка.' : ' Можно начать новую — осталось ' + (MAXATT - st.attempt) + '.'); }
+      else if (r.error === 'limit'){ st.done = true; st.limit = true; save(); m.className = 'msg bad'; m.textContent = 'Для «' + st.name.trim() + '» уже отправлено ' + r.used + ' попыток из ' + r.max + '. Больше отправлять нельзя.'; }
+      else if (r.error === 'name'){ m.className = 'msg bad'; m.textContent = 'Проверьте фамилию и имя.'; }
+      else { m.className = 'msg bad'; m.textContent = 'Не получилось отправить (' + (r.error || 'ошибка') + '). Попробуйте ещё раз или нажмите «Скачать отчёт».'; }
+    } catch(e){ m.className = 'msg bad'; m.textContent = 'Нет связи с сервером. Проверьте интернет и нажмите «Отправить» ещё раз — повтор не съест попытку.'; }
+    finally { clearTimeout(timer); btn.disabled = false; btn.textContent = 'Отправить учителю'; renderAtt(); renderNav(); renderTask(); } });
+  $('again').addEventListener('click', () => { if (st.limit || st.attempt >= MAXATT) return;
+    if (!confirm('Начать попытку ' + (st.attempt + 1) + ' из ' + MAXATT + '? Ответы и фото прошлой попытки сотрутся с этого устройства (у учителя они сохранены).')) return;
+    st = Object.assign(st, {a:{}, photos:{}, lock:{}, attempt: st.attempt + 1, id: uid(), done:false}); save(); cur = 1; $('xMsg').className = 'msg'; renderAtt(); renderNav(); renderTask(); renderRes(); });
+  $('name').value = st.name || ''; $('name').addEventListener('input', () => { st.name = $('name').value; save(); });
+
+  renderAtt(); renderNav(); renderTask(); renderRes();
+})();
+</script>
+</body></html>
