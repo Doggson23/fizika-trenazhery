@@ -254,6 +254,11 @@
                 "ref": {
                   "type": "string",
                   "description": "HTML справочных данных прямо в задании (общие — в reference, вверху теста)"
+                },
+                "tid": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9._-]{1,64}$",
+                  "description": "устойчивый id задания (bank_id или <тест>-NN); ключи на сервере — по tid, n — только порядок"
                 }
               }
             }

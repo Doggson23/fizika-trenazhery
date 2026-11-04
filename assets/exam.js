@@ -134,7 +134,7 @@
     const needsFix = t => { const r = gr(t, st.a[t.n]); return !(r.status === 'ok' || r.ok === true); };
     function renderSol(t){
       const box = $('sol-' + t.n); if (!box) return;
-      const s = SOL && SOL[t.n];
+      const s = SOL && ((t.tid && SOL[t.tid]) || SOL[t.n]);
       let h = '<p><b>Ваш ответ:</b> ' + (st.a[t.n] ? esc(st.a[t.n]) : '—') + ' · <b>верный ответ:</b> ' + esc(s && s.answer || keyText(t)) + '</p>';
       h += s && s.html ? '<div class="solbody"><b>Решение.</b> ' + s.html + '</div>' : '<p class="foot">Решение к этому заданию учитель ещё не добавил.</p>';
       if (needsFix(t)) h += '<label class="fix"><input type="checkbox" data-fix="' + t.n + '"' + (st.fix[t.n] ? ' checked' : '') + '> Выполнил работу над ошибками</label>';
@@ -255,7 +255,7 @@
       if (SERVER && go.length) {                         // ключей на странице нет — спрашиваем сервер, он ничего не записывает
         if (!V2) { flash('Проверка ответов работает через сервер учителя, а он пока не подключён.', 'bad'); return; }
         go.forEach(n => { const m = $('msg-' + n); if (m) { m.className = 'msg info'; m.textContent = 'Проверяю…'; } });
-        try { const r = await (await fetch(V2, {method: 'POST', body: JSON.stringify({v: 2, kind: 'check', trainer: X.trainer || X.id, answers: Object.fromEntries(go.map(n => [n, st.a[n] || '']))}), redirect: 'follow'})).json();
+        try { const r = await (await fetch(V2, {method: 'POST', body: JSON.stringify(Object.assign({v: 2, kind: 'check', trainer: X.trainer || X.id, answers: Object.fromEntries(go.map(n => [n, st.a[n] || '']))}, tidMaps(go))), redirect: 'follow'})).json();
           if (!r.ok) throw new Error(r.error); st.res = Object.assign(st.res || {}, r.results);
         } catch (e) { go.forEach(n => { const m = $('msg-' + n); if (m) { m.className = 'msg bad'; m.textContent = 'Нет связи с сервером — проверьте интернет и нажмите «Проверить» ещё раз.'; } }); return; }
       }
@@ -298,11 +298,13 @@
       rs.forEach(r => cols.push(['№' + r.n, (r.ans || '—') + (r.auto ? ' · ' + r.pts + '/' + r.max : (r.ans && (r.t.kind === 'calc' || r.t.kind === 'exp') ? (r.ok ? ' · ответ верный' : ' · ответ не совпал') : '')) + (r.photos ? ' · фото ' + r.photos : '')]));
       const photos = {}; T.filter(hasPhoto).forEach(t => { if ((st.photos[t.n] || []).length) photos[t.n] = st.photos[t.n]; });
       return {v: 1, id: st.id, trainer: X.trainer || X.id, sheet: X.sheet || X.title, name: st.name.trim(), client_attempt: st.attempt,
-        type: X.type, check_mode: MODE, max_attempts: MAXATT, final: !!st.final, test: X.id, answers: st.a,
+        type: X.type, check_mode: MODE, max_attempts: MAXATT, final: !!st.final, test: X.id, answers: st.a, ...tidMaps(),
         cols: cols.map(c => ({h: c[0], v: c[1]})), autoCol: 'Часть 1 (авто)', prelimCol: 'Предв. итог',
         teacher: T.filter(t => !isAuto(t)).map(t => ({h: '№' + t.n + ' учитель', max: t.pts})),
         scale: thr.map(x => x[0]).sort((a, b) => a - b), photos};
     }
+    // tid — устойчивый id задания: сервер ищет ключ по нему, номер n — только порядок на странице
+    function tidMaps(ns){ const at = {}, order = {}; T.forEach(t => { if (!t.tid) return; order[t.tid] = t.n; if (!ns || ns.includes(t.n)) at[t.tid] = st.a[t.n] || ''; }); return Object.keys(order).length ? {answers_tid: at, order} : {}; }
     const hasAny = () => Object.keys(st.a).some(k => String(st.a[k]).trim()) || Object.keys(st.photos).some(k => st.photos[k].length);
     $('send').addEventListener('click', async () => {
       if ((st.name || '').trim().split(/\s+/).filter(Boolean).length < 2) { flash('Впишите фамилию и имя (вверху страницы) — без них ответы не дойдут до учителя.', 'bad'); $('name').focus(); return; }
