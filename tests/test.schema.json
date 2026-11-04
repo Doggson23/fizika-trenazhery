@@ -2,31 +2,265 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Тест для exam.html (hub/платформа_тестов.md §3)",
   "type": "object",
-  "required": ["id", "version", "type", "title", "check_mode", "attempts", "blocks"],
+  "required": [
+    "id",
+    "version",
+    "type",
+    "title",
+    "check_mode",
+    "attempts",
+    "blocks"
+  ],
   "properties": {
-    "id": {"type": "string", "pattern": "^[a-z0-9-]{1,64}$", "description": "имя файла tests/<id>.json и параметр ?t="},
-    "version": {"type": "integer", "minimum": 1, "description": "поднять при изменении заданий: у учеников сбросится сохранённый черновик"},
-    "type": {"enum": ["exam-topic", "exam-section", "exam-mock", "dz"], "description": "Т1 / Т2 / Т3 / ДЗ"},
-    "check_mode": {"enum": ["on_demand", "after_submit"], "description": "Т1 — on_demand; Т2, Т3 — after_submit"},
-    "attempts": {"type": "integer", "minimum": 0, "description": "0 — без ограничения"},
-    "timer": {"type": ["object", "null"], "properties": {"minutes": {"type": "integer", "minimum": 1}, "mode": {"const": "soft"}}, "description": "мягкий таймер: по истечении предупреждение, сдать можно"},
-    "exam": {"enum": ["oge", "ege", null]}, "subject": {"type": "string"}, "class": {"type": "integer"},
-    "title": {"type": "string"}, "eyebrow": {"type": "string"}, "intro": {"type": "string", "description": "HTML"},
-    "trainer": {"type": "string", "description": "ключ для лимита попыток в Apps Script"},
-    "sheet": {"type": "string", "description": "лист в таблице учителя"},
-    "scale": {"type": "object", "properties": {"max": {"type": "integer"}, "grades": {"type": "array", "items": {"type": "array", "prefixItems": [{"type": "number"}, {"type": "string"}]}}, "note": {"type": "string"}}},
-    "reference": {"type": "string", "description": "HTML справочных данных"},
-    "links": {"type": "array", "items": {"type": "object", "required": ["title", "url"], "properties": {"title": {"type": "string"}, "url": {"type": "string"}, "note": {"type": "string"}}}, "description": "ссылки (например, вариант РЕШУ из раздела «Учителю») — только ссылки, без копирования"},
-    "blocks": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["title", "tasks"], "properties": {
-      "title": {"type": "string"}, "hint": {"type": "string"}, "auto": {"type": "boolean"}, "photo": {"type": "boolean", "description": "к заданиям блока прикладывают фото"},
-      "tasks": {"type": "array", "items": {"type": "object", "required": ["n", "pts", "kind", "text"], "properties": {
-        "n": {"type": "integer"}, "pts": {"type": "integer", "minimum": 1},
-        "kind": {"enum": ["one", "seq", "set", "num", "calc", "exp", "text"], "description": "one — номер ответа; seq — цифры по порядку; set — набор цифр; num — число; calc/exp — число + решение учителю; text — объяснение"},
-        "key": {}, "tol": {"type": "number"}, "unit": {"type": "string"}, "lab": {"type": "string"},
-        "topic": {"type": "string"}, "text": {"type": "string", "description": "HTML условия"}, "fig": {"type": "string", "description": "путь к рисунку от корня сайта"},
-        "photo": {"type": "boolean"}, "bank_id": {"type": ["string", "null"]}, "text_override": {"type": "boolean", "description": "формулировка правлена в конструкторе, банк не менялся"},
-        "source": {"type": "object", "properties": {"book": {"type": "string"}, "number": {"type": "string"}, "url": {"type": "string"}, "rights": {"type": "string"}, "author": {"type": "string"}, "note": {"type": "string"}}}
-      }}}
-    }}}
-  }
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{1,64}$",
+      "description": "имя файла tests/<id>.json и параметр ?t="
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "поднять при изменении заданий: у учеников сбросится сохранённый черновик"
+    },
+    "type": {
+      "enum": [
+        "exam-topic",
+        "exam-section",
+        "exam-mock",
+        "dz"
+      ],
+      "description": "Т1 / Т2 / Т3 / ДЗ"
+    },
+    "check_mode": {
+      "enum": [
+        "on_demand",
+        "after_submit"
+      ],
+      "description": "Т1 — on_demand; Т2, Т3 — after_submit"
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "0 — без ограничения"
+    },
+    "timer": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "mode": {
+          "const": "soft"
+        }
+      },
+      "description": "мягкий таймер: по истечении предупреждение, сдать можно"
+    },
+    "exam": {
+      "enum": [
+        "oge",
+        "ege",
+        null
+      ]
+    },
+    "subject": {
+      "type": "string"
+    },
+    "class": {
+      "type": "integer"
+    },
+    "title": {
+      "type": "string"
+    },
+    "eyebrow": {
+      "type": "string"
+    },
+    "intro": {
+      "type": "string",
+      "description": "HTML"
+    },
+    "trainer": {
+      "type": "string",
+      "description": "ключ для лимита попыток в Apps Script"
+    },
+    "sheet": {
+      "type": "string",
+      "description": "лист в таблице учителя"
+    },
+    "scale": {
+      "type": "object",
+      "properties": {
+        "max": {
+          "type": "integer"
+        },
+        "grades": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "reference": {
+      "type": "string",
+      "description": "HTML справочных данных"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "url"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "ссылки (например, вариант РЕШУ из раздела «Учителю») — только ссылки, без копирования"
+    },
+    "blocks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "tasks"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "hint": {
+            "type": "string"
+          },
+          "auto": {
+            "type": "boolean"
+          },
+          "photo": {
+            "type": "boolean",
+            "description": "к заданиям блока прикладывают фото"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "n",
+                "pts",
+                "kind",
+                "text"
+              ],
+              "properties": {
+                "n": {
+                  "type": "integer"
+                },
+                "pts": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "kind": {
+                  "enum": [
+                    "one",
+                    "seq",
+                    "set",
+                    "num",
+                    "calc",
+                    "exp",
+                    "text"
+                  ],
+                  "description": "one — номер ответа; seq — цифры по порядку; set — набор цифр; num — число; calc/exp — число + решение учителю; text — объяснение"
+                },
+                "key": {},
+                "tol": {
+                  "type": "number"
+                },
+                "unit": {
+                  "type": "string"
+                },
+                "lab": {
+                  "type": "string"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string",
+                  "description": "HTML условия"
+                },
+                "fig": {
+                  "type": "string",
+                  "description": "путь к рисунку от корня сайта"
+                },
+                "photo": {
+                  "type": "boolean"
+                },
+                "bank_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "text_override": {
+                  "type": "boolean",
+                  "description": "формулировка правлена в конструкторе, банк не менялся"
+                },
+                "source": {
+                  "type": "object",
+                  "properties": {
+                    "book": {
+                      "type": "string"
+                    },
+                    "number": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "rights": {
+                      "type": "string"
+                    },
+                    "author": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "ref": {
+                  "type": "string",
+                  "description": "HTML справочных данных прямо в задании (общие — в reference, вверху теста)"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "description": "Решения — отдельным файлом tests/<id>.solutions.json: {id, solutions: {\"<n>\": {answer, html}}}; движок загружает его только после финальной попытки (Т2/Т3). Формулы в решениях — $…$ (KaTeX из assets/katex)."
 }

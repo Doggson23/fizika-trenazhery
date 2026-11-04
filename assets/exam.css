@@ -52,3 +52,9 @@ details.ref{font-size:14px;color:var(--ink-2)}details.ref summary{cursor:pointer
 /* sticky не работает внутри grid-ячейки: обёртка движка — обычный поток */
 #app.wrap{display:block}#app.wrap>*+*{margin-top:14px}
 @media (max-width:560px){.sticky .nav{grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:4px}.sticky .nav button{padding:5px 0;font-size:13px}.task{scroll-margin-top:130px}}
+.sol{border-top:1px dashed var(--rule);padding-top:8px;display:grid;gap:6px}.sol p{margin:0}
+.solbody{background:var(--green-soft);border-radius:8px;padding:8px 10px}
+table.dr{border-collapse:collapse;margin:4px 0}table.dr td{vertical-align:top;padding:4px 12px 4px 0}table.dr td:first-child{border-right:1.5px solid var(--ink);padding-right:12px}table.dr td+td{padding-left:12px}
+label.fix{display:flex;gap:8px;align-items:center;font-weight:600;cursor:pointer}label.fix input{width:22px;height:22px}
+.modal{position:fixed;inset:0;background:rgba(11,60,93,.45);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal .box{background:var(--sheet);border-radius:12px;padding:18px;max-width:440px;display:grid;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,.25)}

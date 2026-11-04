@@ -36,14 +36,18 @@ with sync_playwright() as p:
         pg.fill(sel, a)
     ok(pg.locator('#res tr').count() == 0, 'Т2: до сдачи результатов не видно')
     ok(pg.locator('.msg.ok, .msg.bad').count() == 0, 'Т2: до сдачи нет вердиктов')
-    pg.click('#send'); pg.wait_for_timeout(500)
+    pg.click('#send'); pg.wait_for_selector('.modal'); ok('финальная' in pg.inner_text('.modal').lower(), 'Т2: после «Сдать» вопрос о финальной попытке')
+    pg.click('.modal button[data-a="0"]'); pg.wait_for_timeout(500)
     ok(len(new) == 1, 'Т2: отправлено 1 раз')
+    ok(pg.locator('.sol:not([hidden])').count() == 0, 'Т2: «Нет» — решения не открываются')
     ok(pg.locator('#task-1 input').is_disabled(), 'Т2: после сдачи поля заблокированы')
     ok(pg.locator('#res tr').count() == 17, 'Т2: после сдачи таблица результатов')
     o, n_ = old[0], new[0]
-    ok(o['cols'] == n_['cols'], 'Т2: столбцы совпадают со старой страницей')
-    if o['cols'] != n_['cols']:
-        for a, c in zip(o['cols'], n_['cols']):
+    ncols = [c for c in n_['cols'] if c['h'] != 'Финальная']
+    ok(any(c['h'] == 'Финальная' and c['v'] == 'нет' for c in n_['cols']) and n_['final'] is False, 'Т2: в отправке «Финальная: нет»')
+    ok(o['cols'] == ncols, 'Т2: остальные столбцы совпадают со старой страницей')
+    if o['cols'] != ncols:
+        for a, c in zip(o['cols'], ncols):
             if a != c: print('   old', a, '\n   new', c)
     ok(o['teacher'] == n_['teacher'] and o['scale'] == n_['scale'] and o['autoCol'] == n_['autoCol'] and o['prelimCol'] == n_['prelimCol'], 'Т2: teacher/scale/autoCol/prelimCol совпадают')
     ok(n_['sheet'] == 'ОГЭ кинематика · Т2' and n_['trainer'] == 'oge-kin-t2' and n_['max_attempts'] == 5, 'Т2: свой лист и trainer, max_attempts=5')
@@ -61,7 +65,7 @@ with sync_playwright() as p:
         else: route.fulfill(status=200, content_type='application/json', body='{"ok":true,"attempt":1,"max":5}')
     pg.route(EP + '**', flaky)
     pg.goto('http://localhost:8077/exam.html?t=oge-kin-t2'); pg.wait_for_selector('#task-1 input')
-    pg.fill('#name', 'Петров Иван'); pg.fill('#task-3 input[data-n]', '2'); pg.click('#send'); pg.wait_for_timeout(400)
+    pg.fill('#name', 'Петров Иван'); pg.fill('#task-3 input[data-n]', '2'); pg.click('#send'); pg.click('.modal button[data-a="0"]'); pg.wait_for_timeout(400)
     ok(pg.locator('#xMsg.bad').count() == 1 and pg.locator('#send').inner_text() == 'Отправить ещё раз', 'Т2: при сбое — «Отправить ещё раз»')
     pg.click('#send'); pg.wait_for_timeout(400)
     ok(len(calls) == 2 and calls[0]['id'] == calls[1]['id'], 'Т2: повтор с тем же id (попытка не тратится)')
@@ -94,8 +98,42 @@ with sync_playwright() as p:
     pg.evaluate("(()=>{const k=Object.keys(localStorage).find(k=>k.startsWith('exam:zz'));const s=JSON.parse(localStorage[k]);s.t0=Date.now()-61000;localStorage[k]=JSON.stringify(s)})()")
     pg.reload(); pg.wait_for_selector('#timer'); pg.wait_for_timeout(1200)
     ok('время вышло' in pg.locator('#timer').inner_text() and not pg.locator('#task-1 input').is_disabled(), 'Т3: время вышло — предупреждение, поля открыты')
-    pg.fill('#name', 'Кузнецов Олег'); pg.fill('#task-1 input[data-n]', '431'); pg.click('#send'); pg.wait_for_timeout(400)
+    pg.fill('#name', 'Кузнецов Олег'); pg.fill('#task-1 input[data-n]', '431'); pg.click('#send'); pg.click('.modal button[data-a="0"]'); pg.wait_for_timeout(400)
     ok(t3 and any(c['h'] == 'Время, мин' for c in t3[0]['cols']), 'Т3: в отправке есть «Время, мин»')
+
+    # --- Т2: финальная попытка → решения, работа над ошибками, рейтинг (второй приём)
+    V2 = 'https://script.google.com/macros/s/V2TEST/exec'
+    pg = b.new_page(); pg.on('dialog', lambda d: d.accept()); got = []; errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+    pg.route('**/config.js', lambda r: r.fulfill(status=200, content_type='application/javascript', body='window.TR_ENDPOINT="x";window.TR_ENDPOINT_V2="%s";' % V2))
+    def v2(route):
+        d = json.loads(route.request.post_data); got.append(d)
+        route.fulfill(status=200, content_type='application/json', body=json.dumps({'ok': True, 'rating': sum(1 for g in got if g.get('kind') == 'fix' and g['done'])} if d.get('kind') == 'fix' else {'ok': True, 'attempt': 1, 'max': 5, 'final': d.get('final')}))
+    pg.route(V2, v2)
+    pg.goto('http://localhost:8077/exam.html?t=oge-kin-t2'); pg.wait_for_selector('#task-1 input')
+    ok(pg.locator('details.ref[open]').count() == 1 and pg.evaluate("document.querySelector('details.ref').compareDocumentPosition(document.getElementById('name')) & 4") > 0, 'справочные данные вверху и раскрыты')
+    pg.fill('#name', 'Орлова Мария')
+    for n, a in ANS.items():
+        pg.fill('#task-%d textarea' % n if n == 13 else '#task-%d input[data-n]' % n, a)
+    pg.click('#send'); pg.click('.modal button[data-a="1"]'); pg.wait_for_selector('#sol-16:not([hidden]) .katex', timeout=5000)
+    ok(got[0]['final'] is True and any(c['h'] == 'Финальная' and c['v'] == 'да' for c in got[0]['cols']), 'финальная: в отправке «да»')
+    ok(pg.locator('.sol:not([hidden])').count() == 16, 'финальная: решения всех 16 заданий')
+    ok(pg.locator('.sol .katex').count() > 5, 'формулы в решениях отрисованы KaTeX')
+    wrong = [2, 8, 10, 15]   # в ANS неверные ответы
+    ok(sorted(int(x) for x in pg.eval_on_selector_all('input[data-fix]', 'els => els.map(e => e.dataset.fix)')) == sorted(wrong + [13]), 'галочки только у заданий с ошибками и у объяснения (13)')
+    ok(pg.locator('#send').is_hidden() and pg.locator('#again').is_hidden(), 'финальная: отправлять и начинать заново нельзя')
+    pg.check('input[data-fix="8"]'); pg.wait_for_timeout(300); pg.check('input[data-fix="10"]'); pg.wait_for_timeout(300)
+    fx = [g for g in got if g.get('kind') == 'fix']
+    ok(len(fx) == 2 and fx[0]['n'] == 8 and fx[0]['done'] is True and fx[0]['attempt_id'] == got[0]['id'], 'галочка уходит во второй приём (kind: fix)')
+    ok('мой рейтинг: 2' in pg.inner_text('#total') and 'работа над ошибками: 2/5' in pg.inner_text('#total'), 'рейтинг и счётчик работы над ошибками')
+    pg.reload(); pg.wait_for_selector('#sol-1:not([hidden])')
+    ok(pg.locator('input[data-fix="8"]').is_checked() and pg.locator('#task-1 input').is_disabled(), 'после перезагрузки: решения открыты, галочки на месте')
+    ok(not errs, 'финальная: нет ошибок JS ' + ';'.join(errs))
+    # --- последняя (5-я) попытка — финальная без вопроса
+    pg = b.new_page(); pg.on('dialog', lambda d: d.accept()); last = []; mock(pg, last)
+    pg.goto('http://localhost:8077/exam.html?t=oge-kin-t2'); pg.wait_for_selector('#task-1 input')
+    pg.evaluate("(()=>{const k='exam:oge-kin-t2:v1';localStorage[k]=JSON.stringify({name:'Белов Ян',attempt:5,sent:[1,2,3,4]})})()"); pg.reload(); pg.wait_for_selector('#task-1 input')
+    pg.fill('#task-1 input[data-n]', '431'); pg.click('#send'); pg.wait_for_timeout(600)
+    ok(pg.locator('.modal').count() == 0 and last and last[0]['final'] is True and pg.locator('#sol-1:not([hidden])').count() == 1, '5-я попытка — финальная автоматически, решения открыты')
     # --- плохой адрес
     pg = b.new_page(); pg.goto('http://localhost:8077/exam.html?t=../x'); ok('Не указан' in pg.inner_text('#app'), 'защита от плохого ?t=')
     pg.set_viewport_size({'width': 390, 'height': 844}); pg.goto('http://localhost:8077/exam.html?t=oge-kin-t2'); pg.wait_for_selector('#task-5 img')

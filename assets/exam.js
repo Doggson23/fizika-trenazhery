@@ -53,11 +53,15 @@
     const GRADE = p => { for (const [min, g] of thr) if (p >= min) return g; return '2'; };
     const MAXPTS = T.reduce((a, t) => a + t.pts, 0);
     const KEY = 'exam:' + X.id + ':v' + (X.version || 1);
-    const ENDPOINT = (window.TR_ENDPOINT || '').trim();
+    // второй приём (Code_v2.gs: финальная попытка, работа над ошибками, рейтинг); пусто — прежний приём
+    const V2 = (window.TR_ENDPOINT_V2 || '').trim(), ENDPOINT = V2 || (window.TR_ENDPOINT || '').trim();
+    const EXAM = !T1;                                      // Т2/Т3: финальная попытка и решения
     const TYPE_LABEL = {'exam-topic': 'Т1 · тренажёр по темам', 'exam-section': 'Т2 · тест по разделу', 'exam-mock': 'Т3 · пробник', 'dz': 'ДЗ'};
     document.title = X.title;
 
-    let st = {name: '', a: {}, chk: {}, photos: {}, attempt: 1, id: uid(), done: false, sentOk: false, limit: false, sent: [], t0: null};
+    // final — ученик назвал попытку финальной; closed — попытки закончены, открыты решения; fix — «работа над ошибками» по номерам
+    let st = {name: '', a: {}, chk: {}, photos: {}, attempt: 1, id: uid(), done: false, sentOk: false, limit: false, sent: [], t0: null,
+      final: false, closed: false, fix: {}, rating: null, finalId: ''};
     try { const s = localStorage.getItem(KEY); if (s) st = Object.assign(st, JSON.parse(s)); } catch (e) {}
     const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { flash('Не хватает места на устройстве: удалите лишние фото.', 'bad'); } };
 
@@ -82,7 +86,9 @@
     const att = MAXATT ? 'Попыток: ' + MAXATT + '.' : 'Попытки не ограничены.';
     let h = '<header><div class="eyebrow">' + esc(X.eyebrow || '') + '</div><h1>' + esc(X.title) + '</h1>' + intro +
       '<p class="sub"><span class="badge">' + esc(TYPE_LABEL[X.type] || X.type) + '</span> ' + how + ' ' + att +
-      (TIMER ? ' Время: ' + TIMER.minutes + ' мин (по истечении — предупреждение, сдать можно).' : '') + ' Ответы сохраняются на этом устройстве.</p></header>';
+      (TIMER ? ' Время: ' + TIMER.minutes + ' мин (по истечении — предупреждение, сдать можно).' : '') + ' Ответы сохраняются на этом устройстве.' +
+      (EXAM ? ' После сдачи вас спросят, финальная ли это попытка: после финальной откроются решения всех заданий.' : '') + '</p></header>';
+    if (X.reference) h += '<section class="card"><details class="ref" open><summary>Справочные данные</summary>' + X.reference + '</details></section>';
     h += '<section class="card"><div class="field"><label for="name">Фамилия, имя</label><input id="name" autocomplete="name" placeholder="обязательно для отправки"><span></span></div>' +
       (TIMER ? '<div class="btns"><button class="b" id="go">Начать — запустить таймер</button></div>' : '') + '</section>';
     h += '<div class="sticky"><div class="row"><p class="att" id="att"></p><span class="timer" id="timer"></span></div><div class="bar"><i id="bar"></i></div><div class="nav" id="nav" aria-label="Переход к заданию"></div></div>';
@@ -94,7 +100,6 @@
     h += '<section class="card" id="resCard"><h2>Результат</h2><div class="total" id="total"></div><p class="foot" id="scaleNote"></p>' +
       '<div class="btns"><button class="b" id="send"></button><button class="b" id="again" hidden>Начать новую попытку</button><button class="b ghost" id="dlHtml">Скачать отчёт</button></div>' +
       '<div class="msg" id="xMsg" role="status" aria-live="polite"></div><table class="res" id="res"></table></section>';
-    if (X.reference) h += '<section class="card"><details class="ref"><summary>Справочные данные</summary>' + X.reference + '</details></section>';
     if (X.links && X.links.length) h += '<section class="card"><h2>Ещё потренироваться</h2><ul>' + X.links.map(l => '<li><a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.title) + '</a>' + (l.note ? ' — ' + esc(l.note) : '') + '</li>').join('') + '</ul></section>';
     app.innerHTML = h;
     const flash = (text, cls) => { const m = $('xMsg'); m.className = 'msg ' + (cls || 'info'); m.textContent = text; };
@@ -104,6 +109,7 @@
       const el = $('task-' + t.n), a = st.a[t.n] || '', locked = st.done || st.limit;
       let s = '<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><h2>Задание ' + t.n + '</h2><span class="pts">' + balls(t.pts) + ' · ' + esc(t.topic || '') + '</span></div>';
       s += t.text;
+      if (t.ref) s += '<p class="foot"><b>Справочно:</b> ' + t.ref + '</p>';
       if (t.fig) s += '<div class="fig"><img src="' + esc(t.fig) + '" alt="рисунок к заданию ' + t.n + '" loading="lazy"></div>';
       if (t.kind === 'text') s += '<div class="field" style="grid-template-columns:1fr"><textarea data-n="' + t.n + '" placeholder="Краткий ответ в одну-две фразы (полное объяснение — на листе, фото ниже)"' + (locked ? ' disabled' : '') + '>' + esc(a) + '</textarea></div>';
       else { const ph = t.kind === 'seq' ? ('цифры: ' + (t.lab || '')) : t.kind === 'set' ? 'цифры ответа' : t.kind === 'one' ? 'номер ответа' : 'число';
@@ -112,10 +118,43 @@
       if (hasPhoto(t)) { s += '<label class="upload">📷 Приложить фото решения<input type="file" data-photo="' + t.n + '" accept="image/*" multiple capture="environment"' + (locked ? ' disabled' : '') + '></label><div class="photos" id="photos-' + t.n + '"></div>'; }
       if (T1 && !locked) s += '<div class="btns"><button class="b" data-chk="' + t.n + '">' + (hasPhoto(t) || !isAuto(t) ? 'Сохранить и проверить ответ' : 'Проверить') + '</button></div>';
       if (t.source && (t.source.rights || t.source.url)) s += '<p class="src">Источник: ' + esc(t.source.rights || '') + (t.source.number ? ', задание ' + esc(t.source.number) : '') + (t.source.url ? ' · <a href="' + esc(t.source.url) + '" target="_blank" rel="noopener">ссылка</a>' : '') + '</p>';
-      s += '<div class="msg" id="msg-' + t.n + '" role="status" aria-live="polite"></div>';
+      s += '<div class="msg" id="msg-' + t.n + '" role="status" aria-live="polite"></div><div class="sol" id="sol-' + t.n + '" hidden></div>';
       el.innerHTML = s;
       if (hasPhoto(t)) renderPhotos(t.n);
       showMsg(t);
+      if (st.closed) renderSol(t);
+    }
+
+    // ---------- решения после финальной попытки + «Выполнил работу над ошибками»
+    let SOL = null;
+    const keyText = t => t.kind === 'text' ? 'см. решение' : String(t.key) + (t.unit ? ' ' + t.unit : '');
+    const needsFix = t => { const r = check(t, st.a[t.n]); return !(r.status === 'ok' || r.ok === true); };
+    function renderSol(t){
+      const box = $('sol-' + t.n); if (!box) return;
+      const s = SOL && SOL[t.n];
+      let h = '<p><b>Ваш ответ:</b> ' + (st.a[t.n] ? esc(st.a[t.n]) : '—') + ' · <b>верный ответ:</b> ' + esc(s && s.answer || keyText(t)) + '</p>';
+      h += s && s.html ? '<div class="solbody"><b>Решение.</b> ' + s.html + '</div>' : '<p class="foot">Решение к этому заданию учитель ещё не добавил.</p>';
+      if (needsFix(t)) h += '<label class="fix"><input type="checkbox" data-fix="' + t.n + '"' + (st.fix[t.n] ? ' checked' : '') + '> Выполнил работу над ошибками</label>';
+      box.innerHTML = h; box.hidden = false;
+    }
+    async function openSolutions(){
+      try { const r = await fetch('tests/' + X.id + '.solutions.json', {cache: 'no-cache'}); SOL = r.ok ? (await r.json()).solutions : {}; } catch (e) { SOL = {}; }
+      T.forEach(renderSol); renderRes(); typeset();
+    }
+    function typeset(){
+      const run = () => window.renderMathInElement && renderMathInElement(app, {delimiters: [{left: '$', right: '$', display: false}], throwOnError: false});
+      if (window.renderMathInElement) return run();
+      const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'assets/katex/katex.min.css'; document.head.appendChild(css);
+      const a = document.createElement('script'); a.src = 'assets/katex/katex.min.js';
+      a.onload = () => { const b = document.createElement('script'); b.src = 'assets/katex/auto-render.min.js'; b.onload = run; document.head.appendChild(b); };
+      document.head.appendChild(a);
+    }
+    async function sendFix(n, done){
+      st.fix[n] = done; if (!done) delete st.fix[n]; save(); renderRes();
+      if (!V2) return;                                   // прежний приём не знает kind:'fix' — копим на устройстве
+      try { const r = await (await fetch(V2, {method: 'POST', body: JSON.stringify({v: 2, kind: 'fix', trainer: X.trainer || X.id, sheet: X.sheet || X.title, title: X.title, name: st.name.trim(), n, done, attempt_id: st.finalId}), redirect: 'follow'})).json();
+        if (r.ok && r.rating != null) { st.rating = r.rating; save(); renderRes(); } else if (!r.ok) flash('Отметка не сохранилась у учителя (' + (r.error || 'ошибка') + '). Нажмите галочку ещё раз.', 'bad');
+      } catch (e) { flash('Нет связи: отметка сохранится у учителя, когда вы нажмёте галочку ещё раз с интернетом.', 'bad'); }
     }
     function showMsg(t){
       const m = $('msg-' + t.n); if (!m) return;
@@ -159,22 +198,29 @@
       $('total').innerHTML = show
         ? '<span>авто: <b>' + tt.p1 + '</b>/' + maxAuto + '</span>' + (maxMan ? '<span>к проверке учителем (по ответам): <b>' + tt.p2 + '</b>/' + maxMan + '</span>' : '') + '<span>итого: <b>' + tt.pt + '</b>/' + MAXPTS + '</span><span>отметка: <b>' + (thr.length ? GRADE(tt.pt) : '—') + '</b></span>'
         : '<span>заполнено: <b>' + filled + '</b> из ' + T.length + '</span>';
+      if (st.closed) { const need = T.filter(needsFix).length, did = T.filter(t => needsFix(t) && st.fix[t.n]).length;
+        $('total').innerHTML += '<span>работа над ошибками: <b>' + did + '</b>/' + need + '</span>' + (st.rating != null ? '<span>мой рейтинг: <b>' + st.rating + '</b></span>' : ''); }
       $('scaleNote').textContent = show ? ((maxMan ? 'Баллы за развёрнутые ответы здесь предварительные (по числовому ответу); окончательные ставит учитель по фото решения. ' : '') + (X.scale && X.scale.note || '')) + (T1 ? ' В итоге — все ответы в полях, проверенные и нет.' : '')
         : 'Результат появится после сдачи работы.';
       $('res').innerHTML = show ? '<tr><th>№</th><th>Тема</th><th>Ответ</th><th>Статус</th><th>Баллы</th></tr>' + rs.map(r => '<tr><td class="n">' + r.n + '</td><td>' + esc(r.topic) + '</td><td>' + (r.ans ? esc(String(r.ans).slice(0, 60)) : '—') + (r.photos ? ' 📷' + r.photos : '') + '</td><td>' + SW[statusOf(r.t)] + '</td><td class="n">' + r.pts + '/' + r.max + '</td></tr>').join('') : '';
     }
     function renderAtt(){
       const n = st.sent.length;
-      $('att').textContent = st.limit ? 'Все ' + MAXATT + ' попыток использованы' : MAXATT ? ('Попытка ' + st.attempt + ' из ' + MAXATT + (st.done ? (st.sentOk ? ' · отправлена' : ' · сдана, не отправлена') : '')) : (n ? 'Отправлено учителю: ' + n : 'Тренировка');
+      $('att').textContent = st.closed ? 'Попытки закончены: финальной стала попытка ' + st.attempt + '. Ниже — решения и работа над ошибками' : st.limit ? 'Все ' + MAXATT + ' попыток использованы' : MAXATT ? ('Попытка ' + st.attempt + ' из ' + MAXATT + (st.done ? (st.sentOk ? ' · отправлена' : ' · сдана, не отправлена') : '')) : (n ? 'Отправлено учителю: ' + n : 'Тренировка');
       const send = $('send');
       if (T1) { send.textContent = 'Отправить учителю'; send.hidden = false; }
-      else { send.textContent = st.done ? 'Отправить ещё раз' : 'Сдать работу'; send.hidden = st.done && st.sentOk; }
-      $('again').hidden = T1 || !st.done || !(st.sentOk || !ENDPOINT) || st.limit || (MAXATT && st.attempt >= MAXATT);
+      else { send.textContent = st.done ? 'Отправить ещё раз' : 'Сдать работу'; send.hidden = (st.done && st.sentOk) || st.closed; }
+      $('again').hidden = T1 || st.closed || st.final || !st.done || !(st.sentOk || !ENDPOINT) || st.limit || (MAXATT && st.attempt >= MAXATT);
       $('name').disabled = (!T1 && st.done) || (MAXATT > 0 && n > 0);
       if ($('go')) $('go').hidden = !!st.t0;
     }
     function refresh(){ renderNav(); renderRes(); renderAtt(); }
-    function renderAll(){ T.forEach(renderTask); refresh(); tick(); }
+    function renderAll(){ T.forEach(renderTask); refresh(); tick(); if (st.closed && SOL) typeset(); }
+    function closeAttempts(){ st.closed = true; st.final = true; save(); renderAll(); openSolutions(); }
+    // модальный вопрос с двумя кнопками (confirm() не даёт подписать кнопки)
+    function ask(title, text, yes, no){ return new Promise(res => { const d = document.createElement('div'); d.className = 'modal';
+      d.innerHTML = '<div class="box" role="dialog" aria-modal="true" aria-labelledby="askT"><h2 id="askT">' + esc(title) + '</h2><p>' + esc(text) + '</p><div class="btns"><button class="b" data-a="1">' + esc(yes) + '</button><button class="b ghost" data-a="0">' + esc(no) + '</button></div></div>';
+      d.addEventListener('click', e => { const a = e.target.dataset.a; if (a != null) { d.remove(); res(a === '1'); } }); document.body.appendChild(d); d.querySelector('button').focus(); }); }
 
     // ---------- мягкий таймер
     function tick(){
@@ -192,7 +238,8 @@
     // ---------- события
     app.addEventListener('input', e => { const n = +e.target.dataset.n; if (!n || st.done) return; st.a[n] = e.target.value; startTimer(); save(); renderNav(); renderRes(); if (T1) showMsg(byN(n)); });
     app.addEventListener('keydown', e => { const n = +e.target.dataset.n; if (n && e.key === 'Enter' && T1 && e.target.tagName === 'INPUT') { doCheck([n]); } });
-    app.addEventListener('change', e => { const n = +e.target.dataset.photo; if (n && !st.done) { startTimer(); addPhotos(n, e.target.files); } });
+    app.addEventListener('change', e => { const n = +e.target.dataset.photo; if (n && !st.done) { startTimer(); addPhotos(n, e.target.files); }
+      const f = +e.target.dataset.fix; if (f && st.closed) sendFix(f, e.target.checked); });
     app.addEventListener('click', e => {
       const c = e.target.dataset.chk, cb = e.target.dataset.chkblock;
       if (c) doCheck([+c]);
@@ -234,11 +281,12 @@
     function payload(){
       const rs = rows(), tt = totals(rs);
       const cols = [['Часть 1 (авто)', tt.p1], ['Часть 2 (предв.)', tt.p2], ['Предв. итог', tt.pt], ['Предв. отметка', GRADE(tt.pt)]];
+      if (EXAM) cols.push(['Финальная', st.final ? 'да' : 'нет']);
       if (TIMER) cols.push(['Время, мин', elapsedMin()]);
       rs.forEach(r => cols.push(['№' + r.n, (r.ans || '—') + (r.auto ? ' · ' + r.pts + '/' + r.max : (r.ans && (r.t.kind === 'calc' || r.t.kind === 'exp') ? (r.ok ? ' · ответ верный' : ' · ответ не совпал') : '')) + (r.photos ? ' · фото ' + r.photos : '')]));
       const photos = {}; T.filter(hasPhoto).forEach(t => { if ((st.photos[t.n] || []).length) photos[t.n] = st.photos[t.n]; });
       return {v: 1, id: st.id, trainer: X.trainer || X.id, sheet: X.sheet || X.title, name: st.name.trim(), client_attempt: st.attempt,
-        type: X.type, check_mode: MODE, max_attempts: MAXATT,
+        type: X.type, check_mode: MODE, max_attempts: MAXATT, final: !!st.final,
         cols: cols.map(c => ({h: c[0], v: c[1]})), autoCol: 'Часть 1 (авто)', prelimCol: 'Предв. итог',
         teacher: T.filter(t => !isAuto(t)).map(t => ({h: '№' + t.n + ' учитель', max: t.pts})),
         scale: thr.map(x => x[0]).sort((a, b) => a - b), photos};
@@ -250,10 +298,15 @@
       if (!T1 && !st.done) {
         const left = T.filter(t => !(st.a[t.n] && String(st.a[t.n]).trim()) && !(st.photos[t.n] || []).length).map(t => t.n);
         if (!confirm('Сдать работу' + (MAXATT ? ' (попытка ' + st.attempt + ' из ' + MAXATT + ')' : '') + '?' + (left.length ? ' Без ответа: ' + left.join(', ') + '.' : '') + ' После сдачи ответы изменить нельзя.')) return;
+        const last = MAXATT && st.attempt >= MAXATT;
+        st.final = last ? true : await ask('Это ваша финальная попытка?',
+          'Если «Да» — больше попыток не будет: откроются решения всех заданий, и вы сможете сделать работу над ошибками. Если «Нет» — после отправки можно начать новую попытку' + (MAXATT ? ' (осталось ' + (MAXATT - st.attempt) + ')' : '') + '.',
+          'Да, финальная', 'Нет, буду ещё пробовать');
+        if (st.final) st.finalId = st.id;
         st.done = true; st.doneAt = Date.now(); save(); renderAll();
         $('resCard').scrollIntoView({behavior: 'smooth', block: 'start'});
       } else if (T1 && !confirm('Отправить учителю текущие ответы?')) return;
-      if (!ENDPOINT) { flash('Отправка пока не настроена. Нажмите «Скачать отчёт» и пришлите файл учителю.', 'info'); return; }
+      if (!ENDPOINT) { flash('Отправка пока не настроена. Нажмите «Скачать отчёт» и пришлите файл учителю.', 'info'); if (st.final) closeAttempts(); return; }
       const btn = $('send'); btn.disabled = true; btn.textContent = 'Отправляю…'; flash('Отправляю ответы' + (Object.keys(st.photos).some(k => st.photos[k].length) ? ' и фото' : '') + '…', 'info');
       const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 90000);
       try {
@@ -262,9 +315,10 @@
           st.attempt = r.attempt || st.attempt; st.sent.push({attempt: st.attempt, at: new Date().toISOString(), pt: totals(rows()).pt});
           if (MAXATT && r.max && r.attempt >= r.max) st.limit = true;
           if (T1) { st.attempt += 1; st.id = uid(); flash('Готово: ответы отправлены учителю. Можно тренироваться дальше.', 'ok'); }
-          else { st.sentOk = true; flash('Готово: попытка ' + st.attempt + ' отправлена учителю.' + (st.limit || (MAXATT && st.attempt >= MAXATT) ? ' Это была последняя попытка.' : (MAXATT ? ' Можно начать новую — осталось ' + (MAXATT - st.attempt) + '.' : '')), 'ok'); }
-          save();
-        } else if (r.error === 'limit') { st.done = true; st.limit = true; save(); flash('Для «' + st.name.trim() + '» уже отправлено ' + r.used + ' попыток из ' + r.max + '. Больше отправлять нельзя.', 'bad'); }
+          else { st.sentOk = true; flash('Готово: попытка ' + st.attempt + ' отправлена учителю.' + (st.final ? ' Попытка финальная — ниже решения всех заданий.' : (MAXATT ? ' Можно начать новую — осталось ' + (MAXATT - st.attempt) + '.' : '')), 'ok'); }
+          save(); if (st.final) closeAttempts();
+        } else if (r.error === 'final') { st.done = true; st.final = true; save(); flash('Для «' + st.name.trim() + '» финальная попытка уже отправлена — больше отправлять нельзя.', 'bad'); closeAttempts(); }
+        else if (r.error === 'limit') { st.done = true; st.limit = true; save(); flash('Для «' + st.name.trim() + '» уже отправлено ' + r.used + ' попыток из ' + r.max + '. Больше отправлять нельзя.', 'bad'); if (EXAM) closeAttempts(); }
         else if (r.error === 'name') flash('Проверьте фамилию и имя.', 'bad');
         else flash('Не получилось отправить (' + (r.error || 'ошибка') + '). Попробуйте ещё раз или нажмите «Скачать отчёт».', 'bad');
       } catch (e) { flash('Нет связи с сервером. Проверьте интернет и нажмите кнопку ещё раз — повтор не съест попытку.', 'bad'); }
@@ -277,5 +331,6 @@
     });
 
     renderAll();
+    if (st.closed) openSolutions();
   }
 })();
