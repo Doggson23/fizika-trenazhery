@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 260" width="300" height="260" style="background:#fff;border-radius:8px">
+<circle cx="150" cy="150" r="90" fill="none" stroke="#5B6B7A" stroke-width="1.6" stroke-dasharray="5 4"/><circle cx="150" cy="150" r="4" fill="#0B3C5D"/>
+<text x="158" y="166" font-size="16" font-style="italic" font-family="serif" fill="#0B3C5D">O</text>
+<circle cx="150" cy="60" r="5" fill="#0B3C5D"/><text x="158" y="77" font-size="16" font-style="italic" font-family="serif" fill="#0B3C5D">A</text>
+<g stroke="#1F77B4" stroke-width="2.5" fill="#1F77B4">
+<line x1="150" y1="60" x2="150" y2="18"/><polygon points="150,10 144,22 156,22"/>
+<line x1="150" y1="60" x2="104" y2="60"/><polygon points="96,60 108,54 108,66"/>
+<line x1="150" y1="60" x2="150" y2="104"/><polygon points="150,112 144,100 156,100"/>
+<line x1="150" y1="60" x2="196" y2="60"/><polygon points="204,60 192,54 192,66"/></g>
+<g font-size="15" font-family="sans-serif" fill="#0B3C5D"><text x="157" y="22">1</text><text x="96" y="52">2</text><text x="157" y="110">3</text><text x="198" y="52">4</text></g>
+<path d="M 222 120 A 80 80 0 0 0 198 86" fill="none" stroke="#5B6B7A" stroke-width="1.5"/><polygon points="194,81 196,94 205,88" fill="#5B6B7A"/>
+</svg>

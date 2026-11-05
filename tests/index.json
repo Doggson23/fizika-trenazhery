@@ -13,6 +13,20 @@
    "title": "ОГЭ · Кинематика · тренажёр по темам",
    "class": 9,
    "exam": "oge"
+  },
+  {
+   "id": "oge-okr-t2",
+   "type": "exam-section",
+   "title": "ОГЭ · Движение по окружности",
+   "class": 9,
+   "exam": "oge"
+  },
+  {
+   "id": "ege-okr-t2",
+   "type": "exam-section",
+   "title": "ЕГЭ · Движение по окружности",
+   "class": 10,
+   "exam": "ege"
   }
  ]
 }

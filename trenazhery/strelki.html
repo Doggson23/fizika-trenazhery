@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Стрелки часов: относительная угловая скорость</title>
+<link rel="stylesheet" href="../assets/sim.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">физика · движение по окружности · относительное вращение</div>
+    <h1>Стрелки часов</h1>
+    <p class="sub">Когда минутная стрелка догонит часовую? Перейдите в систему отсчёта часовой стрелки: в ней минутная вращается с угловой скоростью ω<sub>м</sub> − ω<sub>ч</sub>.</p>
+  </header>
+  <div class="tabs" role="tablist"><button class="tab" data-tab="explore">Исследовать</button><button class="tab" data-tab="task">Задача</button></div>
+
+  <section class="lab">
+    <div class="stage"><canvas id="cv" class="sq" style="max-height:620px;margin:0 auto" aria-label="Циферблат с минутной и часовой стрелками"></canvas>
+      <div class="legend"><span><i style="background:var(--f1)"></i>минутная</span><span><i style="background:var(--ink)"></i>часовая</span><span><i style="background:var(--res)"></i>угол между стрелками Δφ (по ходу часов от часовой к минутной)</span></div></div>
+
+    <div class="panel" data-pane="explore">
+      <h2>Ход времени</h2>
+      <div class="seg" role="group" aria-label="Скорость"><button data-sp="60" aria-pressed="false">×60</button><button data-sp="600" aria-pressed="true">×600</button><button data-sp="3600" aria-pressed="false">×3600</button></div>
+      <div class="btns"><button class="b" id="play">Пауза</button><button class="b ghost" id="next0">К встрече</button><button class="b ghost" id="next180">К противоположным</button><button class="b ghost" id="next90">К прямому углу</button></div>
+      <div class="field"><span>Поставить время</span><input id="setT" value="15:00" inputmode="numeric" aria-label="Время чч:мм"><button class="b ghost" id="setB">Ок</button></div>
+      <div class="checks"><label><input type="checkbox" id="chSec"> секундная стрелка</label><label><input type="checkbox" id="chRel" checked> угол между стрелками</label></div>
+      <dl class="read" id="rd"></dl>
+      <div class="rule"><b>Правило.</b> ω<sub>м</sub> = 360°/60 мин = 6°/мин, ω<sub>ч</sub> = 360°/720 мин = 0,5°/мин. Относительно часовой минутная поворачивается на 5,5°/мин и делает полный оборот за 720/11 = 65 5/11 мин — так часто стрелки встречаются.</div>
+    </div>
+
+    <div class="panel" data-pane="task" hidden>
+      <h2>Задача</h2>
+      <p id="tq" class="task"></p>
+      <div class="field"><span>Ответ, мин</span><input id="tin" inputmode="decimal" aria-label="Ответ в минутах"><span class="num">мин</span></div>
+      <div class="btns"><button class="b" id="tchk">Проверить</button><button class="b ghost" id="thint">Подсказка</button><button class="b ghost" id="tnew">Новая задача</button></div>
+      <div class="msg" id="tmsg"></div>
+      <div class="hint" id="thintBox" hidden></div>
+      <div class="score"><span>верно <b id="sOk">0</b></span><span>попыток <b id="sAll">0</b></span><span>серия <b id="sSer">0</b></span></div>
+      <p class="note">Ответ можно вводить дробью: 180/11. Допуск — 3 секунды. После верного ответа часы сами перейдут к этому моменту.</p>
+    </div>
+  </section>
+  <p class="foot">Тренажёр к теме «Движение по окружности» · <a href="../uchebnik/dvizhenie-po-okruzhnosti.html#otnositelnoe">теория в Учебнике</a> · <a href="../index.html">все тренажёры</a></p>
+</div>
+<script src="../assets/sim-core.js"></script>
+<script>
+(function(){
+'use strict';
+const {fmt, prep, text} = SC; const $ = id => document.getElementById(id);
+let t = 15 * 3600, speed = 600, run = true, target = null, mode = 'explore';
+const angM = t => (t / 3600 * 360) % 360, angH = t => (t / 43200 * 360) % 360, angS = t => (t % 60) * 6;
+const rel = t => ((angM(t) - angH(t)) % 360 + 360) % 360;
+const hms = t => { t = ((t % 43200) + 43200) % 43200; const h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, s = t % 60; return (h || 12) + ':' + String(m).padStart(2, '0') + ':' + String(Math.round(s * 10) / 10).replace('.', ',').padStart(2, '0'); };
+// время (с) до ближайшего момента, когда относительный угол станет равен целевому (после текущего)
+const W_REL = 5.5 / 60;             // град/с
+function nextRel(t, deg){ let d = ((deg - rel(t)) % 360 + 360) % 360; if (d < 1e-6) d = 360; return d / W_REL; }
+document.querySelectorAll('[data-sp]').forEach(b => b.addEventListener('click', () => { speed = +b.dataset.sp; document.querySelectorAll('[data-sp]').forEach(x => x.setAttribute('aria-pressed', x === b)); }));
+$('play').addEventListener('click', () => { run = !run; $('play').textContent = run ? 'Пауза' : 'Пуск'; });
+const jump = deg => { const dt = deg === 90 ? Math.min(nextRel(t, 90), nextRel(t, 270)) : nextRel(t, deg); target = t + dt; run = true; $('play').textContent = 'Пауза'; };
+$('next0').addEventListener('click', () => jump(0)); $('next180').addEventListener('click', () => jump(180)); $('next90').addEventListener('click', () => jump(90));
+$('setB').addEventListener('click', () => { const m = $('setT').value.trim().match(/^(\d{1,2})[:.](\d{2})$/); if (!m) return; t = (+m[1] % 12) * 3600 + (+m[2]) * 60; target = null; });
+// ---------- задачи
+let Q = null, nOk = 0, nAll = 0, ser = 0;
+const KINDS = [{deg: 0, w: 'впервые совпадут'}, {deg: 180, w: 'впервые окажутся направлены в противоположные стороны'}, {deg: 90, w: 'впервые образуют прямой угол'}, {deg: 0, w: 'совпадут во второй раз', second: true}];
+function newTask(){
+  const h = 1 + Math.floor(Math.random() * 11), m = [0, 0, 0, 10, 15, 20, 30, 40, 45][Math.floor(Math.random() * 9)];
+  const K = KINDS[Math.floor(Math.random() * KINDS.length)], t0 = h * 3600 + m * 60;
+  let ans = K.deg === 90 ? Math.min(nextRel(t0, 90), nextRel(t0, 270)) : nextRel(t0, K.deg); if (K.second) ans += 360 / W_REL;
+  Q = {t0, ans: ans / 60, K, h, m}; t = t0; run = false; target = null; $('play').textContent = 'Пуск';
+  $('tq').innerHTML = 'Сейчас <b>' + h + ':' + String(m).padStart(2, '0') + '</b>. Через сколько минут минутная и часовая стрелки <b>' + K.w + '</b>?';
+  $('tin').value = ''; $('tmsg').className = 'msg'; $('thintBox').hidden = true; Q.hint = 0;
+}
+$('tnew').addEventListener('click', newTask);
+$('thint').addEventListener('click', () => { if (!Q) return; Q.hint = Math.min(3, Q.hint + 1); const b = $('thintBox'); b.hidden = false;
+  const r0 = rel(Q.t0), need = Q.K.deg === 90 ? 'до 90° или 270°' : 'до ' + Q.K.deg + '°';
+  b.innerHTML = ['Относительная угловая скорость минутной стрелки: 6 − 0,5 = 5,5 град/мин.',
+    'Сейчас минутная стрелка опережает часовую на ' + fmt(r0, 1) + '° (по ходу часов). Нужно, чтобы этот угол вырос ' + need + (Q.K.second ? ', а потом ещё на 360°' : '') + '.',
+    'Время = (нужный прирост угла) / 5,5 град/мин.'].slice(0, Q.hint).join('<br>'); });
+$('tchk').addEventListener('click', () => { if (!Q) return; let s = $('tin').value.trim().replace(',', '.'); let v = /\//.test(s) ? s.split('/').reduce((a, b) => a / b) : parseFloat(s);
+  const m = $('tmsg'); if (!isFinite(v)) { m.className = 'msg bad'; m.textContent = 'Введите число минут, например 16,36 или 180/11.'; return; }
+  nAll++; const ok = Math.abs(v - Q.ans) <= 0.05;
+  if (ok) { nOk++; ser++; m.className = 'msg ok'; m.textContent = 'Верно: ' + fmt(Q.ans, 2) + ' мин. Смотрите на часы.'; t = Q.t0; target = Q.t0 + Q.ans * 60; run = true; speed = 600; }
+  else { ser = 0; m.className = 'msg bad'; const d = v - Q.ans;
+    m.textContent = Math.abs(Math.abs(d) - 720 / 11) < 0.2 ? 'Вы промахнулись ровно на одну встречу (65 5/11 мин) — проверьте, какая по счёту встреча нужна.' :
+      Math.abs(v * 6 - (Q.ans * 5.5)) < 0.3 ? 'Похоже, вы не учли, что часовая стрелка тоже движется: относительная скорость 5,5°/мин, а не 6°/мин.' : 'Пока нет. Посмотрите подсказку.'; }
+  $('sOk').textContent = nOk; $('sAll').textContent = nAll; $('sSer').textContent = ser; });
+SC.tabs(document, k => { mode = k; document.querySelectorAll('[data-pane]').forEach(p => p.hidden = p.dataset.pane !== k); if (k === 'task' && !Q) newTask(); });
+// ---------- рисование
+const cv = $('cv');
+SC.loop(cv, dt => {
+  if (run) { let nt = t + dt * speed; if (target != null && nt >= target) { nt = target; target = null; run = false; $('play').textContent = 'Пуск'; } t = nt; }
+  const {ctx, W, H} = prep(cv), C = SC.col(), cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 18;
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2 * Math.PI); ctx.fillStyle = C.sheet; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = C.ink; ctx.stroke();
+  for (let k = 0; k < 60; k++) { const a = k / 60 * 2 * Math.PI, L = k % 5 ? 0.04 : 0.09; ctx.beginPath();
+    ctx.moveTo(cx + R * (1 - L) * Math.sin(a), cy - R * (1 - L) * Math.cos(a)); ctx.lineTo(cx + R * 0.985 * Math.sin(a), cy - R * 0.985 * Math.cos(a)); ctx.lineWidth = k % 5 ? 1 : 3; ctx.strokeStyle = C.ink; ctx.stroke(); }
+  for (let h = 1; h <= 12; h++) { const a = h / 12 * 2 * Math.PI; text(ctx, String(h), cx + R * 0.8 * Math.sin(a), cy - R * 0.8 * Math.cos(a), {align: 'center', size: Math.max(13, R * 0.1), weight: 600}); }
+  const am = angM(t) * Math.PI / 180, ah = angH(t) * Math.PI / 180, dr = rel(t);
+  if ($('chRel').checked) { ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R * 0.35, ah - Math.PI / 2, ah - Math.PI / 2 + dr * Math.PI / 180); ctx.closePath(); ctx.fillStyle = C.res; ctx.globalAlpha = 0.25; ctx.fill(); ctx.globalAlpha = 1;
+    text(ctx, fmt(dr, 1) + '°', cx + R * 0.45 * Math.sin(ah + dr * Math.PI / 360), cy - R * 0.45 * Math.cos(ah + dr * Math.PI / 360), {align: 'center', color: C.res, weight: 700, size: 14}); }
+  const hand = (a, L, w, c) => { ctx.beginPath(); ctx.moveTo(cx - 0.08 * L * Math.sin(a), cy + 0.08 * L * Math.cos(a)); ctx.lineTo(cx + L * Math.sin(a), cy - L * Math.cos(a)); ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.strokeStyle = c; ctx.stroke(); };
+  hand(ah, R * 0.52, 8, C.ink); hand(am, R * 0.78, 5, C.f1);
+  if ($('chSec').checked) hand(angS(t) * Math.PI / 180, R * 0.86, 1.6, C.bad);
+  ctx.beginPath(); ctx.arc(cx, cy, 6, 0, 2 * Math.PI); ctx.fillStyle = C.ink; ctx.fill();
+  text(ctx, hms(t), 12, 18, {mono: true, size: 15, weight: 600});
+  if (mode === 'explore') $('rd').innerHTML = '<dt>Минутная от 12</dt><dd>' + fmt(angM(t), 1) + '°</dd><dt>Часовая от 12</dt><dd>' + fmt(angH(t), 1) + '°</dd><dt>Δφ = φ<sub>м</sub> − φ<sub>ч</sub></dt><dd>' + fmt(dr, 1) + '°</dd><dt>До встречи</dt><dd>' + fmt(nextRel(t, 0) / 60, 2) + ' мин</dd>';
+});
+})();
+</script>
+</body>
+</html>

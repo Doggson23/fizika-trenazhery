@@ -18,3 +18,10 @@
 
 Ответы уходят POST-запросом в веб-приложение учителя; на странице собирается только фамилия и имя.
 Протокол отправки у `exam.html` тот же, что у `oge-kinematika.html`.
+
+## Учебник и тренажёры «Движение по окружности» (05.11.2026)
+- `uchebnik/index.html` — оглавление Учебника; `uchebnik/dvizhenie-po-okruzhnosti.html` — тема с выводами, встроенными тренажёрами (`assets/okruzhnost-sims.js`) и рамками отдельных тренажёров
+- `trenazhery/peredachi.html` — передачи: ремень, цепь, шестерни, вариатор, планетарный ряд; `trenazhery/strelki.html` — стрелки часов; `trenazhery/prashcha.html`, `trenazhery/katushka.html` — копии тренажёров из артефактов
+- `assets/sim.css`, `assets/sim-core.js` — общий стиль и помощники тренажёров
+- `tests/oge-okr-t2.json`, `tests/ege-okr-t2.json` (+ `.solutions.json`) — тесты по мотивам открытого банка ФИПИ; собираются `tools/build_tests_okr.py` (шаблоны, новые числа, ключи считает код). Пока `grading: client` — ключи в JSON; для серверной проверки перенести их в tests_private и пересобрать Code_v2.gs
+- `materialy/dz-dvizhenie-po-okruzhnosti.pdf` — ученическая версия листка ДЗ

@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Движение по окружности — Учебник</title>
+<link rel="stylesheet" href="../assets/sim.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<style>
+/* Учебник: одна колонка ~74ch, тренажёры и таблицы — на всю ширину 1180px. Шаги мышления — цветные метки. */
+.book{max-width:1180px;margin:0 auto;display:grid;gap:18px}
+.txt{max-width:76ch;display:grid;gap:12px;font-size:16.5px;line-height:1.6}
+.txt p{margin:0} .txt ul,.txt ol{margin:0;padding-left:22px;display:grid;gap:4px}
+h2.sec{font:700 clamp(21px,3vw,27px)/1.2 var(--body);margin:26px 0 0;scroll-margin-top:12px}
+h3.sub3{font:700 17px var(--body);margin:8px 0 0}
+.step{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:999px;border:1px solid currentColor;margin-right:6px;vertical-align:middle}
+.s1{color:#1D4ED8}.s2{color:#B91C1C}.s3{color:#6D28D9}.s4{color:#047857}.s5{color:#B45309}.s6{color:#475569}
+@media (prefers-color-scheme:dark){.s1{color:#8AB4F8}.s2{color:#F7A3A3}.s3{color:#C4B5FD}.s4{color:#6EE7B7}.s5{color:#FCD34D}.s6{color:#CBD5E1}}
+.def{border-left:4px solid #1D4ED8;background:var(--sheet);border-radius:0 8px 8px 0;padding:10px 14px}
+.prop{border:1px solid var(--res);background:var(--res-soft);border-radius:8px;padding:10px 14px}
+.prop b:first-child{display:block;font:600 11.5px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--res);margin-bottom:4px}
+.der{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:12px 16px;display:grid;gap:8px}
+.der ol{padding-left:22px}
+.toc{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:14px 18px;columns:2 260px;column-gap:28px;font-size:15px}
+.toc a{display:block;padding:3px 0;color:var(--ink);text-decoration:none;break-inside:avoid} .toc a:hover{color:var(--f1)}
+.frame{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.frame iframe{display:block;width:100%;height:min(1020px,94vh);border:0}
+.frame .cap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;border-top:1px solid var(--rule);font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.card{display:grid;gap:6px;text-decoration:none;color:inherit;background:var(--sheet);border:1px solid var(--rule);border-left:5px solid var(--f1);border-radius:10px;padding:14px}
+.card:hover{border-color:var(--f1)} .card b{font-size:16px} .card span{font-size:14px;color:var(--ink-2)}
+details.qz{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px 14px}
+details.qz summary{cursor:pointer;font-weight:600}
+details.qz p{margin:8px 0 0}
+figure.fg{margin:0;background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:10px;max-width:520px}
+figure.fg figcaption{font-size:13.5px;color:var(--ink-2);padding-top:6px}
+.katex{font-size:1.06em}
+.crumbs{font-size:14px;color:var(--ink-2)} .crumbs a{color:var(--f1);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="book">
+<header class="txt">
+  <div class="crumbs"><a href="index.html">Учебник</a> · Механика · Кинематика</div>
+  <h1>Движение по окружности</h1>
+  <p class="sub">Угловые величины, центростремительное ускорение, неравномерное и относительное вращение, качение и передачи. Для 9–10 класса, углублённый уровень. Каждая формула — с выводом; рядом — тренажёры, в которых всё можно покрутить.</p>
+  <p class="note">Метки шагов мышления: <span class="step s1">≡ понятие</span><span class="step s2">! закон</span><span class="step s3">↓ вывод</span><span class="step s4">□ устройство мира</span><span class="step s5">▷ как решать</span><span class="step s6">? проверка</span></p>
+</header>
+
+<nav class="toc" aria-label="Содержание">
+  <a href="#radian">1. Радиан и угол поворота</a><a href="#omega">2. Угловая скорость, период, частота</a><a href="#an">3. Центростремительное ускорение: три вывода</a>
+  <a href="#eps">4. Неравномерное вращение</a><a href="#prashcha">5. Праща, центрифуга, Земля</a><a href="#otnositelnoe">6. Относительное вращение</a>
+  <a href="#kachenie">7. Качение колеса</a><a href="#peredachi">8. Инженерия: передачи вращения</a><a href="#reshat">9. Как решать</a><a href="#proverka">10. Проверь себя</a><a href="#materialy">Листок ДЗ и тесты</a>
+</nav>
+
+<!-- 1 -->
+<section class="txt">
+  <h2 class="sec" id="radian"><span class="step s1">≡</span>1. Радиан и угол поворота</h2>
+  <p>Точка движется по окружности радиуса $R$. Её положение удобно задавать не координатами, а одним числом — <b>углом поворота</b> $\varphi$ радиуса, проведённого к точке, от выбранного начального направления.</p>
+  <div class="def"><b>Радиан</b> — центральный угол, опирающийся на дугу, длина которой равна радиусу. Угол в радианах — отношение длины дуги к радиусу: $\varphi = \dfrac{s}{R}$, отсюда <b>длина дуги $s = R\varphi$</b>.</div>
+  <p>Полная окружность имеет длину $2\pi R$, значит, полный оборот — это $2\pi$ радиан: $360^\circ = 2\pi$, $180^\circ = \pi$, $90^\circ = \dfrac{\pi}{2}$, $1~\text{рад} = \dfrac{180^\circ}{\pi} \approx 57{,}3^\circ$. Радиан — отношение метров к метрам, поэтому единица угловой скорости рад/с — то же, что $\text{с}^{-1}$.</p>
+  <div class="prop"><b>Свойство</b>Формула $s = R\varphi$ верна только для угла в радианах. Самая частая ошибка в задачах на вращение — подставить градусы.</div>
+  <p>Синус и косинус угла — это проекции точки единичной окружности на оси $y$ и $x$. Когда точка бежит по окружности, её проекции колеблются по закону $\cos\varphi$ и $\sin\varphi$ — это понадобится в третьем выводе ускорения.</p>
+</section>
+<section class="lab" data-sim="trig">
+  <div class="stage"><canvas class="wide" aria-label="Единичная окружность: синус, косинус, тангенс и дуга"></canvas></div>
+  <div class="panel"><h2>Единичная окружность</h2>
+    <div class="ctl"><label for="tgPhi"><span>Угол φ</span><output id="tgPhiO"></output></label><input id="tgPhi" type="range" min="0" max="360" step="1" value="40"></div>
+    <div class="btns"><button class="b" id="tgPlay">Пуск</button></div>
+    <dl class="read" id="tgRead"></dl>
+    <p class="note">Оранжевая дуга — путь точки $s = R\varphi$ при $R = 1$. Пунктир — тангенс: отрезок касательной в точке $(1; 0)$.</p></div>
+</section>
+
+<!-- 2 -->
+<section class="txt">
+  <h2 class="sec" id="omega"><span class="step s1">≡</span><span class="step s3">↓</span>2. Угловая скорость, период, частота</h2>
+  <div class="def"><b>Угловая скорость</b> — быстрота изменения угла поворота: $\omega = \dfrac{d\varphi}{dt}$. При равномерном вращении $\omega = \dfrac{\Delta\varphi}{\Delta t}$ и $\varphi = \varphi_0 + \omega t$.<br><b>Период</b> $T$ — время одного оборота, <b>частота</b> $\nu = \dfrac{1}{T}$ — число оборотов в секунду (Гц, об/с). В технике частоту пишут в об/мин: $n = 60\nu$.</div>
+  <div class="der"><b>Вывод: $\omega = 2\pi/T$ и $v = \omega R$.</b>
+    <ol><li>За период радиус поворачивается на полный угол $2\pi$: $\omega = \dfrac{2\pi}{T} = 2\pi\nu$.</li>
+    <li>Путь по дуге $s = R\varphi$. Радиус постоянный, поэтому, дифференцируя по времени, получаем $v = \dfrac{ds}{dt} = R\,\dfrac{d\varphi}{dt} = \omega R$.</li>
+    <li>Для равномерного вращения то же самое видно за один оборот: $v = \dfrac{2\pi R}{T} = \omega R$.</li></ol></div>
+  <div class="prop"><b>Свойство</b>Все точки твёрдого тела, вращающегося вокруг оси, имеют одну угловую скорость, а линейная скорость растёт пропорционально расстоянию до оси: $v = \omega r$. Центр окружности, по которой движется точка, лежит на оси, а не в «центре тела»: точка на широте $\psi$ вращается вместе с Землёй по окружности радиуса $R\cos\psi$.</div>
+  <p>Скорость направлена по касательной к окружности, то есть перпендикулярно радиусу: за малое время точка смещается вдоль дуги, а малая дуга практически совпадает с отрезком касательной.</p>
+</section>
+
+<!-- 3 -->
+<section class="txt">
+  <h2 class="sec" id="an"><span class="step s3">↓</span>3. Центростремительное ускорение: три вывода</h2>
+  <p>При равномерном вращении модуль скорости постоянен, но её направление всё время поворачивается — значит, ускорение есть. Найдём его тремя независимыми способами: если ответы сойдутся, ему можно доверять.</p>
+  <h3 class="sub3">Способ 1. Треугольник скоростей</h3>
+  <div class="der"><ol>
+    <li>За малое время $\Delta t$ радиус поворачивается на угол $\Delta\varphi = \omega\Delta t$. Скорость перпендикулярна радиусу, значит, она поворачивается на тот же угол.</li>
+    <li>Отложим $\vec v_1$ и $\vec v_2$ из одной точки: получится равнобедренный треугольник со сторонами $v$, $v$ и углом $\Delta\varphi$ между ними; третья сторона — $\Delta\vec v = \vec v_2 - \vec v_1$.</li>
+    <li>При малом угле основание треугольника почти совпадает с дугой окружности радиуса $v$: $|\Delta\vec v| \approx v\,\Delta\varphi$.</li>
+    <li>$a = \dfrac{|\Delta\vec v|}{\Delta t} = v\,\dfrac{\Delta\varphi}{\Delta t} = v\omega$. Подставляя $v = \omega R$: $\boxed{a_n = \omega^2 R = \dfrac{v^2}{R}}$.</li>
+    <li>Углы при основании равнобедренного треугольника стремятся к $90^\circ$, поэтому $\Delta\vec v \perp \vec v$ — ускорение направлено по радиусу к центру.</li></ol></div>
+  <figure class="fg"><svg viewBox="0 0 460 210" role="img" aria-label="Векторы скорости в двух близких точках и их разность">
+    <g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M30 190 A 170 170 0 0 1 150 40" stroke-dasharray="4 4" opacity=".5"/></g>
+    <line x1="30" y1="190" x2="94" y2="60" stroke="currentColor" opacity=".5"/><line x1="30" y1="190" x2="150" y2="40" stroke="currentColor" opacity=".5"/>
+    <g stroke-width="3"><line x1="94" y1="60" x2="160" y2="92" stroke="#1F77B4"/><polygon points="170,97 154,95 160,82" fill="#1F77B4"/>
+    <line x1="150" y1="40" x2="214" y2="91" stroke="#1F77B4"/><polygon points="222,98 206,94 214,82" fill="#1F77B4"/></g>
+    <text x="150" y="112" fill="#1F77B4" font-style="italic" font-size="15">v₁</text><text x="222" y="80" fill="#1F77B4" font-style="italic" font-size="15">v₂</text>
+    <g transform="translate(280 30)"><line x1="0" y1="0" x2="110" y2="53" stroke="#1F77B4" stroke-width="3"/><polygon points="120,58 104,56 110,43" fill="#1F77B4"/>
+      <line x1="0" y1="0" x2="95" y2="76" stroke="#1F77B4" stroke-width="3"/><polygon points="103,82 87,78 95,66" fill="#1F77B4"/>
+      <line x1="118" y1="57" x2="105" y2="80" stroke="#C0392B" stroke-width="3"/><polygon points="102,86 101,72 112,77" fill="#C0392B"/>
+      <text x="124" y="80" fill="#C0392B" font-style="italic" font-size="15">Δv</text><text x="20" y="40" font-size="14" fill="currentColor">Δφ</text>
+      <path d="M 30 14 A 33 33 0 0 1 26 21" stroke="currentColor" fill="none"/></g>
+    <text x="16" y="205" font-size="13" fill="currentColor">центр</text></svg>
+    <figcaption>Скорость поворачивается вместе с радиусом. Из одной точки векторы $\vec v_1$, $\vec v_2$ образуют равнобедренный треугольник, основание $\Delta\vec v$ при малом $\Delta\varphi$ смотрит к центру.</figcaption></figure>
+  <h3 class="sub3">Способ 2. Годограф скорости</h3>
+  <div class="der"><p>Отложим все векторы скорости из одной точки. Их концы бегут по окружности радиуса $v$ (она называется годографом скорости) с той же угловой скоростью $\omega$, потому что вектор скорости поворачивается вместе с радиусом. Ускорение — это «скорость конца вектора скорости»: точка годографа движется по окружности радиуса $v$ с угловой скоростью $\omega$, значит, по только что выведенной формуле $v = \omega R$ её скорость равна $a = \omega v = \omega^2R$. Направлена она по касательной к годографу, то есть перпендикулярно $\vec v$, — к центру исходной окружности.</p></div>
+  <h3 class="sub3">Способ 3. Проекции (связь с колебаниями)</h3>
+  <div class="der"><ol>
+    <li>Координаты точки при равномерном вращении: $x = R\cos\omega t$, $y = R\sin\omega t$.</li>
+    <li>Скорость: $v_x = \dot x = -\omega R\sin\omega t$, $v_y = \dot y = \omega R\cos\omega t$; модуль $\sqrt{v_x^2 + v_y^2} = \omega R$.</li>
+    <li>Ускорение: $a_x = \dot v_x = -\omega^2R\cos\omega t = -\omega^2x$, $a_y = -\omega^2 y$. Значит, $\vec a = -\omega^2\vec r$: вектор ускорения противоположен радиусу-вектору, его модуль $\omega^2R$.</li>
+    <li>Уравнение $\ddot x = -\omega^2x$ — уравнение гармонических колебаний: тень точки, вращающейся по окружности, колеблется гармонически. К этому мы вернёмся в теме «Колебания».</li></ol></div>
+  <div class="prop"><b>Свойство</b>$a_n = \dfrac{v^2}{R} = \omega^2R$ — это не две разные формулы: в первой постоянной считают скорость, во второй — угловую скорость. Если увеличить радиус при той же $v$, ускорение уменьшится; при той же $\omega$ — увеличится.</div>
+</section>
+
+<!-- 4 -->
+<section class="txt">
+  <h2 class="sec" id="eps"><span class="step s1">≡</span><span class="step s3">↓</span>4. Неравномерное вращение</h2>
+  <div class="def"><b>Угловое ускорение</b> $\varepsilon = \dfrac{d\omega}{dt}$, рад/с². Модуль скорости $v = \omega R$ теперь меняется; быстрота его изменения — <b>касательное ускорение</b> $a_\tau = \dfrac{dv}{dt} = \varepsilon R$. Оно направлено по касательной (вдоль скорости при разгоне, против — при торможении).</div>
+  <p>Полное ускорение складывается из двух перпендикулярных составляющих: нормальной (поворот скорости) и касательной (изменение её модуля): $a = \sqrt{a_n^2 + a_\tau^2}$, а угол $\beta$ между $\vec a$ и $\vec v$ находится из $\operatorname{tg}\beta = \dfrac{a_n}{a_\tau}$.</p>
+  <div class="der"><b>Вывод формул равнопеременного вращения через интеграл.</b>
+    <ol><li>Угловая скорость — интеграл от ускорения: $\omega(t) = \omega_0 + \displaystyle\int_0^t\varepsilon\,dt$. При $\varepsilon = \text{const}$: $\omega = \omega_0 + \varepsilon t$.</li>
+    <li>Угол — интеграл от угловой скорости: $\varphi - \varphi_0 = \displaystyle\int_0^t(\omega_0 + \varepsilon t)\,dt = \omega_0 t + \dfrac{\varepsilon t^2}{2}$.</li>
+    <li>Исключим время: $t = \dfrac{\omega - \omega_0}{\varepsilon}$, $\Delta\varphi = \dfrac{\omega_0(\omega - \omega_0)}{\varepsilon} + \dfrac{(\omega - \omega_0)^2}{2\varepsilon} = \dfrac{\omega^2 - \omega_0^2}{2\varepsilon}$.</li></ol>
+    <p>Получились те же формулы, что для равноускоренного движения по прямой, с заменой $x \to \varphi$, $v \to \omega$, $a \to \varepsilon$. Для любого закона $\omega(t)$ угол поворота — <b>площадь под графиком $\omega(t)$</b>.</p></div>
+  <div class="prop"><b>Свойство</b>При разгоне из покоя с постоянным $\varepsilon$: $\operatorname{tg}\beta = \dfrac{\omega^2R}{\varepsilon R} = \varepsilon t^2 = 2\varphi$ — угол между ускорением и скоростью зависит только от того, на какой угол уже повернулась точка. Ускорение составит $45^\circ$ со скоростью, когда точка повернётся на $\tfrac12$ рад, — при любом $\varepsilon$ и любом радиусе.</div>
+  <p>В тренажёре ниже метки положения ставятся через равные промежутки 0,25 с, как на стробоскопической фотографии: при $\varepsilon = 0$ они идут на равных расстояниях, при разгоне расходятся, при торможении сгущаются.</p>
+</section>
+<section class="lab" data-sim="point">
+  <div class="stage"><canvas class="wide" aria-label="Точка на окружности: векторы скорости и ускорений"></canvas>
+    <div class="legend"><span><i style="background:var(--vv)"></i>v</span><span><i style="background:var(--an)"></i>aₙ</span><span><i style="background:var(--at)"></i>aτ</span><span><i style="background:var(--aa)"></i>a</span></div></div>
+  <div class="panel"><h2>Точка на окружности</h2>
+    <div class="ctl"><label for="ptW"><span>Начальная угловая скорость ω₀</span><output id="ptWO"></output></label><input id="ptW" type="range" min="0" max="3" step="0.05" value="0.8"></div>
+    <div class="ctl"><label for="ptE"><span>Угловое ускорение ε</span><output id="ptEO"></output></label><input id="ptE" type="range" min="-0.6" max="0.6" step="0.05" value="0.15"></div>
+    <div class="ctl"><label for="ptR"><span>Радиус R</span><output id="ptRO"></output></label><input id="ptR" type="range" min="0.5" max="3" step="0.1" value="1.5"></div>
+    <div class="checks"><label><input type="checkbox" id="ptA" checked> показывать ускорения</label></div>
+    <div class="btns"><button class="b" id="ptPlay">Пауза</button><button class="b ghost" id="ptReset">Сначала</button></div>
+    <dl class="read" id="ptRead"></dl></div>
+</section>
+
+<!-- 5 -->
+<section class="txt">
+  <h2 class="sec" id="prashcha"><span class="step s4">□</span>5. Праща, центрифуга, Земля</h2>
+  <p>Пока камень в праще вращается, верёвка всё время тянет его к центру и поворачивает его скорость. Стоит отпустить конец — сила исчезает, и камень летит <b>по касательной</b>, с той скоростью, которую имел в момент броска: $v = \omega L$, где $L$ — длина пращи. Давид, по преданию, раскручивал пращу, а чемпионы метания молота делают то же самое всем телом: длинный трос — большая скорость при той же угловой скорости.</p>
+  <ul>
+    <li><b>Земля.</b> $\omega = \dfrac{2\pi}{24~\text{ч}} \approx 7{,}3\cdot10^{-5}$ рад/с. Точка экватора движется со скоростью около 465 м/с (быстрее звука!), но её центростремительное ускорение всего 0,034 м/с² — примерно в 300 раз меньше $g$.</li>
+    <li><b>Центрифуга стиральной машины</b> при 1200 об/мин и радиусе барабана 25 см: $a_n = (2\pi\cdot20)^2\cdot0{,}25 \approx 3{,}9\cdot10^3$ м/с² — почти $400g$. Вода из белья уходит через отверстия по касательной.</li>
+    <li><b>Жёсткий диск</b> компьютера крутится с частотой 7200 об/мин: край пластины радиусом 4,75 см движется со скоростью около 36 м/с — 130 км/ч, а считывающая головка висит над ним на расстоянии в несколько нанометров.</li>
+  </ul>
+</section>
+<div class="frame"><iframe src="../trenazhery/prashcha.html" title="Тренажёр «Праща»" loading="lazy"></iframe>
+  <div class="cap"><span>Тренажёр «Праща»: камень летит по касательной; задача на v и aₙ; игра «Попади в мишень».</span><a href="../trenazhery/prashcha.html">Открыть отдельно →</a></div></div>
+
+<!-- 6 -->
+<section class="txt">
+  <h2 class="sec" id="otnositelnoe"><span class="step s2">!</span><span class="step s3">↓</span>6. Относительное вращение</h2>
+  <p>Две точки вращаются вокруг одного центра с угловыми скоростями $\omega_1$ и $\omega_2$: $\varphi_1 = \omega_1t$, $\varphi_2 = \omega_2t$. Угол между их радиусами $\Delta\varphi = (\omega_1 - \omega_2)t$ растёт равномерно.</p>
+  <div class="def"><b>Закон относительного вращения.</b> В системе отсчёта, которая вращается вокруг той же оси с угловой скоростью $\omega_0$, любое тело вращается с угловой скоростью $\omega - \omega_0$: углы поворота вычитаются, как перемещения при переходе в движущуюся систему отсчёта.</div>
+  <div class="der"><b>Вывод: как часто встречаются стрелки.</b>
+    <ol><li>Минутная стрелка: $\omega_{\text{м}} = \dfrac{360^\circ}{60~\text{мин}} = 6^\circ/\text{мин}$; часовая: $\omega_{\text{ч}} = \dfrac{360^\circ}{720~\text{мин}} = 0{,}5^\circ/\text{мин}$.</li>
+    <li>В системе отсчёта часовой стрелки минутная поворачивается на $5{,}5^\circ$ в минуту.</li>
+    <li>Встречи — каждый раз, когда относительный угол меняется на $360^\circ$: через $S = \dfrac{360^\circ}{5{,}5^\circ/\text{мин}} = \dfrac{720}{11}~\text{мин} = 65\tfrac{5}{11}$ мин. За 12 часов — 11 встреч, а не 12.</li>
+    <li>В общем виде: $\dfrac{1}{S} = \left|\dfrac{1}{T_1} - \dfrac{1}{T_2}\right|$; если тела вращаются в разные стороны — сумма.</li></ol></div>
+  <ul>
+    <li><b>Планеты.</b> Противостояния Марса повторяются через $S = \left(\dfrac{1}{365{,}25} - \dfrac{1}{687}\right)^{-1} \approx 780$ суток — поэтому космические аппараты к Марсу запускают раз в два с небольшим года.</li>
+    <li><b>Звёздные сутки.</b> Земля обращается вокруг Солнца в ту же сторону, в какую вращается вокруг оси, поэтому относительно звёзд она поворачивается за 23 ч 56 мин 4 с — на 4 минуты быстрее, чем относительно Солнца.</li>
+    <li><b>Планетарная передача</b> (раздел 8): в системе отсчёта водила оси сателлитов неподвижны, и расчёт сводится к обычной зубчатой передаче.</li>
+  </ul>
+</section>
+<div class="frame"><iframe src="../trenazhery/strelki.html" title="Тренажёр «Стрелки часов»" loading="lazy"></iframe>
+  <div class="cap"><span>Тренажёр «Стрелки часов»: угол между стрелками, кнопки «к встрече», задачи со случайным временем.</span><a href="../trenazhery/strelki.html">Открыть отдельно →</a></div></div>
+
+<!-- 7 -->
+<section class="txt">
+  <h2 class="sec" id="kachenie"><span class="step s3">↓</span><span class="step s5">▷</span>7. Качение колеса</h2>
+  <p>Движение колеса — сумма двух: поступательного вместе с осью (скорость $\vec v_0$ у всех точек) и вращения вокруг оси (скорость $\omega R$ по касательной к ободу). Скорость точки обода — векторная сумма: $\vec v = \vec v_0 + \vec v_{\text{вр}}$.</p>
+  <div class="der"><b>Условие качения без проскальзывания.</b>
+    <ol><li>Нижняя точка обода касается дороги и не скользит по ней — её скорость равна нулю.</li>
+    <li>У нижней точки $\vec v_0$ направлена вперёд, а вращательная скорость $\omega R$ — назад: $v_{\text{низ}} = v_0 - \omega R = 0$, отсюда $\boxed{v_0 = \omega R}$.</li>
+    <li>Тогда верхняя точка движется со скоростью $v_0 + \omega R = 2v_0$, а точка на уровне оси — со скоростью $v_0\sqrt2$ под углом $45^\circ$.</li>
+    <li>В каждый момент колесо как бы поворачивается вокруг точки касания — это <b>мгновенный центр скоростей</b> (МЦС): скорость любой точки перпендикулярна отрезку до МЦС и пропорциональна его длине.</li></ol></div>
+  <p>След точки обода — циклоида. Если колесо буксует ($\omega R > v_0$), МЦС поднимается внутрь колеса; при юзе ($\omega R < v_0$) уходит под дорогу. Попробуйте в тренажёре.</p>
+</section>
+<section class="lab" data-sim="wheel">
+  <div class="stage"><canvas class="wide" aria-label="Катящееся колесо: скорости точек обода"></canvas>
+    <div class="legend"><span><i style="background:var(--vv)"></i>поступательная v₀</span><span><i style="background:var(--at)"></i>вращательная ωR</span><span><i style="background:var(--an)"></i>сумма</span><span><i style="background:var(--res)"></i>след точки</span><span><i style="background:var(--aa)"></i>МЦС</span></div></div>
+  <div class="panel"><h2>Колесо</h2>
+    <div class="ctl"><label for="whV"><span>Скорость оси v₀</span><output id="whVO"></output></label><input id="whV" type="range" min="0.5" max="4" step="0.1" value="2"></div>
+    <div class="ctl"><label for="whK"><span>ωR / v₀</span><output id="whKO"></output></label><input id="whK" type="range" min="0" max="2" step="0.05" value="1"></div>
+    <div class="ctl"><label for="whZ"><span>Масштаб</span><output id="whZO"></output></label><input id="whZ" type="range" min="0.6" max="2" step="0.1" value="1.2"></div>
+    <div class="seg" role="group" aria-label="Векторы"><button data-vm="sum" aria-pressed="true">Сумма</button><button data-vm="parts" aria-pressed="false">Составляющие</button><button data-vm="all" aria-pressed="false">Всё</button></div>
+    <div class="checks"><label><input type="checkbox" id="whCam" checked> камера следует за колесом</label></div>
+    <dl class="read" id="whRead"></dl></div>
+</section>
+<div class="frame"><iframe src="../trenazhery/katushka.html" title="Тренажёр «Катушка с нитью»" loading="lazy"></iframe>
+  <div class="cap"><span>Тренажёр «Катушка с нитью» (10 класс): куда покатится катушка, если тянуть нить под углом α; v<sub>O</sub> = uR/(R cos α − r).</span><a href="../trenazhery/katushka.html">Открыть отдельно →</a></div></div>
+
+<!-- 8 -->
+<section class="txt">
+  <h2 class="sec" id="peredachi"><span class="step s4">□</span><span class="step s3">↓</span>8. Инженерия: передачи вращения</h2>
+  <p>Двигатель обычно вращается быстро и со слабым моментом, а колесу, барабану или винту нужно медленнее и сильнее. Передача меняет угловую скорость, момент силы и иногда направление вращения. Расчёт любой передачи держится на двух правилах.</p>
+  <div class="def"><b>Правило 1. Общий вал</b> — общая угловая скорость: все колёса, насаженные на один вал, вращаются с одной $\omega$.<br>
+    <b>Правило 2. Общая линия контакта</b> — общая линейная скорость: ремень, цепь, зубья в зацеплении и фрикционные катки без проскальзывания движутся в точке контакта с одной скоростью: $\omega_1R_1 = \omega_2R_2$.</div>
+  <div class="der"><b>Вывод: передаточное отношение, модуль, момент и КПД.</b>
+    <ol><li>Из $\omega_1R_1 = \omega_2R_2$: $i = \dfrac{\omega_1}{\omega_2} = \dfrac{n_1}{n_2} = \dfrac{R_2}{R_1}$ — <b>передаточное отношение</b> (1 — ведущее колесо).</li>
+    <li>Зубья двух колёс в зацеплении одинаковы, их шаг по окружности $p$ общий. Длина делительной окружности $2\pi R = zp$, поэтому $R \propto z$ и $i = \dfrac{z_2}{z_1}$. Размер зуба задают <b>модулем</b> $m = \dfrac{p}{\pi} = \dfrac{d}{z}$ (мм): колёса с разным модулем не сцепятся.</li>
+    <li>Ремень тянет обод силой $F$, обод движется со скоростью $v = \omega R$. Мощность $P = Fv = F\omega R = M\omega$, где $M = FR$ — момент силы.</li>
+    <li>Без потерь мощность на входе и выходе одинакова: $M_1\omega_1 = M_2\omega_2$, $\dfrac{M_2}{M_1} = i$. Во сколько раз проигрываем в угловой скорости — во столько выигрываем в моменте («золотое правило» для вращения).</li>
+    <li>Каждая ступень теряет долю мощности: $P_2 = \eta_1P_1$, $P_3 = \eta_2P_2 = \eta_1\eta_2P_1$ — КПД ступеней перемножаются.</li>
+    <li>Внешнее зацепление меняет направление вращения, ремень, цепь и внутреннее зацепление — нет. Промежуточное (<b>паразитное</b>) колесо меняет только направление: $\dfrac{z_{\text{п}}}{z_1}\cdot\dfrac{z_2}{z_{\text{п}}} = \dfrac{z_2}{z_1}$.</li></ol></div>
+  <h3 class="sub3">Особенности разных передач</h3>
+  <ul>
+    <li><b>Ремень</b> передаёт момент трением. Он немного проскальзывает (1–2 %), поэтому $n_2 = n_1\dfrac{d_1}{d_2}(1 - s)$. Чтобы не буксовать, ремень должен охватывать малый шкив по дуге не меньше $120^\circ$; длину ремня считают по межосевому расстоянию $a$: $L \approx 2a + \dfrac{\pi(d_1 + d_2)}{2} + \dfrac{(d_2 - d_1)^2}{4a}$. Зубчатый ремень (ремень ГРМ, ремень GT2 в 3D-принтере) не скользит.</li>
+    <li><b>Цепь</b> не скользит, но ложится на звёздочку многоугольником. Скорость цепи пульсирует от $\omega R$ до $\omega R\cos\dfrac{180^\circ}{z}$ — это «полигональный эффект»: у звёздочки на 10 зубьев размах около 5 %, на 20 — около 1,2 %. Средняя скорость цепи $v = zpn$.</li>
+    <li><b>Зубчатые колёса</b> — самые компактные и точные: КПД пары 97–99 %. Чтобы получить большое передаточное отношение, ставят несколько ступеней: $i = i_1 i_2 \ldots$</li>
+    <li><b>Фрикционный вариатор</b> плавно меняет передаточное отношение, но передаёт момент не больше $\mu N R$: сила трения покоя ограничена.</li>
+    <li><b>Планетарный ряд</b>: солнечное колесо, сателлиты на водиле и корона с внутренними зубьями. Перейдём в систему отсчёта водила — оси сателлитов там неподвижны, и по закону раздела 6 $\dfrac{\omega_{\text{к}} - \omega_{\text{в}}}{\omega_{\text{с}} - \omega_{\text{в}}} = -\dfrac{z_{\text{с}}}{z_{\text{к}}}$ (формула Виллиса). Закрепляя разные звенья, получают разные передачи от одного ряда — так переключаются автоматические коробки и велосипедные втулки.</li>
+  </ul>
+</section>
+<div class="tblwrap"><table class="cmp">
+  <thead><tr><th>Передача</th><th>Как передаёт</th><th>КПД (типично)</th><th>Сильные стороны</th><th>Слабые стороны</th><th>Где встречается</th></tr></thead>
+  <tbody>
+  <tr><td><b>Ремённая</b></td><td>трение ремня о шкив (зубчатый ремень — зацепление)</td><td>0,94–0,98</td><td>тихая, гасит рывки, проскальзывает при перегрузке, большие расстояния между валами</td><td>скольжение 1–2 %, нагружает валы натяжением, ремень изнашивается</td><td>генератор и насос автомобиля (поликлиновой ремень), ремень ГРМ, стиральная машина, 3D-принтеры (GT2)</td></tr>
+  <tr><td><b>Цепная</b></td><td>зацепление звеньев с зубьями звёздочки</td><td>0,96–0,98</td><td>нет скольжения, большие силы, большие расстояния</td><td>шум, пульсация скорости, нужна смазка, цепь вытягивается</td><td>велосипед (шаг 1/2″), мотоцикл, цепь ГРМ, бензопила, конвейеры</td></tr>
+  <tr><td><b>Зубчатая</b></td><td>зацепление зубьев</td><td>0,97–0,99 на пару</td><td>компактная, точная, огромные мощности, долгий срок службы</td><td>валы близко, нужна точность изготовления, шумит на больших скоростях</td><td>коробки передач, редукторы, часы, ветрогенераторы, шуруповёрт</td></tr>
+  <tr><td><b>Червячная</b></td><td>винт-«червяк» вращает колесо</td><td>0,5–0,9</td><td>передаточное отношение до 80 в одной ступени, самоторможение — колесо не может повернуть червяк</td><td>низкий КПД, нагрев, износ</td><td>колки гитары, подъёмники, шлагбаумы, рулевые механизмы</td></tr>
+  <tr><td><b>Фрикционная, вариатор</b></td><td>трение катков</td><td>0,85–0,95</td><td>плавно меняет передаточное отношение, защищает от перегрузки</td><td>малый момент (не больше μNR), проскальзывание, большие силы прижима</td><td>старые проигрыватели и станки; в автомобильных CVT (Audi multitronic, Nissan Xtronic) — ремень или цепь между раздвижными конусами</td></tr>
+  <tr><td><b>Планетарная</b></td><td>зацепление: солнце, сателлиты, корона</td><td>0,95–0,99</td><td>большое передаточное отношение в малом объёме, вход и выход на одной оси, нагрузка делится между сателлитами</td><td>сложнее изготовить и собрать</td><td>АКПП, велосипедные втулки Shimano Nexus и Sturmey-Archer, Toyota Prius, редукторы шуруповёртов и сервоприводов</td></tr>
+  </tbody></table></div>
+<section class="txt"><p><b>Из истории.</b> Самая древняя известная зубчатая «вычислительная машина» — Антикитерский механизм (II–I века до н. э.), найденный на затонувшем корабле: несколько десятков бронзовых колёс показывали положение Солнца и Луны и предсказывали затмения. Передаточные отношения в нём подобраны так, чтобы воспроизводить астрономические периоды, — по сути это задача об относительном вращении из раздела 6.</p></section>
+<div class="frame"><iframe src="../trenazhery/peredachi.html" title="Тренажёр «Передачи вращения»" loading="lazy"></iframe>
+  <div class="cap"><span>Тренажёр «Передачи»: ремень (скольжение, угол обхвата, длина), цепь (пульсация, число звеньев), шестерни (модуль, паразитное колесо, две ступени, момент и КПД), вариатор (μNR), планетарный ряд.</span><a href="../trenazhery/peredachi.html">Открыть отдельно →</a></div></div>
+
+<!-- 9 -->
+<section class="txt">
+  <h2 class="sec" id="reshat"><span class="step s5">▷</span>9. Как решать задачи на вращение</h2>
+  <ol>
+    <li><b>Переведите единицы:</b> обороты — в радианы ($1~\text{об} = 2\pi$), об/мин — в рад/с ($\omega = \dfrac{2\pi n}{60}$), градусы — в радианы.</li>
+    <li><b>Передачи и механизмы:</b> отметьте, какие колёса на общем валу (общая $\omega$), а какие связаны ремнём, цепью или зацеплением (общая $v$). Пройдите цепочку от ведущего колеса к ведомому.</li>
+    <li><b>Встречи, обгоны, синодические периоды:</b> перейдите в систему отсчёта одного из тел, $\omega_{\text{отн}} = \omega_1 - \omega_2$; встреча — когда относительный угол меняется на $2\pi$.</li>
+    <li><b>Неравномерное вращение:</b> $\omega = \dot\varphi$, $\varepsilon = \dot\omega$; обратно — интегралы или площадь под графиком. При $\varepsilon = \text{const}$ — готовые формулы раздела 4.</li>
+    <li><b>Полное ускорение:</b> отдельно $a_n = \omega^2R$ (к центру) и $a_\tau = \varepsilon R$ (по касательной), затем теорема Пифагора и $\operatorname{tg}\beta = a_n/a_\tau$.</li>
+    <li><b>Проверка:</b> размерность, предельные случаи ($\varepsilon = 0$, $R \to 0$, одинаковые колёса), знак — в какую сторону вращается выход.</li>
+  </ol>
+</section>
+
+<!-- 10 -->
+<section class="txt">
+  <h2 class="sec" id="proverka"><span class="step s6">?</span>10. Проверь себя</h2>
+  <details class="qz"><summary>Во сколько раз угловая скорость минутной стрелки больше, чем часовой? А линейная скорость конца, если минутная в 1,5 раза длиннее?</summary><p>Угловая — в 12 раз ($T$ = 1 ч и 12 ч). Линейная $v = \omega R$ — в $12\cdot1{,}5 = 18$ раз.</p></details>
+  <details class="qz"><summary>Две точки на диске: одна в 2 раза дальше от оси. Сравните их ω, v и aₙ.</summary><p>Угловые скорости равны; $v$ у дальней в 2 раза больше; $a_n = \omega^2R$ — тоже в 2 раза больше.</p></details>
+  <details class="qz"><summary>Ремень соединяет шкивы 10 см и 30 см. Что одинаково у шкивов, а что отличается в 3 раза?</summary><p>Одинакова линейная скорость точек обода (скорость ремня). Угловая скорость малого шкива в 3 раза больше; $a_n = v^2/R$ на малом шкиве тоже в 3 раза больше.</p></details>
+  <details class="qz"><summary>Через сколько времени после 12:00 стрелки часов впервые совпадут снова?</summary><p>Через $\dfrac{720}{11}$ мин $= 1$ ч $5\tfrac{5}{11}$ мин $\approx$ 1 ч 5 мин 27 с: в системе часовой стрелки минутная вращается со скоростью $5{,}5^\circ$/мин.</p></details>
+  <details class="qz"><summary>Колесо разгоняется из покоя с постоянным ε. На какой угол оно повернётся к моменту, когда aₙ = aτ?</summary><p>$\omega^2R = \varepsilon R$, $\varepsilon^2t^2 = \varepsilon$, $\varepsilon t^2 = 1$, $\varphi = \dfrac{\varepsilon t^2}{2} = \dfrac12$ рад — при любых $\varepsilon$ и $R$.</p></details>
+  <details class="qz"><summary>Зачем в редукторе ставят паразитное колесо, если оно не меняет передаточного отношения?</summary><p>Чтобы изменить направление вращения выходного вала или разнести валы на нужное расстояние, не меняя передаточного отношения.</p></details>
+</section>
+
+<!-- материалы -->
+<section class="txt" id="materialy">
+  <h2 class="sec">Листок ДЗ и тесты по теме</h2>
+  <div class="cards">
+    <a class="card" href="../materialy/dz-dvizhenie-po-okruzhnosti.pdf"><b>Листок ДЗ, 25 задач →</b><span>Угловые величины, передачи, стрелки и планеты, неравномерное вращение, интегралы. PDF.</span></a>
+    <a class="card" href="../exam.html?t=oge-okr-t2" style="border-left-color:var(--res)"><b>Тест ОГЭ · Движение по окружности →</b><span>9 класс, задания по мотивам открытого банка ФИПИ, проверка после сдачи.</span></a>
+    <a class="card" href="../exam.html?t=ege-okr-t2" style="border-left-color:var(--res)"><b>Тест ЕГЭ · Движение по окружности →</b><span>10 класс, задания по мотивам открытого банка ФИПИ и передачи.</span></a>
+  </div>
+</section>
+<p class="foot"><a href="index.html">← Оглавление Учебника</a> · <a href="../index.html">Тренажёры и тесты</a></p>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script src="../assets/katex/auto-render.min.js"></script>
+<script>renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false, ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'canvas']});</script>
+<script src="../assets/sim-core.js"></script>
+<script src="../assets/okruzhnost-sims.js"></script>
+</body>
+</html>

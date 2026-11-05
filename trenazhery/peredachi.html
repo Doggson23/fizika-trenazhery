@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Передачи: ремень, цепь, шестерни, вариатор, планетарная</title>
+<link rel="stylesheet" href="../assets/sim.css">
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div class="eyebrow">физика · инженерия · движение по окружности</div>
+    <h1>Передачи вращения</h1>
+    <p class="sub">Ремень, цепь, зубчатые колёса, фрикционный вариатор и планетарный ряд. Меняйте размеры и обороты — справа считаются параметры, по которым инженеры выбирают передачу. Анимация замедлена, числа — настоящие.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Тип передачи">
+    <button class="tab" role="tab" data-tab="belt">Ремень</button>
+    <button class="tab" role="tab" data-tab="chain">Цепь</button>
+    <button class="tab" role="tab" data-tab="gears">Шестерни</button>
+    <button class="tab" role="tab" data-tab="fric">Вариатор</button>
+    <button class="tab" role="tab" data-tab="planet">Планетарная</button>
+  </div>
+
+  <!-- ===================== РЕМЕНЬ ===================== -->
+  <section class="lab" data-pane="belt">
+    <div class="stage"><canvas id="cvBelt" class="wide" aria-label="Ремённая передача: два шкива и ремень"></canvas>
+      <div class="legend"><span><i style="background:var(--f1)"></i>ведущий шкив 1</span><span><i style="background:var(--f2)"></i>ведомый шкив 2</span><span><i style="background:var(--res)"></i>ремень, метки движутся со скоростью ремня</span></div></div>
+    <div class="panel" id="pBelt">
+      <h2>Ремённая передача</h2>
+      <div class="ctl"><label for="bd1"><span>Диаметр ведущего шкива d<sub>1</sub></span><output id="bd1O"></output></label><input id="bd1" type="range" min="40" max="250" step="5" value="80"></div>
+      <div class="ctl"><label for="bd2"><span>Диаметр ведомого шкива d<sub>2</sub></span><output id="bd2O"></output></label><input id="bd2" type="range" min="40" max="320" step="5" value="200"></div>
+      <div class="ctl"><label for="ba"><span>Межосевое расстояние a</span><output id="baO"></output></label><input id="ba" type="range" min="150" max="800" step="10" value="400"></div>
+      <div class="ctl"><label for="bn"><span>Частота двигателя n<sub>1</sub></span><output id="bnO"></output></label><input id="bn" type="range" min="300" max="3000" step="50" value="1450"></div>
+      <div class="ctl"><label for="bs"><span>Скольжение ремня s</span><output id="bsO"></output></label><input id="bs" type="range" min="0" max="6" step="0.5" value="2"></div>
+      <div class="ctl"><label for="bp"><span>Мощность двигателя P</span><output id="bpO"></output></label><input id="bp" type="range" min="100" max="4000" step="100" value="1500"></div>
+      <dl class="read" id="rBelt"></dl>
+      <div class="warnbox" id="wBelt" hidden></div>
+      <p class="note"><b>Угол обхвата</b> — дуга, по которой ремень лежит на малом шкиве; чем он меньше, тем легче ремню проскользнуть (норма — не меньше 120°). <b>Пробеги</b> — сколько раз в секунду каждый участок ремня изгибается на шкивах; от этого зависит срок службы.</p>
+    </div>
+  </section>
+
+  <!-- ===================== ЦЕПЬ ===================== -->
+  <section class="lab" data-pane="chain" hidden>
+    <div class="stage"><canvas id="cvChain" class="wide" aria-label="Цепная передача: две звёздочки и цепь"></canvas>
+      <div class="legend"><span><i style="background:var(--f1)"></i>ведущая звёздочка</span><span><i style="background:var(--f2)"></i>ведомая</span><span><i style="background:var(--res)"></i>скорость цепи за один зуб (внизу справа)</span></div></div>
+    <div class="panel" id="pChain">
+      <h2>Цепная передача</h2>
+      <div class="ctl"><label for="cz1"><span>Зубьев ведущей z<sub>1</sub></span><output id="cz1O"></output></label><input id="cz1" type="range" min="8" max="32" step="1" value="15"></div>
+      <div class="ctl"><label for="cz2"><span>Зубьев ведомой z<sub>2</sub></span><output id="cz2O"></output></label><input id="cz2" type="range" min="8" max="60" step="1" value="45"></div>
+      <div class="ctl"><label for="cp"><span>Шаг цепи p</span><output id="cpO"></output></label>
+        <select id="cp" class="sel"><option value="9.525">9,525 мм (3/8″) — мопед, привод ГРМ</option><option value="12.7">12,7 мм (1/2″) — велосипед</option><option value="15.875" selected>15,875 мм (5/8″) — мотоцикл</option><option value="19.05">19,05 мм (3/4″) — станки, конвейеры</option></select></div>
+      <div class="ctl"><label for="ca"><span>Межосевое расстояние, шагов</span><output id="caO"></output></label><input id="ca" type="range" min="20" max="80" step="1" value="40"></div>
+      <div class="ctl"><label for="cn"><span>Частота ведущей n<sub>1</sub></span><output id="cnO"></output></label><input id="cn" type="range" min="30" max="3000" step="10" value="3000"></div>
+      <dl class="read" id="rChain"></dl>
+      <p class="note"><b>Полигональный эффект.</b> Цепь лежит на звёздочке многоугольником, поэтому её скорость пульсирует с размахом 1 − cos(180°/z<sub>1</sub>). Уменьшите z<sub>1</sub> до 8–10 и посмотрите на график: так цепь шумит и изнашивается. Число звеньев цепи делают чётным — иначе нужно «переходное» звено.</p>
+    </div>
+  </section>
+
+  <!-- ===================== ШЕСТЕРНИ ===================== -->
+  <section class="lab" data-pane="gears" hidden>
+    <div class="stage"><canvas id="cvGear" class="wide" aria-label="Зубчатая передача"></canvas>
+      <div class="legend"><span><i style="background:var(--f1)"></i>ведущее колесо</span><span><i style="background:var(--f2)"></i>ведомые</span><span><i style="background:var(--res)"></i>паразитное / промежуточное</span><span>стрелки — направление вращения</span></div></div>
+    <div class="panel" id="pGear">
+      <h2>Зубчатая передача</h2>
+      <div class="seg" role="group" aria-label="Схема"><button data-g="pair" aria-pressed="true">Одна пара</button><button data-g="idle" aria-pressed="false">С паразитной</button><button data-g="two" aria-pressed="false">Две ступени</button></div>
+      <div class="ctl"><label for="gz1"><span>z<sub>1</sub> (ведущее)</span><output id="gz1O"></output></label><input id="gz1" type="range" min="8" max="40" step="1" value="12"></div>
+      <div class="ctl"><label for="gz2"><span>z<sub>2</sub></span><output id="gz2O"></output></label><input id="gz2" type="range" min="10" max="72" step="1" value="36"></div>
+      <div class="ctl" id="gIdleBox" hidden><label for="gzi"><span>z паразитного</span><output id="gziO"></output></label><input id="gzi" type="range" min="10" max="40" step="1" value="18"></div>
+      <div id="gTwoBox" hidden>
+        <div class="ctl"><label for="gz3"><span>z<sub>3</sub> (на валу колеса 2)</span><output id="gz3O"></output></label><input id="gz3" type="range" min="8" max="30" step="1" value="10"></div>
+        <div class="ctl"><label for="gz4"><span>z<sub>4</sub> (выходное)</span><output id="gz4O"></output></label><input id="gz4" type="range" min="10" max="60" step="1" value="40"></div>
+      </div>
+      <div class="ctl"><label for="gm"><span>Модуль m (размер зуба)</span><output id="gmO"></output></label><input id="gm" type="range" min="0.5" max="4" step="0.5" value="2"></div>
+      <div class="ctl"><label for="gn"><span>Частота входного вала</span><output id="gnO"></output></label><input id="gn" type="range" min="60" max="3000" step="60" value="3000"></div>
+      <div class="ctl"><label for="gp"><span>Мощность на входе P</span><output id="gpO"></output></label><input id="gp" type="range" min="50" max="3000" step="50" value="750"></div>
+      <div class="ctl"><label for="ge"><span>КПД одной пары η</span><output id="geO"></output></label><input id="ge" type="range" min="0.90" max="0.99" step="0.01" value="0.97"></div>
+      <dl class="read" id="rGear"></dl>
+      <p class="note"><b>Модуль</b> m = d/z — размер зуба в миллиметрах: зацепляться могут только колёса с одинаковым модулем, поэтому d<sub>1</sub>/d<sub>2</sub> = z<sub>1</sub>/z<sub>2</sub>. <b>Паразитное колесо</b> меняет направление, но не передаточное отношение — проверьте.</p>
+    </div>
+  </section>
+
+  <!-- ===================== ВАРИАТОР ===================== -->
+  <section class="lab" data-pane="fric" hidden>
+    <div class="stage"><canvas id="cvFric" class="wide" aria-label="Лобовой фрикционный вариатор, вид вдоль оси диска"></canvas>
+      <div class="legend"><span><i style="background:var(--f1)"></i>ролик (ведущий)</span><span><i style="background:var(--f2)"></i>диск (ведомый)</span><span><i style="background:var(--v)"></i>скорость точки контакта</span></div></div>
+    <div class="panel" id="pFric">
+      <h2>Лобовой вариатор</h2>
+      <div class="ctl"><label for="fr"><span>Радиус ролика r</span><output id="frO"></output></label><input id="fr" type="range" min="15" max="50" step="1" value="30"></div>
+      <div class="ctl"><label for="fn"><span>Частота ролика</span><output id="fnO"></output></label><input id="fn" type="range" min="60" max="1500" step="30" value="600"></div>
+      <div class="ctl"><label for="fR"><span>Положение ролика R (через ось — реверс)</span><output id="fRO"></output></label><input id="fR" type="range" min="-140" max="140" step="1" value="60"></div>
+      <div class="ctl"><label for="fN"><span>Сила прижима N</span><output id="fNO"></output></label><input id="fN" type="range" min="20" max="600" step="10" value="200"></div>
+      <div class="ctl"><label for="fmu"><span>Коэффициент трения μ</span><output id="fmuO"></output></label><input id="fmu" type="range" min="0.05" max="0.6" step="0.01" value="0.3"></div>
+      <div class="ctl"><label for="fM"><span>Момент нагрузки на диске</span><output id="fMO"></output></label><input id="fM" type="range" min="0" max="20" step="0.5" value="3"></div>
+      <dl class="read" id="rFric"></dl>
+      <div class="warnbox" id="wFric" hidden></div>
+      <p class="note">Без проскальзывания скорость точки контакта общая: ω<sub>р</sub>r = ω<sub>д</sub>R. Сила трения покоя не больше μN, поэтому передаваемый момент не больше μNR — у оси диска передача «не тянет». Так устроены вариаторы старых станков и проигрывателей; в автомобильных CVT (Audi multitronic, Nissan Xtronic) вместо ролика — ремень или цепь между раздвижными конусами.</p>
+    </div>
+  </section>
+
+  <!-- ===================== ПЛАНЕТАРНАЯ ===================== -->
+  <section class="lab" data-pane="planet" hidden>
+    <div class="stage"><canvas id="cvPlan" class="wide" aria-label="Планетарный ряд: солнце, сателлиты, водило, корона"></canvas>
+      <div class="legend"><span><i style="background:var(--f1)"></i>солнце</span><span><i style="background:var(--res)"></i>сателлиты</span><span><i style="background:var(--f3)"></i>водило</span><span><i style="background:var(--ink-2)"></i>корона</span></div></div>
+    <div class="panel" id="pPlan">
+      <h2>Планетарный ряд</h2>
+      <div class="seg" role="group" aria-label="Что неподвижно"><button data-p="ring" aria-pressed="true">Корона стоит</button><button data-p="carrier" aria-pressed="false">Водило стоит</button><button data-p="sun" aria-pressed="false">Солнце стоит</button></div>
+      <div class="ctl"><label for="pzs"><span>Зубьев солнца z<sub>с</sub></span><output id="pzsO"></output></label><input id="pzs" type="range" min="12" max="40" step="1" value="15"></div>
+      <div class="ctl"><label for="pzr"><span>Зубьев короны z<sub>к</sub></span><output id="pzrO"></output></label><input id="pzr" type="range" min="36" max="90" step="1" value="45"></div>
+      <div class="ctl"><label for="pn"><span>Частота входа</span><output id="pnO"></output></label><input id="pn" type="range" min="60" max="3000" step="60" value="1200"></div>
+      <dl class="read" id="rPlan"></dl>
+      <div class="warnbox" id="wPlan" hidden></div>
+      <p class="note">Ключ к расчёту — перейти в систему отсчёта водила: там оси сателлитов неподвижны, и угловые скорости равны ω − ω<sub>в</sub> (формула Виллиса). Где встречается: велосипедные втулки Shimano Nexus и Sturmey-Archer, автоматические коробки, гибридный привод Toyota Prius, редукторы шуруповёртов.</p>
+    </div>
+  </section>
+
+  <p class="foot">Тренажёр к теме «Движение по окружности» · <a href="../uchebnik/dvizhenie-po-okruzhnosti.html#peredachi">теория в Учебнике</a> · <a href="../index.html">все тренажёры</a></p>
+</div>
+
+<script src="../assets/sim-core.js"></script>
+<script>
+(function(){
+'use strict';
+const {fmt, prep, arrow, text, gear, rotArrow} = SC;
+const $ = id => document.getElementById(id);
+const TAU = 2 * Math.PI;
+const rpm = n => fmt(n, n < 100 ? 1 : 0) + ' об/мин';
+const VIS = 0.45;                 // ведущее звено на экране делает 0,45 об/с (замедление)
+const dl = (el, rows) => { el.innerHTML = rows.map(r => '<dt>' + r[0] + '</dt><dd' + (r[2] ? ' class="' + r[2] + '"' : '') + '>' + r[1] + '</dd>').join(''); };
+const reduce = SC.reduce;
+let active = 'belt';
+SC.tabs(document, k => { active = k; });
+
+/* ========================= РЕМЕНЬ ========================= */
+(function(){
+  const cv = $('cvBelt'), P = $('pBelt');
+  const g = {}; ['bd1', 'bd2', 'ba', 'bn', 'bs', 'bp'].forEach(id => g[id] = SC.slider(P, id,
+    {bd1: v => v + ' мм', bd2: v => v + ' мм', ba: v => v + ' мм', bn: rpm, bs: v => fmt(v, 1) + ' %', bp: v => fmt(v, 0) + ' Вт'}[id], calc));
+  let th1 = 0, th2 = 0, ph = 0, S = {};
+  function calc(){
+    if (!g.bp) return;
+    const d1 = g.bd1(), d2 = g.bd2(), n1 = g.bn(), s = g.bs() / 100, Pw = g.bp();
+    let a = g.ba(); const amin = (d1 + d2) / 2 + 20; const aa = Math.max(a, amin);
+    const r1 = d1 / 2, r2 = d2 / 2, beta = Math.asin((r2 - r1) / aa);
+    const alpha1 = (Math.PI - 2 * Math.abs(beta)) * 180 / Math.PI;                // обхват малого шкива
+    const L = 2 * aa + Math.PI * (d1 + d2) / 2 + (d2 - d1) ** 2 / (4 * aa);         // длина ремня, мм
+    const v = Math.PI * d1 / 1000 * n1 / 60, n2 = n1 * d1 / d2 * (1 - s), w1 = TAU * n1 / 60, w2 = TAU * n2 / 60;
+    const eta = 0.96, M1 = Pw / w1, M2 = eta * Pw / w2, an = v * v / (Math.min(r1, r2) / 1000);
+    S = {d1, d2, a: aa, r1, r2, beta, n1, n2, v, s};
+    dl($('rBelt'), [['Скорость ремня v = πd₁n₁', fmt(v, 2) + ' м/с'], ['Частота ведомого n₂', rpm(n2)],
+      ['Передаточное отношение n₁/n₂', fmt(n1 / n2, 2)], ['Угол обхвата малого шкива', fmt(alpha1, 0) + '°', alpha1 < 120 ? 'w' : 'g'],
+      ['Длина ремня', fmt(L, 0) + ' мм'], ['Пробеги ремня v/L', fmt(v / (L / 1000), 1) + ' 1/с', v / (L / 1000) > 15 ? 'w' : ''],
+      ['Ускорение ремня на малом шкиве', fmt(an, 0) + ' м/с²'], ['Момент на валу 1, M = P/ω', fmt(M1, 2) + ' Н·м'], ['Момент на валу 2 (КПД 0,96)', fmt(M2, 2) + ' Н·м']]);
+    const w = []; if (a < amin) w.push('Шкивы не помещаются: межосевое расстояние увеличено до ' + fmt(amin, 0) + ' мм.');
+    if (alpha1 < 120) w.push('Угол обхвата меньше 120° — ремень будет буксовать: увеличьте межосевое расстояние или уменьшите разницу диаметров.');
+    if (v > 30) w.push('Скорость ремня больше 30 м/с — центробежные силы ослабляют прижим ремня к шкиву.');
+    $('wBelt').hidden = !w.length; $('wBelt').textContent = w.join(' ');
+  }
+  calc();
+  function pulley(ctx, x, y, r, th, col, C){
+    ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fillStyle = C.grid; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = col; ctx.stroke();
+    for (let k = 0; k < 4; k++) { const a = th + k * Math.PI / 2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + r * 0.9 * Math.cos(a), y + r * 0.9 * Math.sin(a)); ctx.lineWidth = 2; ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(x, y, Math.max(3, r * 0.12), 0, TAU); ctx.fillStyle = col; ctx.fill(); ctx.restore();
+  }
+  SC.loop(cv, dt => {
+    if (active !== 'belt' || !S.d1) return;
+    const {ctx, W, H} = prep(cv), C = SC.col();
+    const sc = Math.min((W - 60) / (S.a + S.r1 + S.r2), (H - 70) / (2 * Math.max(S.r1, S.r2)));
+    const x1 = 30 + S.r1 * sc, x2 = x1 + S.a * sc, y = H / 2 - 6, R1 = S.r1 * sc, R2 = S.r2 * sc;
+    const k = VIS / (S.n1 / 60);                         // замедление
+    const w1 = TAU * S.n1 / 60 * k, w2 = TAU * S.n2 / 60 * k, vv = S.v * 1000 * sc * k;   // px/с
+    if (!reduce) { th1 += w1 * dt; th2 += w2 * dt; ph += vv * dt; }
+    // ремень: верхняя ветвь → шкив 2 → нижняя ветвь → шкив 1 (по часовой на экране)
+    const b = S.beta, pts = [], add = (x, yy) => pts.push([x, yy]);
+    const ang = a => [Math.cos(a), -Math.sin(a)];       // математический угол → экран
+    for (let i = 0; i <= 40; i++) { const a = Math.PI / 2 + b - i / 40 * (Math.PI + 2 * b); const [c, s] = ang(a); add(x2 + R2 * c, y + R2 * s); }
+    for (let i = 0; i <= 40; i++) { const a = -Math.PI / 2 - b - i / 40 * (Math.PI - 2 * b); const [c, s] = ang(a); add(x1 + R1 * c, y + R1 * s); }
+    pts.push(pts[0]);
+    ctx.lineWidth = 6; ctx.strokeStyle = C.res; ctx.globalAlpha = 0.55; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); ctx.globalAlpha = 1;
+    pulley(ctx, x1, y, R1, th1, C.f1, C); pulley(ctx, x2, y, R2, th2, C.f2, C);
+    // метки на ремне
+    const seg = []; let tot = 0; for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(l); tot += l; }
+    const step = 26; ctx.fillStyle = C.res;
+    for (let s0 = ((ph % step) + step) % step; s0 < tot; s0 += step) { let s = s0, i = 0; while (i < seg.length && s > seg[i]) { s -= seg[i]; i++; } if (i >= seg.length) break;
+      const p = pts[i], q = pts[i + 1], t = s / seg[i]; ctx.beginPath(); ctx.arc(p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t, 2.6, 0, TAU); ctx.fill(); }
+    // скорость ремня
+    const top = pts[0], top2 = pts[pts.length - 2];
+    const mx = (x1 + x2) / 2; arrow(ctx, mx - 30, y - Math.max(R1, R2) - 18, mx + 30, y - Math.max(R1, R2) - 18 + 60 * Math.tan(-b) * 0, C.v, 2.5, 'v');
+    rotArrow(ctx, x1, y, R1 + 12, -1, C.f1); rotArrow(ctx, x2, y, R2 + 12, -1, C.f2);
+    text(ctx, 'n₁ = ' + rpm(S.n1), x1, y + R1 + 26, {align: 'center', color: C.f1, weight: 600});
+    text(ctx, 'n₂ = ' + rpm(S.n2), x2, y + R2 + 26, {align: 'center', color: C.f2, weight: 600});
+    text(ctx, 'замедлено в ' + fmt(1 / k, 0) + ' раз', W - 10, 14, {align: 'right', color: C.ink2, size: 12});
+  });
+})();
+
+/* ========================= ЦЕПЬ ========================= */
+(function(){
+  const cv = $('cvChain'), P = $('pChain'); const g = {};
+  ['cz1', 'cz2', 'ca', 'cn'].forEach(id => g[id] = SC.slider(P, id, {cz1: v => v, cz2: v => v, ca: v => v + ' · p', cn: rpm}[id], calc));
+  $('cp').addEventListener('change', calc);
+  let th1 = 0, S = {};
+  function calc(){
+    if (!g.cn) return;
+    const z1 = g.cz1(), z2 = g.cz2(), p = parseFloat($('cp').value), A = g.ca(), n1 = g.cn();
+    const R1 = p / (2 * Math.sin(Math.PI / z1)), R2 = p / (2 * Math.sin(Math.PI / z2)), a = A * p;
+    const vavg = z1 * p / 1000 * n1 / 60, n2 = n1 * z1 / z2, w1 = TAU * n1 / 60;
+    const vmax = w1 * R1 / 1000, vmin = vmax * Math.cos(Math.PI / z1), puls = 1 - Math.cos(Math.PI / z1);
+    let X = 2 * A + (z1 + z2) / 2 + ((z2 - z1) / TAU) ** 2 / A; const Xe = Math.ceil(X / 2) * 2;
+    S = {z1, z2, p, R1, R2, a, n1, n2, vavg, vmax, vmin, puls};
+    dl($('rChain'), [['Делительный диаметр ведущей, p/sin(180°/z)', fmt(2 * R1, 1) + ' мм'], ['Средняя скорость цепи z₁pn₁', fmt(vavg, 2) + ' м/с'],
+      ['Скорость: max / min', fmt(vmax, 2) + ' / ' + fmt(vmin, 2) + ' м/с'], ['Пульсация 1 − cos(180°/z₁)', fmt(puls * 100, 2) + ' %', puls > 0.03 ? 'w' : 'g'],
+      ['Частота ведомой n₂', rpm(n2)], ['Передаточное отношение z₂/z₁', fmt(z2 / z1, 2)], ['Звеньев в цепи (чётное)', Xe + ' (расчёт ' + fmt(X, 1) + ')']]);
+  }
+  calc();
+  function sprocket(ctx, x, y, z, R, th, col, C){
+    ctx.save(); ctx.strokeStyle = col; ctx.fillStyle = C.grid; ctx.lineWidth = 2; ctx.beginPath();
+    for (let k = 0; k <= z; k++) { const a = th + k * TAU / z; const xx = x + R * Math.cos(a), yy = y + R * Math.sin(a); k ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy); }
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = col; for (let k = 0; k < z; k++) { const a = th + k * TAU / z; ctx.beginPath(); ctx.arc(x + R * Math.cos(a), y + R * Math.sin(a), Math.max(1.8, R * Math.sin(Math.PI / z) * 0.38), 0, TAU); ctx.fill(); }
+    ctx.beginPath(); ctx.arc(x, y, Math.max(3, R * 0.12), 0, TAU); ctx.fill(); ctx.restore();
+  }
+  SC.loop(cv, dt => {
+    if (active !== 'chain' || !S.z1) return;
+    const {ctx, W, H} = prep(cv), C = SC.col();
+    const sc = Math.min((W - 60) / (S.a + S.R1 + S.R2), (H - 80) / (2 * Math.max(S.R1, S.R2)));
+    const R1 = S.R1 * sc, R2 = S.R2 * sc, x1 = 30 + R1, x2 = x1 + S.a * sc, y = H / 2 - 10;
+    const k = VIS * 0.6 / (S.n1 / 60); if (!reduce) th1 += TAU * S.n1 / 60 * k * dt;
+    const th2 = th1 * S.z1 / S.z2;
+    // ветви цепи: касательные к описанным окружностям
+    const b = Math.asin((R2 - R1) / (S.a * sc)); ctx.strokeStyle = C.res; ctx.lineWidth = 3;
+    const up1 = [x1 - R1 * Math.sin(b), y - R1 * Math.cos(b)], up2 = [x2 - R2 * Math.sin(b), y - R2 * Math.cos(b)];
+    const dn1 = [x1 - R1 * Math.sin(b), y + R1 * Math.cos(b)], dn2 = [x2 - R2 * Math.sin(b), y + R2 * Math.cos(b)];
+    [[up1, up2], [dn2, dn1]].forEach(([a, c]) => { ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(c[0], c[1]); ctx.stroke();
+      const L = Math.hypot(c[0] - a[0], c[1] - a[1]), st = S.p * sc, off = ((th1 * R1) % st + st) % st;
+      ctx.fillStyle = C.res; for (let s = off; s < L; s += st) { ctx.beginPath(); ctx.arc(a[0] + (c[0] - a[0]) * s / L, a[1] + (c[1] - a[1]) * s / L, Math.max(1.8, st * 0.2), 0, TAU); ctx.fill(); } });
+    sprocket(ctx, x1, y, S.z1, R1, th1, C.f1, C); sprocket(ctx, x2, y, S.z2, R2, th2, C.f2, C);
+    rotArrow(ctx, x1, y, R1 + 12, -1, C.f1); rotArrow(ctx, x2, y, R2 + 12, -1, C.f2);
+    text(ctx, 'z₁ = ' + S.z1, x1, y + R1 + 22, {align: 'center', color: C.f1, weight: 600}); text(ctx, 'z₂ = ' + S.z2, x2, y + R2 + 22, {align: 'center', color: C.f2, weight: 600});
+    // график скорости цепи за три зуба
+    const gw = Math.min(220, W * 0.36), gh = 64, gx = W - gw - 12, gy = H - gh - 12;
+    ctx.fillStyle = C.sheet; ctx.strokeStyle = C.rule; ctx.lineWidth = 1; ctx.fillRect(gx, gy, gw, gh); ctx.strokeRect(gx, gy, gw, gh);
+    const vmax = S.vmax, vmin = S.vmin, lo = vmax * (1 - Math.max(S.puls * 1.6, 0.01)), Y = v => gy + gh - 8 - (v - lo) / (vmax - lo) * (gh - 22);
+    ctx.strokeStyle = C.res; ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 120; i++) { const u = i / 120 * 3, f = (u % 1) - 0.5, v = vmax * Math.cos(f * TAU / S.z1); const xx = gx + 4 + (gw - 8) * i / 120; i ? ctx.lineTo(xx, Y(v)) : ctx.moveTo(xx, Y(v)); }
+    ctx.stroke(); ctx.setLineDash([4, 3]); ctx.strokeStyle = C.ink2; ctx.beginPath(); ctx.moveTo(gx + 4, Y(S.vavg)); ctx.lineTo(gx + gw - 4, Y(S.vavg)); ctx.stroke(); ctx.setLineDash([]);
+    const ph = ((th1 / (TAU / S.z1)) % 3 + 3) % 3, f = (ph % 1) - 0.5; ctx.fillStyle = C.res; ctx.beginPath(); ctx.arc(gx + 4 + (gw - 8) * ph / 3, Y(vmax * Math.cos(f * TAU / S.z1)), 4, 0, TAU); ctx.fill();
+    text(ctx, 'v цепи за 3 зуба; пунктир — средняя', gx + 6, gy + 9, {size: 11, color: C.ink2});
+  });
+})();
+
+/* ========================= ШЕСТЕРНИ ========================= */
+(function(){
+  const cv = $('cvGear'), P = $('pGear'); const g = {}; let mode = 'pair', th1 = 0;
+  ['gz1', 'gz2', 'gzi', 'gz3', 'gz4', 'gm', 'gn', 'gp', 'ge'].forEach(id => g[id] = SC.slider(P, id,
+    {gz1: v => v, gz2: v => v, gzi: v => v, gz3: v => v, gz4: v => v, gm: v => fmt(v, 1) + ' мм', gn: rpm, gp: v => fmt(v, 0) + ' Вт', ge: v => fmt(v, 2)}[id], calc));
+  P.querySelectorAll('[data-g]').forEach(b => b.addEventListener('click', () => { mode = b.dataset.g; P.querySelectorAll('[data-g]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    $('gIdleBox').hidden = mode !== 'idle'; $('gTwoBox').hidden = mode !== 'two'; calc(); }));
+  let S = {};
+  function chain(){       // список колёс: {z, par (индекс), psi (угол к родителю), coax, role}
+    const L = [{z: g.gz1(), role: 'in'}];
+    if (mode === 'pair') L.push({z: g.gz2(), par: 0, psi: 0, role: 'out'});
+    if (mode === 'idle') { L.push({z: g.gzi(), par: 0, psi: 0, role: 'mid'}); L.push({z: g.gz2(), par: 1, psi: 0, role: 'out'}); }
+    if (mode === 'two') { L.push({z: g.gz2(), par: 0, psi: 0, role: 'mid'}); L.push({z: g.gz3(), par: 1, coax: true, role: 'mid'}); L.push({z: g.gz4(), par: 2, psi: Math.PI / 3, role: 'out'}); }
+    return L;
+  }
+  function calc(){
+    if (!g.ge) return;
+    const L = chain(), m = g.gm(), n1 = g.gn(), Pw = g.gp(), eta = g.ge();
+    // угловые скорости (знак: + по часовой на экране) и пары зацепления
+    L[0].w = 1; let pairs = 0;
+    L.forEach((G, i) => { if (!i) return; const p = L[G.par]; if (G.coax) G.w = p.w; else { G.w = -p.w * p.z / G.z; pairs++; } });
+    const out = L[L.length - 1], i_tot = 1 / Math.abs(out.w), n_out = n1 * Math.abs(out.w), same = out.w > 0;
+    const w1 = TAU * n1 / 60, M1 = Pw / w1, Pout = Pw * eta ** pairs, Mout = Pout / (TAU * n_out / 60);
+    const aw = mode === 'two' ? [m * (L[0].z + L[1].z) / 2, m * (L[2].z + L[3].z) / 2] : mode === 'idle' ? [m * (L[0].z + L[1].z) / 2, m * (L[1].z + L[2].z) / 2] : [m * (L[0].z + L[1].z) / 2];
+    S = {L, m, n1};
+    const rows = [['Делительные диаметры d = m·z', L.map(G => fmt(m * G.z, 0)).join(' / ') + ' мм'], ['Межосевое расстояние a = m(z₁+z₂)/2', aw.map(a => fmt(a, 0)).join(' и ') + ' мм'],
+      ['Передаточное отношение i = n<sub>вх</sub>/n<sub>вых</sub>', fmt(i_tot, 2)], ['Частота выхода', rpm(n_out)], ['Направление выхода', same ? 'как у входа' : 'противоположное', same ? 'g' : ''],
+      ['Пар в зацеплении', pairs], ['Момент на входе M = P/ω', fmt(M1, 2) + ' Н·м'], ['Момент на выходе', fmt(Mout, 2) + ' Н·м'], ['Мощность на выходе, ηᵏP', fmt(Pout, 0) + ' Вт (' + fmt(eta ** pairs * 100, 1) + ' %)']];
+    if (mode === 'idle') rows.splice(3, 0, ['Без паразитного было бы', 'i = ' + fmt(L[2].z / L[0].z, 2) + ', противоположное']);
+    dl($('rGear'), rows);
+  }
+  calc();
+  SC.loop(cv, dt => {
+    if (active !== 'gears' || !S.L) return;
+    const {ctx, W, H} = prep(cv), C = SC.col(), L = S.L;
+    // раскладка в «модульных» единицах: r = z/2
+    L.forEach((G, i) => { G.r = G.z / 2; if (!i) { G.x = 0; G.y = 0; return; } const p = L[G.par];
+      if (G.coax) { G.x = p.x; G.y = p.y; } else { const d = p.r + G.r; G.x = p.x + d * Math.cos(G.psi); G.y = p.y + d * Math.sin(G.psi); } });
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity; L.forEach(G => { const R = G.r + 1.2; x0 = Math.min(x0, G.x - R); x1 = Math.max(x1, G.x + R); y0 = Math.min(y0, G.y - R); y1 = Math.max(y1, G.y + R); });
+    const sc = Math.min((W - 40) / (x1 - x0), (H - 50) / (y1 - y0)), ox = (W - (x1 - x0) * sc) / 2 - x0 * sc, oy = (H - (y1 - y0) * sc) / 2 - y0 * sc + 4;
+    const k = VIS / (S.n1 / 60); if (!reduce) th1 += TAU * VIS * dt;
+    // фазы зубьев: потомок встаёт впадиной к зубу родителя
+    L[0].th = th1;
+    L.forEach((G, i) => { if (!i) return; const p = L[G.par]; if (G.coax) G.th = p.th; else G.th = G.psi + Math.PI + Math.PI / G.z - (p.th - G.psi) * p.z / G.z; });
+    const order = L.map((G, i) => i).sort((a, b) => (L[a].coax ? 1 : 0) - (L[b].coax ? 1 : 0));
+    order.forEach(i => { const G = L[i]; const col = G.role === 'in' ? C.f1 : G.role === 'out' ? C.f2 : C.res;
+      ctx.globalAlpha = G.coax ? 1 : 0.92; gear(ctx, ox + G.x * sc, oy + G.y * sc, G.z, G.r * sc, G.th, C.sheet, col); ctx.globalAlpha = 1;
+      rotArrow(ctx, ox + G.x * sc, oy + G.y * sc, G.r * sc * (G.coax ? 0.55 : 0.62), G.w > 0 ? -1 : 1, col);
+      text(ctx, 'z=' + G.z, ox + G.x * sc, oy + (G.y + (G.coax ? -G.r * 0.25 : G.r + 2.4)) * sc + (G.coax ? 0 : 0), {align: 'center', color: col, weight: 700, size: 12}); });
+    text(ctx, 'замедлено в ' + fmt(1 / k, 0) + ' раз', W - 10, 14, {align: 'right', color: C.ink2, size: 12});
+  });
+})();
+
+/* ========================= ВАРИАТОР ========================= */
+(function(){
+  const cv = $('cvFric'), P = $('pFric'); const g = {};
+  ['fr', 'fn', 'fR', 'fN', 'fmu', 'fM'].forEach(id => g[id] = SC.slider(P, id,
+    {fr: v => v + ' мм', fn: rpm, fR: v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v) + ' мм', fN: v => v + ' Н', fmu: v => fmt(v, 2), fM: v => fmt(v, 1) + ' Н·м'}[id], calc));
+  let thd = 0, thr = 0, S = {};
+  function calc(){
+    if (!g.fM) return;
+    const r = g.fr(), n = g.fn(), R = g.fR(), N = g.fN(), mu = g.fmu(), Ml = g.fM();
+    const Mmax = mu * N * Math.abs(R) / 1000, slip = Math.abs(R) < 1 || Ml > Mmax;
+    const nd = Math.abs(R) < 1 ? Infinity : n * r / R;
+    S = {r, n, R, slip, nd};
+    dl($('rFric'), [['Частота диска n·r/R', slip ? '0 (буксует)' : rpm(Math.abs(nd)) + (nd < 0 ? ', реверс' : ''), slip ? 'w' : ''],
+      ['Передаточное отношение R/r', Math.abs(R) < 1 ? '—' : fmt(Math.abs(R) / r, 2)], ['Сила трения не больше μN', fmt(mu * N, 0) + ' Н'],
+      ['Наибольший момент на диске μNR', fmt(Mmax, 2) + ' Н·м', slip ? 'w' : 'g'], ['Нагрузка', fmt(Ml, 1) + ' Н·м'],
+      ['Диапазон для R от 20 до 140 мм', 'n<sub>max</sub>/n<sub>min</sub> = 7']]);
+    $('wFric').hidden = !slip; $('wFric').textContent = Math.abs(R) < 1 ? 'Ролик на оси диска: чтобы не было проскальзывания, диск должен был бы вращаться бесконечно быстро — передача не работает.'
+      : 'Нагрузка больше μNR: трения покоя не хватает, ролик проскальзывает по диску. Сдвиньте ролик дальше от оси или прижмите сильнее.';
+  }
+  calc();
+  SC.loop(cv, dt => {
+    if (active !== 'fric' || !S.r) return;
+    const {ctx, W, H} = prep(cv), C = SC.col();
+    const RD = 150, sc = Math.min((H - 40) / (2 * RD + 20), (W - 40) / (2 * RD + 120)), cx = W / 2 - 30, cy = H / 2;
+    const k = VIS / (S.n / 60), wr = TAU * S.n / 60 * k, wd = S.slip ? 0 : wr * S.r / S.R;
+    if (!reduce) { thr += wr * dt; thd += wd * dt; }
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, RD * sc, 0, TAU); ctx.fillStyle = C.grid; ctx.fill(); ctx.strokeStyle = C.f2; ctx.lineWidth = 2.5; ctx.stroke();
+    for (let i = 0; i < 12; i++) { const a = thd + i * TAU / 12; ctx.beginPath(); ctx.moveTo(cx + 18 * Math.cos(a), cy + 18 * Math.sin(a)); ctx.lineTo(cx + RD * sc * 0.97 * Math.cos(a), cy + RD * sc * 0.97 * Math.sin(a)); ctx.strokeStyle = C.f2; ctx.globalAlpha = i % 3 ? 0.35 : 0.9; ctx.lineWidth = i % 3 ? 1 : 2; ctx.stroke(); }
+    ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(cx, cy, 6, 0, TAU); ctx.fillStyle = C.f2; ctx.fill(); ctx.restore();
+    // ролик: ось — вдоль радиуса (горизонтально), виден сбоку прямоугольником ширины b и высоты 2r
+    const xR = cx + S.R * sc, b = 22 * sc, hr = S.r * sc;
+    ctx.save(); ctx.beginPath(); ctx.rect(xR - b / 2, cy - hr, b, 2 * hr); ctx.fillStyle = C.sheet; ctx.fill(); ctx.clip();
+    ctx.strokeStyle = C.f1; ctx.lineWidth = 2; const st = 9; const off = ((thr * hr) % st + st) % st;
+    for (let yy = cy - hr + off - st; yy < cy + hr + st; yy += st) { ctx.beginPath(); ctx.moveTo(xR - b / 2, yy); ctx.lineTo(xR + b / 2, yy); ctx.stroke(); }
+    ctx.restore(); ctx.strokeStyle = C.f1; ctx.lineWidth = 2.5; ctx.strokeRect(xR - b / 2, cy - hr, b, 2 * hr);
+    ctx.beginPath(); ctx.moveTo(xR + b / 2, cy); ctx.lineTo(cx + RD * sc + 70, cy); ctx.lineWidth = 3; ctx.stroke();
+    text(ctx, 'вал ролика', cx + RD * sc + 66, cy - 12, {align: 'right', color: C.f1, size: 12});
+    ctx.beginPath(); ctx.arc(xR, cy, 4, 0, TAU); ctx.fillStyle = C.ink; ctx.fill();
+    // скорость точки контакта
+    const vpx = Math.min(60, 26 + Math.abs(S.R) * sc * 0.1);
+    arrow(ctx, xR, cy, xR, cy + vpx, S.slip ? C.bad : C.v, 2.5, S.slip ? 'скольжение' : 'v');
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(xR, cy); ctx.stroke(); ctx.setLineDash([]);
+    text(ctx, 'R', (cx + xR) / 2, cy - 10, {align: 'center', italic: true, color: C.ink2});
+    text(ctx, S.slip ? 'диск стоит' : 'диск: ' + rpm(Math.abs(S.nd)), cx, cy + RD * sc + 12, {align: 'center', color: S.slip ? C.bad : C.f2, weight: 700});
+    text(ctx, 'замедлено в ' + fmt(1 / k, 0) + ' раз', W - 10, 14, {align: 'right', color: C.ink2, size: 12});
+  });
+})();
+
+/* ========================= ПЛАНЕТАРНАЯ ========================= */
+(function(){
+  const cv = $('cvPlan'), P = $('pPlan'); const g = {}; let fixed = 'ring', ths = 0, thc = 0, thr = 0, S = {};
+  ['pzs', 'pzr', 'pn'].forEach(id => g[id] = SC.slider(P, id, {pzs: v => v, pzr: v => v, pn: rpm}[id], calc));
+  P.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => { fixed = b.dataset.p; P.querySelectorAll('[data-p]').forEach(x => x.setAttribute('aria-pressed', x === b)); ths = thc = thr = 0; calc(); }));
+  function calc(){
+    if (!g.pn) return;
+    let zs = g.pzs(), zr = g.pzr(); if ((zr - zs) % 2) zr += 1; if (zr < zs + 6) zr = zs + 6;
+    const zp = (zr - zs) / 2, n = g.pn(); let ws, wc, wr, inp, out;
+    // формула Виллиса: (ωк − ωв)/(ωс − ωв) = −zс/zк
+    if (fixed === 'ring') { ws = n; wr = 0; wc = ws * zs / (zs + zr); inp = 'солнце'; out = 'водило'; }
+    if (fixed === 'carrier') { ws = n; wc = 0; wr = -ws * zs / zr; inp = 'солнце'; out = 'корона'; }
+    if (fixed === 'sun') { wc = n; ws = 0; wr = wc * (1 + zs / zr); inp = 'водило'; out = 'корона'; }
+    const wpRel = -(ws - wc) * zs / zp, wp = wpRel + wc;
+    const wout = fixed === 'ring' ? wc : wr, win = fixed === 'sun' ? wc : ws;
+    S = {zs, zr, zp, ws, wc, wr, wp, n};
+    dl($('rPlan'), [['Зубьев сателлита (z<sub>к</sub> − z<sub>с</sub>)/2', zp + (zr !== g.pzr() ? ' (z<sub>к</sub> поправлено до ' + zr + ')' : '')],
+      ['Вход → выход', inp + ' → ' + out], ['Частота выхода', rpm(Math.abs(wout)) + (wout < 0 ? ', обратно' : '')], ['Передаточное отношение n<sub>вх</sub>/n<sub>вых</sub>', fmt(win / wout, 3)],
+      ['Солнце / водило / корона', [ws, wc, wr].map(w => fmt(w, 0)).join(' / ') + ' об/мин'], ['Сателлит: в СО водила / абсолютно', fmt(wpRel, 0) + ' / ' + fmt(wp, 0) + ' об/мин']]);
+    const ok3 = (zs + zr) % 3 === 0; $('wPlan').hidden = ok3;
+    $('wPlan').textContent = 'Три одинаково расставленных сателлита не встанут: (z_с + z_к) = ' + (zs + zr) + ' не делится на 3 — видно, как зубья налезают. Подберите числа зубьев.';
+  }
+  calc();
+  function ring(ctx, cx, cy, z, r, th, C){
+    const m = 2 * r / z, step = TAU / z, ri = r - m, ro = r + 1.25 * m;
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, ro + 3.2 * m, 0, TAU);
+    for (let k = z; k >= 0; k--) { const c = th + k * step + step / 2;   // впадины кольца — где у колеса были бы зубья
+      const a = [c + step * 0.5, c + step * 0.27, c + step * 0.15, c - step * 0.15, c - step * 0.27, c - step * 0.5], R = [ri, ri, ro, ro, ri, ri];
+      for (let j = 0; j < 6; j++) { const x = cx + R[j] * Math.cos(a[j]), y = cy + R[j] * Math.sin(a[j]); (k === z && j === 0) ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } }
+    ctx.closePath(); ctx.fillStyle = C.grid; ctx.fill('evenodd'); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.2; ctx.stroke(); ctx.restore();
+  }
+  SC.loop(cv, dt => {
+    if (active !== 'planet' || !S.zs) return;
+    const {ctx, W, H} = prep(cv), C = SC.col();
+    const sc = (Math.min(W, H) - 30) / (S.zr + 8), cx = W / 2, cy = H / 2;
+    const base = Math.max(Math.abs(S.ws), Math.abs(S.wc), Math.abs(S.wr)) / 60, k = VIS * 0.7 / base;
+    if (!reduce) { ths += TAU * S.ws / 60 * k * dt; thc += TAU * S.wc / 60 * k * dt; thr += TAU * S.wr / 60 * k * dt; }
+    const rs = S.zs / 2 * sc, rp = S.zp / 2 * sc, rr = S.zr / 2 * sc, orb = rs + rp;
+    // кольцо: фаза от сателлита 0 (внутреннее зацепление), в СО водила
+    const psi0 = 0, thp0rel = psi0 + Math.PI + Math.PI / S.zp - ((ths - thc) - psi0) * S.zs / S.zp;
+    const thRing = thc + psi0 + Math.PI / S.zr + (thp0rel - psi0) * S.zp / S.zr;
+    ring(ctx, cx, cy, S.zr, rr, thRing, C);
+    // водило
+    ctx.strokeStyle = C.f3; ctx.lineWidth = 7; ctx.lineCap = 'round';
+    for (let j = 0; j < 3; j++) { const a = thc + j * TAU / 3; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + orb * Math.cos(a), cy + orb * Math.sin(a)); ctx.stroke(); }
+    gear(ctx, cx, cy, S.zs, rs, ths, C.sheet, C.f1);
+    for (let j = 0; j < 3; j++) { const psi = j * TAU / 3, a = thc + psi;
+      const thp = thc + psi + Math.PI + Math.PI / S.zp - ((ths - thc) - psi) * S.zs / S.zp;
+      ctx.globalAlpha = 0.95; gear(ctx, cx + orb * Math.cos(a), cy + orb * Math.sin(a), S.zp, rp, thp, C.sheet, C.res); ctx.globalAlpha = 1; }
+    ctx.beginPath(); ctx.arc(cx, cy, 5, 0, TAU); ctx.fillStyle = C.f3; ctx.fill();
+    text(ctx, fixed === 'ring' ? 'корона закреплена' : fixed === 'carrier' ? 'водило закреплено' : 'солнце закреплено', 10, 14, {color: C.ink2, size: 12});
+  });
+})();
+})();
+</script>
+</body>
+</html>

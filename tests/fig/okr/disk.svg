@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 260" width="300" height="260" style="background:#fff;border-radius:8px">
+<circle cx="150" cy="130" r="115" fill="#1E2A33"/><circle cx="150" cy="130" r="112" fill="none" stroke="#3a4a57" stroke-width="1"/>
+<circle cx="150" cy="130" r="95" fill="none" stroke="#3a4a57"/><circle cx="150" cy="130" r="75" fill="none" stroke="#3a4a57"/><circle cx="150" cy="130" r="55" fill="none" stroke="#3a4a57"/>
+<circle cx="150" cy="130" r="32" fill="#E8833A"/><circle cx="150" cy="130" r="4" fill="#fff"/><text x="158" y="124" fill="#fff" font-size="15" font-style="italic" font-family="serif">O</text>
+<circle cx="234" cy="112" r="7" fill="#C0392B"/><text x="226" y="100" fill="#fff" font-size="17" font-style="italic" font-family="serif">A</text>
+<circle cx="138" cy="72" r="7" fill="#C0392B"/><text x="114" y="66" fill="#fff" font-size="17" font-style="italic" font-family="serif">B</text>
+<path d="M 60 60 A 120 120 0 0 1 120 20" fill="none" stroke="#0B3C5D" stroke-width="2.5"/><polygon points="126,17 112,16 118,28" fill="#0B3C5D"/>
+</svg>

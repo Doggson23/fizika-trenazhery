@@ -1,0 +1,317 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Тренажёр «Праща»</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Вид сверху на пращу: слева поле с сеткой в метрах, справа пульт; на телефоне пульт уходит под поле. Палитра 7–9 классов — синий и зелёный. */
+:root{
+  --paper:#EEF5FA; --sheet:#FFFFFF; --ink:#1F2D3A; --ink-2:#5B6B7A; --rule:#D6E3EC;
+  --grid:#E3EDF3; --grid-major:#C3D5E1; --path:#1F77B4; --stone:#0B3C5D; --mark:#2E9C6B; --mark-soft:#E5F4EB;
+  --vel:#2E9C6B; --acc:#D2462E; --target:#D2462E; --ok:#1F7A4D; --ok-soft:#E3F2E8; --bad:#A33A2E; --bad-soft:#F7E4E1; --rope:#7A8B99;
+  --display:"Unbounded","Golos Text",system-ui,sans-serif; --body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E1A24; --sheet:#132331; --ink:#E8F0F5; --ink-2:#9FB2C2; --rule:#24384A;
+  --grid:#1A2C3B; --grid-major:#2A4256; --path:#5BB8E8; --stone:#CFE8F7; --mark:#5FD39A; --mark-soft:#173226;
+  --vel:#5FD39A; --acc:#FF8A73; --target:#FF8A73; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; --rope:#9FB2C2; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E1A24; --sheet:#132331; --ink:#E8F0F5; --ink-2:#9FB2C2; --rule:#24384A;
+  --grid:#1A2C3B; --grid-major:#2A4256; --path:#5BB8E8; --stone:#CFE8F7; --mark:#5FD39A; --mark-soft:#173226;
+  --vel:#5FD39A; --acc:#FF8A73; --target:#FF8A73; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; --rope:#9FB2C2; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:16px}
+h1{font:700 clamp(24px,4vw,36px)/1.15 var(--display);margin:0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:4px 0 0}
+.eyebrow{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:600 15px var(--body);padding:10px 16px;min-height:44px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--stone);color:var(--sheet);border-color:var(--stone)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--path);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.stage{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px;min-width:0}
+canvas{display:block;width:100%;aspect-ratio:16/10;max-width:100%;border-radius:4px;touch-action:manipulation}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2);padding:8px 4px 2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:14px;min-width:0}
+.panel h2{font:600 15px var(--display);margin:0}
+.ctl{display:grid;gap:4px}
+.ctl label{display:flex;justify-content:space-between;font-size:15px}
+.ctl output,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--path);min-height:32px}
+.checks{display:grid;gap:6px;font-size:15px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer;min-height:32px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 15px var(--body);padding:10px 16px;min-height:44px;border-radius:6px;border:1px solid var(--stone);background:var(--stone);color:var(--sheet);cursor:pointer}
+button.b.go{background:var(--mark);border-color:var(--mark);color:#fff;font-size:17px}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+.read{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:15px;border-top:1px solid var(--rule);padding-top:12px;margin:0}
+.read dt{color:var(--ink-2)} .read dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.task{display:grid;gap:10px}
+.task p{margin:0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:15px}
+.field input{font:500 16px var(--mono);padding:9px 10px;min-height:44px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.msg{font-size:15px;padding:10px 12px;border-radius:6px;display:none}
+.msg.ok{display:block;background:var(--ok-soft);color:var(--ok)} .msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}
+.hint{font-size:15px;background:var(--mark-soft);border-left:3px solid var(--mark);padding:8px 10px;border-radius:0 6px 6px 0}
+.svo{font-size:15px;border:1px solid var(--mark);background:var(--mark-soft);padding:10px 12px;border-radius:6px}
+.score{display:flex;gap:14px;font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.score span b{font-size:20px}
+.f{font-family:var(--mono);font-size:.95em;white-space:nowrap}
+sub,sup{font-size:.72em}
+.foot{font-size:14px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">физика · 9 класс · движение по окружности</div>
+    <h1>Праща</h1>
+    <p class="sub">Вид сверху: камень на верёвке вращается против часовой стрелки. Отпустите — и он полетит по касательной. Тяжесть и сопротивление воздуха не учитываем, клетка — 1 м.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Режим">
+    <button class="tab" role="tab" id="t-ex" aria-selected="true" data-mode="explore">Исследовать</button>
+    <button class="tab" role="tab" id="t-task" aria-selected="false" data-mode="task">Задача</button>
+    <button class="tab" role="tab" id="t-game" aria-selected="false" data-mode="game">Попади в мишень</button>
+  </div>
+
+  <div class="lab">
+    <div class="stage">
+      <canvas id="cv" width="960" height="600" aria-label="Поле, вид сверху: окружность, по которой движется камень, его скорость и ускорение; оси в метрах"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--path)"></i>окружность и полёт</span>
+        <span><i style="background:var(--vel)"></i>скорость v</span>
+        <span><i style="background:var(--acc)"></i>ускорение a<sub>ц</sub> (к центру)</span>
+        <span><i style="background:var(--target)"></i>мишень</span>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <section id="p-explore" class="task">
+        <h2>Пульт</h2>
+        <div class="ctl"><label for="R"><span>Радиус R (длина верёвки)</span> <output id="RO" class="num"></output></label><input id="R" type="range" min="0.5" max="2" step="0.1" value="1"></div>
+        <div class="ctl"><label for="T"><span>Период T</span> <output id="TO" class="num"></output></label><input id="T" type="range" min="0.5" max="4" step="0.1" value="2"></div>
+        <div class="checks">
+          <label><input type="checkbox" id="cV" checked> вектор скорости</label>
+          <label><input type="checkbox" id="cA" checked> вектор ускорения</label>
+          <label><input type="checkbox" id="cSlow"> показывать в 4 раза медленнее</label>
+        </div>
+        <div class="btns"><button class="b go" id="rel">Отпустить!</button><button class="b ghost" id="again">Заново</button></div>
+        <dl class="read">
+          <dt>Частота ν = 1/T</dt><dd id="rN"></dd>
+          <dt>Скорость v = 2πR/T</dt><dd id="rV"></dd>
+          <dt>Угловая скорость ω = 2π/T</dt><dd id="rW"></dd>
+          <dt>Ускорение a<sub>ц</sub> = v²/R</dt><dd id="rA"></dd>
+        </dl>
+        <p class="foot">Попробуйте: увеличьте радиус вдвое при том же периоде — во сколько раз выросли v и a<sub>ц</sub>? Отпустите камень в разных точках: куда он летит?</p>
+      </section>
+
+      <section id="p-task" class="task" hidden>
+        <h2>Задача</h2>
+        <p>Мальчик раскрутил пращу с верёвкой длиной <b>R = 0,8 м</b>. Камень делает <b>2 оборота в секунду</b>. С какой скоростью вылетит камень? Какое центростремительное ускорение было у камня перед вылетом? Примите π ≈ 3,14.</p>
+        <div class="field"><label for="ansV">v =</label><input id="ansV" inputmode="decimal" placeholder="например, 7,5" autocomplete="off"><span>м/с</span></div>
+        <div class="field"><label for="ansA">a<sub>ц</sub> =</label><input id="ansA" inputmode="decimal" placeholder="например, 50" autocomplete="off"><span>м/с²</span></div>
+        <div class="btns"><button class="b" id="check">Проверить</button><button class="b ghost" id="hintBtn">Подсказка (0/3)</button></div>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        <div id="hints" class="task"></div>
+        <div class="svo" id="svo" hidden><b>Свойство.</b> В момент отпускания скорость камня направлена по касательной к окружности, а дальше он летит по прямой. Её модуль v = 2πRν. Центростремительное ускорение a<sub>ц</sub> = v²/R направлено к центру — его создаёт натяжение верёвки.</div>
+      </section>
+
+      <section id="p-game" class="task" hidden>
+        <h2>Попади в мишень</h2>
+        <p id="gText">Камень вращается. Нажмите «Отпустить!» (или пробел) в тот момент, когда он полетит точно в мишень. Если мишень лежит так, что в неё не попасть, жмите «Не попасть».</p>
+        <div class="btns"><button class="b go" id="gRel">Отпустить!</button><button class="b ghost" id="never">Не попасть</button><button class="b ghost" id="next">Новая мишень</button></div>
+        <div class="msg" id="gMsg" role="status" aria-live="polite"></div>
+        <div class="score"><span>попаданий <b id="sHit">0</b></span><span>бросков <b id="sShot">0</b></span><span>серия <b id="sStreak">0</b></span></div>
+        <p class="foot">Подсказка для победы: смотрите не на мишень, а на касательную. Камень полетит туда, куда направлена его скорость в момент броска.</p>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const PI = Math.PI;
+  let C = {}, U = 1;
+  function resize(){ const dpr = window.devicePixelRatio || 1, w = Math.max(280, cv.clientWidth || 640);
+    const W = Math.round(w*dpr), H = Math.round(w*0.625*dpr); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; U = dpr * Math.max(0.85, Math.min(1.2, w/700)); }
+  resize();
+  new ResizeObserver(() => { const old = cv.width; resize(); if (cv.width !== old) draw(); }).observe(cv);
+  function readColors(){ const s = getComputedStyle(document.documentElement);
+    ['sheet','ink','ink-2','grid','grid-major','path','stone','mark','vel','acc','target','rope','ok','bad'].forEach(k => C[k] = s.getPropertyValue('--'+k).trim()); }
+  readColors();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+  new MutationObserver(() => { readColors(); draw(); }).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+  const fmt = (x, d=1) => (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).replace('.', ',');
+  const parse = s => { if (s == null) return NaN; s = String(s).trim().replace(',', '.').replace(/\s+/g,'');
+    const m = s.match(/^(\d*\.?\d+)\/(\d*\.?\d+)$/); if (m) return parseFloat(m[1])/parseFloat(m[2]); return parseFloat(s); };
+
+  // поле 16 × 10 м, центр вращения
+  const FW = 10, FH = 6.25, CX = 2.6, CY = 3.125;
+  const S = { mode:'explore', R:1, T:2, showV:true, showA:true, slow:false,
+              phi:0, flying:null, last:null, anim:null, tFly:0,
+              taskSolved:false, hintsShown:0, game:null, score:{hit:0, shot:0, streak:0} };
+
+  let view = {sc:40, ox:0, oy:0};
+  function fit(){ const pad = {l:30*U, r:10*U, t:10*U, b:24*U};
+    const cw = cv.width - pad.l - pad.r, ch = cv.height - pad.t - pad.b, sc = Math.min(cw/FW, ch/FH);
+    view = {sc, ox:pad.l, oy:pad.t + FH*sc}; }
+  const X = x => view.ox + x*view.sc, Y = y => view.oy - y*view.sc;
+
+  function grid(){
+    ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= FW; x++){ ctx.strokeStyle = x % 5 === 0 ? C['grid-major'] : C.grid; ctx.beginPath(); ctx.moveTo(X(x)+.5, Y(0)); ctx.lineTo(X(x)+.5, Y(FH)); ctx.stroke(); }
+    for (let y = 0; y <= FH; y++){ ctx.strokeStyle = y % 5 === 0 ? C['grid-major'] : C.grid; ctx.beginPath(); ctx.moveTo(X(0), Y(y)+.5); ctx.lineTo(X(FW), Y(y)+.5); ctx.stroke(); }
+    ctx.fillStyle = C['ink-2']; ctx.font = (11*U) + 'px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let x = 0; x <= FW - 1; x += 1) ctx.fillText(String(x), X(x), Y(0) + 4*U);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let y = 1; y <= FH - 0.5; y += 1) ctx.fillText(String(y), X(0) - 5*U, Y(y));
+    ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText('x, м', X(FW), Y(0) + 4*U); ctx.textAlign = 'left';
+    ctx.fillText('y, м', X(0) + 6*U, Y(FH) + 2*U);
+  }
+  function arrow(x0, y0, dx, dy, color, lab){
+    const x1 = x0 + dx, y1 = y0 + dy, L = Math.hypot(dx, dy); if (L < 3*U) return;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3*U;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    const ang = Math.atan2(dy, dx), hl = Math.min(12*U, L*0.4);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - hl*Math.cos(ang - .45), y1 - hl*Math.sin(ang - .45)); ctx.lineTo(x1 - hl*Math.cos(ang + .45), y1 - hl*Math.sin(ang + .45)); ctx.closePath(); ctx.fill();
+    if (lab){ ctx.font = '600 ' + (14*U) + 'px "Golos Text", system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(lab, x1 + 12*U*Math.cos(ang), y1 + 12*U*Math.sin(ang)); }
+  }
+  function disc(x, y, r, fill, stroke){ ctx.beginPath(); ctx.arc(X(x), Y(y), r, 0, 2*PI); ctx.fillStyle = fill; ctx.fill(); if (stroke){ ctx.lineWidth = 2*U; ctx.strokeStyle = stroke; ctx.stroke(); } }
+  function target(t){ ctx.strokeStyle = C.target; ctx.lineWidth = 2.5*U;
+    [1, 0.6].forEach(k => { ctx.beginPath(); ctx.arc(X(t.x), Y(t.y), t.r*k*view.sc, 0, 2*PI); ctx.stroke(); });
+    disc(t.x, t.y, 4*U, C.target); }
+
+  const kin = () => { const v = 2*PI*S.R/S.T; return {v, nu:1/S.T, w:2*PI/S.T, a:v*v/S.R}; };
+  const pos = phi => [CX + S.R*Math.cos(phi), CY + S.R*Math.sin(phi)];
+
+  function draw(){
+    fit(); grid();
+    // окружность и центр
+    ctx.strokeStyle = C.path; ctx.lineWidth = 2*U; ctx.setLineDash([6*U, 6*U]);
+    ctx.beginPath(); ctx.arc(X(CX), Y(CY), S.R*view.sc, 0, 2*PI); ctx.stroke(); ctx.setLineDash([]);
+    disc(CX, CY, 5*U, C.ink);
+    if (S.mode === 'game' && S.game) target(S.game);
+    const k = kin(), vs = view.sc*Math.min(0.3, 1.6/k.v);  // масштаб стрелок: длина ∝ v (ограничена)
+    if (S.flying){
+      const f = S.flying, x = f.x0 + f.ux*k.v*S.tFly, y = f.y0 + f.uy*k.v*S.tFly;
+      ctx.strokeStyle = C.path; ctx.lineWidth = 2.5*U; ctx.setLineDash([3*U, 5*U]);
+      ctx.beginPath(); ctx.moveTo(X(f.x0), Y(f.y0)); ctx.lineTo(X(x), Y(y)); ctx.stroke(); ctx.setLineDash([]);
+      disc(f.x0, f.y0, 4*U, C['ink-2']);
+      if (S.showV) arrow(X(x), Y(y), f.ux*k.v*vs, -f.uy*k.v*vs, C.vel, 'v');
+      disc(x, y, 9*U, C.stone, C.sheet);
+    } else {
+      const [x, y] = pos(S.phi);
+      ctx.strokeStyle = C.rope; ctx.lineWidth = 2*U; ctx.beginPath(); ctx.moveTo(X(CX), Y(CY)); ctx.lineTo(X(x), Y(y)); ctx.stroke();
+      const ux = -Math.sin(S.phi), uy = Math.cos(S.phi);
+      if (S.showV) arrow(X(x), Y(y), ux*k.v*vs, -uy*k.v*vs, C.vel, 'v');
+      if (S.showA && S.mode !== 'game'){ const L = Math.min(S.R*view.sc*0.85, 14*U + Math.sqrt(k.a)*4*U); arrow(X(x), Y(y), -Math.cos(S.phi)*L, Math.sin(S.phi)*L, C.acc, 'a'); }
+      disc(x, y, 9*U, C.stone, C.sheet);
+    }
+  }
+
+  // ---------- анимация: вращение и полёт
+  let tPrev = null;
+  function tick(now){
+    if (tPrev == null) tPrev = now;
+    let dt = Math.min(0.05, (now - tPrev)/1000); tPrev = now;
+    if (S.slow && S.mode === 'explore') dt /= 4;
+    if (S.flying){ S.tFly += dt; const f = S.flying, k = kin(), x = f.x0 + f.ux*k.v*S.tFly, y = f.y0 + f.uy*k.v*S.tFly;
+      if (S.mode === 'game' && S.game && !f.judged){ const d = Math.hypot(x - S.game.x, y - S.game.y);
+        if (d <= S.game.r){ f.judged = true; judge(true); } }
+      if (x < -1 || x > FW + 1 || y < -1 || y > FH + 1){ if (S.mode === 'game' && !f.judged){ f.judged = true; judge(false); } S.flying = null; S.tFly = 0; } }
+    else S.phi = (S.phi + 2*PI*dt/S.T) % (2*PI);
+    draw(); S.anim = requestAnimationFrame(tick);
+  }
+  function start(){ if (reduce){ draw(); return; } cancelAnimationFrame(S.anim); tPrev = null; S.anim = requestAnimationFrame(tick); }
+  function release(){ if (S.flying) return; const [x, y] = pos(S.phi); S.flying = {x0:x, y0:y, ux:-Math.sin(S.phi), uy:Math.cos(S.phi), phi:S.phi}; S.tFly = 0;
+    if (reduce){ // без анимации: сразу итог
+      const f = S.flying; let hit = false; if (S.mode === 'game' && S.game) hit = missDist(f) <= S.game.r;
+      S.tFly = 30; draw(); if (S.mode === 'game') judge(hit); S.flying = null; } }
+  // расстояние от мишени до луча полёта
+  function missDist(f){ const g = S.game, dx = g.x - f.x0, dy = g.y - f.y0, along = dx*f.ux + dy*f.uy; if (along < 0) return Infinity; return Math.abs(dx*f.uy - dy*f.ux); }
+
+  // ---------- Исследовать
+  function syncExplore(){
+    S.R = +$('R').value; S.T = +$('T').value; S.showV = $('cV').checked; S.showA = $('cA').checked; S.slow = $('cSlow').checked;
+    $('RO').textContent = fmt(S.R) + ' м'; $('TO').textContent = fmt(S.T) + ' с';
+    const k = kin(); $('rN').textContent = fmt(k.nu, 2) + ' с⁻¹'; $('rV').textContent = fmt(k.v, 2) + ' м/с'; $('rW').textContent = fmt(k.w, 2) + ' рад/с'; $('rA').textContent = fmt(k.a, 1) + ' м/с²';
+    draw();
+  }
+  ['R','T','cV','cA','cSlow'].forEach(id => $(id).addEventListener('input', syncExplore));
+  $('rel').addEventListener('click', release);
+  $('again').addEventListener('click', () => { S.flying = null; S.tFly = 0; draw(); });
+
+  // ---------- Задача: R = 0,8 м, ν = 2 об/с → v = 2·3,14·0,8·2 = 10,048 м/с, a = v²/R ≈ 126,2 м/с²
+  const VT = 2*3.14*0.8*2, AT = VT*VT/0.8;
+  const HINTS = [
+    'За один оборот камень проходит длину окружности 2πR. А оборотов в секунду — два.',
+    'Скорость — путь за секунду: v = 2πR·ν. Ускорение: a<sub>ц</sub> = v²/R.',
+    'v = 2 · 3,14 · 0,8 · 2 ≈ 10 м/с. Осталось возвести в квадрат и разделить на 0,8.'
+  ];
+  $('hintBtn').addEventListener('click', () => { if (S.hintsShown >= 3) return; const d = document.createElement('div'); d.className = 'hint';
+    d.innerHTML = (S.hintsShown + 1) + '. ' + HINTS[S.hintsShown]; $('hints').appendChild(d); S.hintsShown++;
+    $('hintBtn').textContent = 'Подсказка (' + S.hintsShown + '/3)'; if (S.hintsShown >= 3) $('hintBtn').disabled = true; });
+  $('check').addEventListener('click', () => {
+    const v = parse($('ansV').value), a = parse($('ansA').value), m = $('msg');
+    if (isNaN(v)){ m.className = 'msg bad'; m.textContent = 'Введите скорость числом (можно с запятой).'; return; }
+    const vOk = Math.abs(v - VT)/VT <= 0.02, aOk = !isNaN(a) && Math.abs(a - AT)/AT <= 0.03;
+    if (vOk && aOk){ S.taskSolved = true; m.className = 'msg ok';
+      m.textContent = 'Верно: v = 2πRν ≈ 10 м/с (36 км/ч), a = v²/R ≈ 126 м/с² — в 12 раз больше g! Смотрите: камень вылетает по касательной.';
+      $('svo').hidden = false; S.R = 0.8; S.T = 0.5; S.flying = null; setTimeout(release, 700); return; }
+    m.className = 'msg bad';
+    if (!vOk){
+      if (Math.abs(v - VT/2)/VT <= 0.03) m.textContent = 'Скорость вдвое меньше нужной: возможно, вы взяли длину окружности πR вместо 2πR или один оборот вместо двух.';
+      else if (Math.abs(v - 2*3.14*0.8/2)/VT <= 0.05) m.textContent = 'Похоже, вы разделили на 2 оборота, а нужно умножить: за секунду камень проходит два круга.';
+      else if (Math.abs(v - 0.8*2)/VT <= 0.05) m.textContent = 'Вы умножили радиус на частоту, но за оборот камень проходит не R, а целую окружность 2πR.';
+      else m.textContent = 'Скорость неверна. С такой скоростью камень пролетел бы за секунду ' + fmt(v) + ' м, а он за секунду делает два круга по ' + fmt(2*3.14*0.8, 2) + ' м.';
+    } else {
+      if (!isNaN(a) && Math.abs(a - VT/0.8)/AT <= 0.05) m.textContent = 'Скорость верная. В формуле ускорения скорость стоит в квадрате: a = v²/R.';
+      else if (!isNaN(a) && Math.abs(a - VT*VT*0.8)/AT <= 0.05) m.textContent = 'Скорость верная. Квадрат скорости нужно делить на радиус, а не умножать.';
+      else m.textContent = 'Скорость верная, ускорение — нет. Проверьте расчёт a = v²/R.';
+    }
+  });
+
+  // ---------- Игра
+  const rnd = (a, b) => a + Math.random()*(b - a);
+  function newTarget(){
+    const imp = Math.random() < 0.2; let x, y;
+    if (imp){ const ang = rnd(0, 2*PI), d = rnd(0, S.R*0.55); x = CX + d*Math.cos(ang); y = CY + d*Math.sin(ang); }
+    else { do { x = rnd(4.8, 9.3); y = rnd(0.7, 5.55); } while (Math.hypot(x - CX, y - CY) < 2.6); }
+    S.game = {x, y, r:0.55, reach: Math.hypot(x - CX, y - CY) > S.R + 0.55}; S.flying = null; $('gMsg').className = 'msg'; draw();
+  }
+  function score(hit){ S.score.shot++; if (hit){ S.score.hit++; S.score.streak++; } else S.score.streak = 0;
+    $('sHit').textContent = S.score.hit; $('sShot').textContent = S.score.shot; $('sStreak').textContent = S.score.streak; }
+  function judge(hit){ const m = $('gMsg'); score(hit); m.className = hit ? 'msg ok' : 'msg bad';
+    m.textContent = hit ? 'Попадание! Камень вылетел по касательной точно в мишень.' : (S.game.reach ? 'Мимо. Камень летит по касательной в точке отпускания — отпускайте чуть раньше или позже.' : 'Эта мишень внутри круга: касательные к окружности туда не проходят. Правильный ответ — «Не попасть».'); }
+  $('gRel').addEventListener('click', release);
+  $('never').addEventListener('click', () => { const m = $('gMsg'), ok = !S.game.reach; score(ok); m.className = ok ? 'msg ok' : 'msg bad';
+    m.textContent = ok ? 'Верно: мишень внутри круга, а камень после отпускания всегда летит наружу по касательной.' : 'Попасть можно: мишень снаружи круга. К ней ведут касательные — ищите точку отпускания.'; });
+  $('next').addEventListener('click', newTarget);
+  document.addEventListener('keydown', e => { if (e.code === 'Space' && S.mode !== 'task' && !/INPUT|BUTTON/.test(document.activeElement.tagName)){ e.preventDefault(); release(); } });
+
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+    S.mode = b.dataset.mode; S.flying = null; S.tFly = 0;
+    $('p-explore').hidden = S.mode !== 'explore'; $('p-task').hidden = S.mode !== 'task'; $('p-game').hidden = S.mode !== 'game';
+    if (S.mode === 'task'){ S.R = 0.8; S.T = 0.5; S.showV = true; S.showA = true; }
+    if (S.mode === 'explore') syncExplore();
+    if (S.mode === 'game'){ S.R = 1.2; S.T = 3.2; S.showV = true; if (!S.game) newTarget(); }
+    draw();
+  }));
+
+  syncExplore(); start();
+})();
+</script>
+
+</body></html>
