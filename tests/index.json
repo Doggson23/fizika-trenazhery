@@ -27,6 +27,13 @@
    "title": "ЕГЭ · Движение по окружности",
    "class": 10,
    "exam": "ege"
+  },
+  {
+   "id": "dz-10fm-okruzhnost",
+   "type": "dz",
+   "title": "ДЗ · Движение по окружности",
+   "class": 10,
+   "exam": null
   }
  ]
 }

@@ -1,0 +1,227 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Светодиод и резистор</title><link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: лабораторный стол — слева «миллиметровка» с полётом, справа пульт; на телефоне пульт уходит под график. Жёлтый — только траектория и главное. */
+:root{
+  --paper:#F5F6F8; --sheet:#FFFFFF; --ink:#14161A; --ink-2:#555C66; --rule:#DCE0E5;
+  --grid:#E6EAEE; --grid-major:#C9CFD6; --traj:#C89A00; --mark:#FFD400; --mark-soft:#FFF5BF;
+  --vx:#B07D00; --vy:#2F6FA8; --env:#7A5BB5; --target:#C0392B; --ok:#2E7D4F; --ok-soft:#E3F2E8; --bad:#A33A2E; --bad-soft:#F7E4E1;
+  --display:"Unbounded","Golos Text",system-ui,sans-serif; --body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:16px}
+h1{font:700 clamp(24px,4vw,36px)/1.15 var(--display);margin:0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:4px 0 0}
+.eyebrow{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:600 14px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.stage{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px;min-width:0}
+canvas{display:block;width:100%;aspect-ratio:16/10;max-width:100%;border-radius:4px;touch-action:manipulation}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2);padding:8px 4px 2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:14px;min-width:0}
+.panel h2{font:600 15px var(--display);margin:0}
+.ctl{display:grid;gap:4px}
+.ctl label{display:flex;justify-content:space-between;font-size:14px}
+.ctl output,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--traj)}
+.checks{display:grid;gap:6px;font-size:14px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 14px var(--body);padding:9px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+.read{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14px;border-top:1px solid var(--rule);padding-top:12px}
+.read dt{color:var(--ink-2)} .read dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.task{display:grid;gap:10px}
+.task p{margin:0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:14px}
+.field input{font:500 15px var(--mono);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.msg{font-size:14px;padding:10px 12px;border-radius:6px;display:none}
+.msg.ok{display:block;background:var(--ok-soft);color:var(--ok)} .msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}
+.hint{font-size:14px;background:var(--mark-soft);border-left:3px solid var(--traj);padding:8px 10px;border-radius:0 6px 6px 0}
+.svo{font-size:14px;border:1px solid var(--traj);background:var(--mark-soft);padding:10px 12px;border-radius:6px}
+.svo b{font-weight:600}
+.score{display:flex;gap:14px;font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.score span b{font-size:18px}
+.f{font-family:var(--mono);font-size:.95em;white-space:nowrap}
+sub,sup{font-size:.72em}
+.foot{font-size:13px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.crumb{font-size:14px;color:var(--ink-2)}.crumb a{color:var(--ink-2)}
+</style></head><body>
+<nav class="wrap crumb"><a href="/">← Тезаурус</a> · <a href="/zadano/">Задано мне</a></nav>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">инженерия · электроника · закон Ома</div>
+    <h1>Светодиод и резистор</h1>
+    <p class="sub">Светодиод нельзя включать прямо в 5 В — сгорит. На нём почти постоянное «прямое» напряжение U<sub>пр</sub>, а лишнее напряжение должен взять на себя резистор: I = (U − U<sub>пр</sub>) / R. Обычный светодиод 5 мм рассчитан на 20 мА.</p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Режим">
+    <button class="tab" role="tab" id="t-ex" aria-selected="true" data-mode="explore">Исследовать</button>
+    <button class="tab" role="tab" id="t-task" aria-selected="false" data-mode="task">Задача</button>
+    <button class="tab" role="tab" id="t-game" aria-selected="false" data-mode="game">Игра</button>
+  </div>
+  <div class="lab">
+    <div class="stage">
+      <canvas id="cv" width="960" height="600" aria-label="Схема: источник, резистор, светодиод"></canvas>
+      <div class="legend"><span><i style="background:var(--vy)"></i>ток</span><span><i style="background:var(--traj)"></i>напряжение на резисторе</span><span><i style="background:var(--target)"></i>перегрузка</span></div>
+    </div>
+    <aside class="panel">
+      <section id="p-explore" class="task">
+        <h2>Пульт</h2>
+        <div class="ctl"><label for="u"><span>Источник U</span> <output id="uO" class="num"></output></label><input id="u" type="range" min="0" max="4" step="1" value="1"></div>
+        <div class="ctl"><label for="col"><span>Светодиод</span> <output id="colO" class="num"></output></label><input id="col" type="range" min="0" max="4" step="1" value="0"></div>
+        <div class="ctl"><label for="r"><span>Резистор R (ряд E12)</span> <output id="rO" class="num"></output></label><input id="r" type="range" min="0" max="24" step="1" value="8"></div>
+        <dl class="read">
+          <dt>U<sub>R</sub> = U − U<sub>пр</sub></dt><dd id="rUR"></dd>
+          <dt>Ток I = U<sub>R</sub>/R</dt><dd id="rI"></dd>
+          <dt>Мощность на R: I²R</dt><dd id="rP"></dd>
+          <dt>Мощность светодиода</dt><dd id="rPL"></dd>
+        </dl>
+        <div class="msg" id="eMsg" role="status" aria-live="polite"></div>
+        <p class="foot">Найдите: при каком R красный светодиод от 5 В получит ровно около 15 мА? Что будет с синим светодиодом от 3,3 В? Почему резисторы продают не любого номинала, а рядами (E12: 10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82 и их ×10, ×100)?</p>
+      </section>
+      <section id="p-task" class="task" hidden>
+        <h2>Задача</h2>
+        <p>Красный светодиод (U<sub>пр</sub> = 2,0 В) подключают к выводу Arduino (5 В) и хотят ток <b>15 мА</b>. Какое сопротивление нужно по расчёту? Какой резистор взять из ряда E12, чтобы ток не превысил 15 мА?</p>
+        <div class="field"><label for="ansR">R =</label><input id="ansR" inputmode="decimal" placeholder="по расчёту" autocomplete="off"><span>Ом</span></div>
+        <div class="field"><label for="ansE">E12:</label><input id="ansE" inputmode="decimal" placeholder="номинал" autocomplete="off"><span>Ом</span></div>
+        <div class="btns"><button class="b" id="check">Проверить</button><button class="b ghost" id="hintBtn">Подсказка (0/3)</button></div>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        <div id="hints" class="task"></div>
+        <div class="svo" id="svo" hidden><b>Свойство.</b> Ближайший номинал берут с запасом — больше расчётного: ток станет чуть меньше (здесь 3/220 ≈ 13,6 мА), яркость почти та же, а светодиод и вывод Arduino (до 20 мА, предел 40 мА) в безопасности.</div>
+      </section>
+      <section id="p-game" class="task" hidden>
+        <h2>Игра</h2>
+        <p id="gText"></p>
+        <div class="field"><label for="gA" id="gLab">R =</label><input id="gA" inputmode="decimal" placeholder="число" autocomplete="off"><span id="gU">Ом</span></div>
+        <div class="btns"><button class="b" id="gCheck">Проверить</button><button class="b ghost" id="never">Не загорится</button><button class="b ghost" id="gNext">Другая задача</button></div>
+        <div class="msg" id="gMsg" role="status" aria-live="polite"></div>
+        <div class="score"><span>верно <b id="sHit">0</b></span><span>всего <b id="sShot">0</b></span><span>серия <b id="sStreak">0</b></span></div>
+        <p class="foot">Номинал — ближайший из E12, при котором ток не больше заданного. Ток — с допуском 2 %.</p>
+      </section>
+    </aside>
+  </div>
+</div>
+<script>
+(function(){
+  const $ = id => document.getElementById(id), cv = $('cv'), ctx = cv.getContext('2d');
+  let C = {}, U = 1;
+  function resize(){ const dpr = window.devicePixelRatio || 1, w = Math.max(280, cv.clientWidth || 640);
+    const W = Math.round(w*dpr), H = Math.round(w*0.625*dpr); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; U = dpr*Math.max(0.85, Math.min(1.15, w/700)); }
+  function readColors(){ const s = getComputedStyle(document.documentElement); ['sheet','ink','ink-2','grid','traj','vy','target','ok'].forEach(k => C[k] = s.getPropertyValue('--'+k).trim()); }
+  resize(); readColors();
+  new ResizeObserver(() => { const o = cv.width; resize(); if (cv.width !== o) draw(); }).observe(cv);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+  const fmt = (x, d=2) => (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).replace('.', ',');
+  const parse = s => { s = String(s == null ? '' : s).trim().replace(/,/g, '.').replace(/\s+/g,'').replace(/(к|k)$/i, 'e3').replace(/(ом|ohm|Ω)$/i, ''); return parseFloat(s); };
+  const SRC = [[3.3, '3,3 В (ESP32)'], [5, '5 В (Arduino)'], [9, '9 В (батарейка «Крона»)'], [12, '12 В (блок питания)'], [3, '3 В (две батарейки AA)']];
+  const LED = [['красный', 2.0, '255,50,40'], ['жёлтый', 2.1, '255,200,0'], ['зелёный', 2.2, '40,220,90'], ['синий', 3.0, '60,120,255'], ['белый', 3.1, '235,240,255']];
+  const E12b = [10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82];   // шкала пульта: 47 Ом … 4,7 кОм
+  const RSET = []; [10, 100, 1000].forEach(m => E12b.forEach(v => { const r = v*m; if (r >= 47 && r <= 4700) RSET.push(r); }));
+  const ALL = []; [1, 10, 100, 1000, 10000].forEach(m => E12b.forEach(v => ALL.push(v*m)));
+  const nextE12 = r => ALL.find(v => v >= r - 1e-9);
+  const ohm = r => r >= 1000 ? fmt(r/1000, r % 1000 ? 1 : 0) + ' кОм' : Math.round(r) + ' Ом';
+  const S = {mode:'explore', u:5, led:0, R:220, solved:false, hints:0, game:null, score:{hit:0, shot:0, streak:0}};
+  const cur = (u, uf, R) => Math.max(0, (u - uf)/R);
+
+  function draw(){
+    let u = S.u, l = S.led, R = S.R, tag = '';
+    if (S.mode === 'task'){ u = 5; l = 0; R = S.solved ? 220 : null; }
+    if (S.mode === 'game' && S.game){ u = S.game.u; l = S.game.l; R = S.game.R || null; }
+    ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, cv.width, cv.height);
+    const W = cv.width, H = cv.height, x0 = W*.16, x1 = W*.84, y0 = H*.28, y1 = H*.78;
+    const I = R ? cur(u, LED[l][1], R) : 0, over = I > 0.0201, burn = I > 0.03;
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 3*U; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(x0, (y0 + y1)/2 - 22*U); ctx.lineTo(x0, y0); ctx.lineTo(W*.36, y0); ctx.moveTo(W*.56, y0); ctx.lineTo(x1, y0); ctx.lineTo(x1, (y0 + y1)/2 - 30*U);
+    ctx.moveTo(x1, (y0 + y1)/2 + 30*U); ctx.lineTo(x1, y1); ctx.lineTo(x0, y1); ctx.lineTo(x0, (y0 + y1)/2 + 22*U); ctx.stroke();
+    // источник: длинная и короткая пластины
+    const yb = (y0 + y1)/2; ctx.beginPath(); ctx.moveTo(x0 - 30*U, yb - 22*U); ctx.lineTo(x0 + 30*U, yb - 22*U); ctx.stroke(); ctx.lineWidth = 6*U; ctx.beginPath(); ctx.moveTo(x0 - 15*U, yb + 22*U); ctx.lineTo(x0 + 15*U, yb + 22*U); ctx.stroke();
+    ctx.lineWidth = 3*U;
+    // резистор
+    ctx.fillStyle = C.sheet; ctx.fillRect(W*.36, y0 - 16*U, W*.2, 32*U); ctx.strokeRect(W*.36, y0 - 16*U, W*.2, 32*U);
+    // светодиод: треугольник вниз и черта
+    const ly = yb; ctx.beginPath(); ctx.moveTo(x1 - 26*U, ly - 30*U); ctx.lineTo(x1 + 26*U, ly - 30*U); ctx.lineTo(x1, ly + 14*U); ctx.closePath();
+    const br = Math.min(1, I/0.02), rgb = LED[l][2];
+    if (br > 0){ const g = ctx.createRadialGradient(x1, ly - 8*U, 0, x1, ly - 8*U, 90*U); g.addColorStop(0, 'rgba(' + rgb + ',' + (0.9*br) + ')'); g.addColorStop(1, 'rgba(' + rgb + ',0)');
+      ctx.save(); ctx.fillStyle = g; ctx.fillRect(x1 - 90*U, ly - 98*U, 180*U, 180*U); ctx.restore(); }
+    ctx.fillStyle = 'rgba(' + rgb + ',' + (0.25 + 0.75*br) + ')'; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1 - 26*U, ly + 14*U); ctx.lineTo(x1 + 26*U, ly + 14*U); ctx.stroke();
+    ctx.font = '600 ' + 14*U + 'px "Golos Text", sans-serif'; ctx.textBaseline = 'middle'; ctx.fillStyle = C.ink;
+    ctx.textAlign = 'right'; ctx.fillText(fmt(u, 1) + ' В', x0 - 38*U, yb); ctx.fillText('+', x0 - 38*U, yb - 22*U);
+    ctx.textAlign = 'center'; ctx.fillText(R ? ohm(R) : 'R = ?', W*.46, y0 - 34*U);
+    ctx.textAlign = 'right'; ctx.fillText(LED[l][0] + ', ' + fmt(LED[l][1], 1) + ' В', x1 - 36*U, ly - 8*U);
+    if (R){ ctx.fillStyle = C.traj; ctx.textAlign = 'center'; ctx.fillText('UR = ' + fmt(Math.max(0, u - LED[l][1]), 1) + ' В', W*.46, y0 + 34*U);
+      ctx.fillStyle = burn ? C.target : over ? C.traj : C.vy; ctx.fillText('I = ' + fmt(I*1000, 1) + ' мА' + (burn ? ' — сгорит!' : over ? ' — больше 20 мА' : I === 0 ? ' — не горит' : ''), W*.5, y1 + 30*U);
+      if (I > 0){ ctx.strokeStyle = C.vy; ctx.fillStyle = C.vy; ctx.lineWidth = 2.4*U; const ax = W*.66, ay = y0 - 14*U; ctx.beginPath(); ctx.moveTo(ax - 30*U, ay); ctx.lineTo(ax + 20*U, ay); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ax + 28*U, ay); ctx.lineTo(ax + 16*U, ay - 6*U); ctx.lineTo(ax + 16*U, ay + 6*U); ctx.closePath(); ctx.fill(); } }
+  }
+  function sync(){ S.u = SRC[+$('u').value][0]; S.led = +$('col').value; S.R = RSET[+$('r').value];
+    $('uO').textContent = SRC[+$('u').value][1]; $('colO').textContent = LED[S.led][0] + ' · ' + fmt(LED[S.led][1], 1) + ' В'; $('rO').textContent = ohm(S.R);
+    const uf = LED[S.led][1], I = cur(S.u, uf, S.R); $('rUR').textContent = fmt(Math.max(0, S.u - uf), 2) + ' В'; $('rI').textContent = fmt(I*1000, 1) + ' мА';
+    $('rP').textContent = fmt(I*I*S.R*1000, 0) + ' мВт'; $('rPL').textContent = fmt(uf*I*1000, 0) + ' мВт';
+    const m = $('eMsg'); m.className = 'msg';
+    if (I === 0){ m.className = 'msg bad'; m.textContent = 'Напряжения источника не хватает: оно меньше прямого напряжения светодиода — ток не идёт.'; }
+    else if (I > 0.03){ m.className = 'msg bad'; m.textContent = 'Ток больше 30 мА: светодиод быстро деградирует или сгорит. Возьмите резистор больше.'; }
+    else if (I*I*S.R > 0.125){ m.className = 'msg bad'; m.textContent = 'На резисторе ' + fmt(I*I*S.R*1000, 0) + ' мВт — обычный маленький резистор рассчитан на 125 мВт (1/8 Вт): нужен на 0,25 Вт.'; }
+    draw(); }
+  ['u','col','r'].forEach(id => $(id).addEventListener('input', sync));
+
+  // ---------- задача: R = (5 − 2)/0,015 = 200 Ом → E12: 220 Ом
+  const HINTS = ['На резисторе остаётся то, что не взял светодиод: U_R = 5 − 2,0 = 3 В.', 'Ток в цепи один и тот же: R = U_R / I, ток — в амперах (15 мА = 0,015 А).', 'R = 3 / 0,015 = 200 Ом. В ряду E12 есть 180 и 220 — какой не даст току превысить 15 мА?'];
+  $('hintBtn').addEventListener('click', () => { if (S.hints >= 3) return; const d = document.createElement('div'); d.className = 'hint'; d.textContent = (S.hints + 1) + '. ' + HINTS[S.hints]; $('hints').appendChild(d);
+    S.hints++; $('hintBtn').textContent = 'Подсказка (' + S.hints + '/3)'; if (S.hints >= 3) $('hintBtn').disabled = true; });
+  $('check').addEventListener('click', () => { const r = parse($('ansR').value), e = parse($('ansE').value), m = $('msg'); m.className = 'msg bad';
+    if (isNaN(r)){ m.textContent = 'Введите расчётное сопротивление в омах.'; return; }
+    if (Math.abs(r - 333.3) < 2) { m.textContent = '5 В / 15 мА — это без светодиода. На нём самом остаётся 2 В, на резистор приходится только 3 В.'; return; }
+    if (Math.abs(r - 0.2) < 0.01) { m.textContent = 'Похоже, ток подставлен в миллиамперах. 15 мА = 0,015 А.'; return; }
+    if (Math.abs(r - 200) > 2){ m.textContent = 'С R = ' + fmt(r, 0) + ' Ом ток будет ' + fmt(3/r*1000, 1) + ' мА, а нужно 15 мА.'; return; }
+    if (isNaN(e)){ m.textContent = 'Расчёт верный. Теперь номинал из ряда E12.'; return; }
+    if (Math.abs(e - 180) < 1){ m.textContent = 'С 180 Ом ток будет 16,7 мА — больше заданного. Берут ближайший больший номинал.'; return; }
+    if (Math.abs(e - 220) > 1){ m.textContent = E12b.some(v => [v, v*10, v*100].includes(Math.round(e))) ? 'Такой номинал есть, но он не ближайший больший к 200 Ом.' : 'Такого номинала в ряду E12 нет.'; return; }
+    S.solved = true; m.className = 'msg ok'; m.textContent = 'Верно: 200 Ом по расчёту, ставим 220 Ом — ток 13,6 мА.'; $('svo').hidden = false; draw(); });
+
+  // ---------- игра: подбери номинал / найди ток / не загорится
+  const rnd = (a, b) => a + Math.floor(Math.random()*(b - a + 1)), pick = a => a[rnd(0, a.length - 1)];
+  const GEN = [
+    () => { const s = pick([0, 1, 1, 2, 3]), l = rnd(0, 4), I = pick([5, 10, 15, 20]); const u = SRC[s][0], need = (u - LED[l][1])/(I/1000);
+      return {q:'Источник ' + SRC[s][1] + ', ' + LED[l][0] + ' светодиод (' + fmt(LED[l][1], 1) + ' В), ток не больше ' + I + ' мА. Какой номинал E12 взять?', lab:'R =', un:'Ом', u, l, ans:need > 0 ? nextE12(need) : null, exact:true}; },
+    () => { const s = pick([1, 2, 3]), l = rnd(0, 4), R = pick([150, 220, 330, 470, 680, 1000]); const u = SRC[s][0];
+      return {q:'Источник ' + SRC[s][1] + ', ' + LED[l][0] + ' светодиод (' + fmt(LED[l][1], 1) + ' В), резистор ' + ohm(R) + '. Какой ток?', lab:'I =', un:'мА', u, l, R, ans:(u - LED[l][1])/R*1000}; },
+    () => { const l = pick([0, 3, 4]); const u = l ? pick([3, 3.3]) - (l === 4 ? 0.3 : 0.3) : 1.5;
+      return {q:'Батарейка ' + fmt(u, 1) + ' В и ' + LED[l][0] + ' светодиод (' + fmt(LED[l][1], 1) + ' В). Какой резистор взять на ток 10 мА?', lab:'R =', un:'Ом', u, l, ans:null}; }];
+  function newGame(){ S.game = pick(GEN)(); const g = S.game; $('gText').textContent = g.q; $('gLab').textContent = g.lab; $('gU').textContent = g.un; $('gA').value = ''; $('gMsg').className = 'msg'; draw(); }
+  function score(ok){ S.score.shot++; if (ok){ S.score.hit++; S.score.streak++; } else S.score.streak = 0; $('sHit').textContent = S.score.hit; $('sShot').textContent = S.score.shot; $('sStreak').textContent = S.score.streak; }
+  function verdict(ok, t){ score(ok); const m = $('gMsg'); m.className = ok ? 'msg ok' : 'msg bad'; m.textContent = t; }
+  $('gCheck').addEventListener('click', () => { const g = S.game, a = parse($('gA').value);
+    if (g.ans == null) return verdict(false, 'Напряжение источника не больше прямого напряжения светодиода — ток не пойдёт при любом резисторе. Ответ — «Не загорится».');
+    if (isNaN(a)){ $('gMsg').className = 'msg bad'; $('gMsg').textContent = 'Введите число.'; return; }
+    const ok = g.exact ? Math.abs(a - g.ans) < 0.5 : Math.abs(a - g.ans) <= 0.02*g.ans;
+    if (ok && g.exact){ g.R = g.ans; draw(); }
+    verdict(ok, ok ? 'Верно.' : 'Нет, верно ' + (g.exact ? ohm(g.ans) : fmt(g.ans, 1) + ' мА') + '.'); });
+  $('never').addEventListener('click', () => { const g = S.game; verdict(g.ans == null, g.ans == null ? 'Верно: источнику не хватает напряжения, чтобы «открыть» светодиод.' : 'Загорится: ответ ' + (g.exact ? ohm(g.ans) : fmt(g.ans, 1) + ' мА') + '.'); });
+  $('gNext').addEventListener('click', newGame);
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); S.mode = t.dataset.mode;
+    ['explore','task','game'].forEach(k => $('p-' + k).hidden = k !== S.mode); if (S.mode === 'game' && !S.game) newGame(); draw(); }));
+  sync();
+})();
+</script>
+</body></html>

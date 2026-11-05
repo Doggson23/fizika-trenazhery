@@ -50,7 +50,7 @@
     const MAXATT = X.attempts || 0;                       // 0 — без ограничения
     const TIMER = X.timer && X.timer.minutes ? X.timer : null;
     const thr = (X.scale && X.scale.grades || []).slice().sort((a, b) => b[0] - a[0]);
-    const GRADE = p => { for (const [min, g] of thr) if (p >= min) return g; return '2'; };
+    const GRADE = p => { if (!thr.length) return '—'; for (const [min, g] of thr) if (p >= min) return g; return '2'; };
     const MAXPTS = T.reduce((a, t) => a + t.pts, 0);
     const KEY = 'exam:' + X.id + ':v' + (X.version || 1);
     // второй приём (Code_v2.gs: финальная попытка, работа над ошибками, рейтинг); пусто — прежний приём
@@ -264,6 +264,9 @@
       if (ns.length === 1 && empty) { const m = $('msg-' + ns[0]); m.className = 'msg info'; m.textContent = 'Сначала введите ответ.'; }
     }
     if ($('go')) $('go').addEventListener('click', startTimer);
+    // вход по коду на Тезаурусе (/voiti/): подставить ФИО и отправлять код вместе с работой
+    const ME = (() => { try { return JSON.parse(localStorage.getItem('mf:student') || 'null'); } catch (e) { return null; } })();
+    if (ME && !st.name && ME.name) { st.name = ME.name; save(); }
     $('name').value = st.name || ''; $('name').addEventListener('input', () => { st.name = $('name').value; save(); });
 
     // ---------- отчёт файлом (запасной путь без сети)
@@ -298,7 +301,7 @@
       rs.forEach(r => cols.push(['№' + r.n, (r.ans || '—') + (r.auto ? ' · ' + r.pts + '/' + r.max : (r.ans && (r.t.kind === 'calc' || r.t.kind === 'exp') ? (r.ok ? ' · ответ верный' : ' · ответ не совпал') : '')) + (r.photos ? ' · фото ' + r.photos : '')]));
       const photos = {}; T.filter(hasPhoto).forEach(t => { if ((st.photos[t.n] || []).length) photos[t.n] = st.photos[t.n]; });
       return {v: 1, id: st.id, trainer: X.trainer || X.id, sheet: X.sheet || X.title, name: st.name.trim(), client_attempt: st.attempt,
-        type: X.type, check_mode: MODE, max_attempts: MAXATT, final: !!st.final, test: X.id, answers: st.a, ...tidMaps(),
+        code: ME ? ME.code : '', type: X.type, check_mode: MODE, max_attempts: MAXATT, final: !!st.final, test: X.id, answers: st.a, ...tidMaps(),
         cols: cols.map(c => ({h: c[0], v: c[1]})), autoCol: 'Часть 1 (авто)', prelimCol: 'Предв. итог',
         teacher: T.filter(t => !isAuto(t)).map(t => ({h: '№' + t.n + ' учитель', max: t.pts})),
         scale: thr.map(x => x[0]).sort((a, b) => a - b), photos};

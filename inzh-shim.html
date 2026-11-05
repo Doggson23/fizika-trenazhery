@@ -1,0 +1,210 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>ШИМ: скважность и среднее напряжение</title><link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: лабораторный стол — слева «миллиметровка» с полётом, справа пульт; на телефоне пульт уходит под график. Жёлтый — только траектория и главное. */
+:root{
+  --paper:#F5F6F8; --sheet:#FFFFFF; --ink:#14161A; --ink-2:#555C66; --rule:#DCE0E5;
+  --grid:#E6EAEE; --grid-major:#C9CFD6; --traj:#C89A00; --mark:#FFD400; --mark-soft:#FFF5BF;
+  --vx:#B07D00; --vy:#2F6FA8; --env:#7A5BB5; --target:#C0392B; --ok:#2E7D4F; --ok-soft:#E3F2E8; --bad:#A33A2E; --bad-soft:#F7E4E1;
+  --display:"Unbounded","Golos Text",system-ui,sans-serif; --body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:16px}
+h1{font:700 clamp(24px,4vw,36px)/1.15 var(--display);margin:0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:4px 0 0}
+.eyebrow{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:600 14px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.stage{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px;min-width:0}
+canvas{display:block;width:100%;aspect-ratio:16/10;max-width:100%;border-radius:4px;touch-action:manipulation}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2);padding:8px 4px 2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:14px;min-width:0}
+.panel h2{font:600 15px var(--display);margin:0}
+.ctl{display:grid;gap:4px}
+.ctl label{display:flex;justify-content:space-between;font-size:14px}
+.ctl output,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--traj)}
+.checks{display:grid;gap:6px;font-size:14px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 14px var(--body);padding:9px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+.read{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14px;border-top:1px solid var(--rule);padding-top:12px}
+.read dt{color:var(--ink-2)} .read dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.task{display:grid;gap:10px}
+.task p{margin:0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:14px}
+.field input{font:500 15px var(--mono);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.msg{font-size:14px;padding:10px 12px;border-radius:6px;display:none}
+.msg.ok{display:block;background:var(--ok-soft);color:var(--ok)} .msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}
+.hint{font-size:14px;background:var(--mark-soft);border-left:3px solid var(--traj);padding:8px 10px;border-radius:0 6px 6px 0}
+.svo{font-size:14px;border:1px solid var(--traj);background:var(--mark-soft);padding:10px 12px;border-radius:6px}
+.svo b{font-weight:600}
+.score{display:flex;gap:14px;font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.score span b{font-size:18px}
+.f{font-family:var(--mono);font-size:.95em;white-space:nowrap}
+sub,sup{font-size:.72em}
+.foot{font-size:13px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.crumb{font-size:14px;color:var(--ink-2)}.crumb a{color:var(--ink-2)}
+</style></head><body>
+<nav class="wrap crumb"><a href="/">← Тезаурус</a> · <a href="/zadano/">Задано мне</a></nav>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">инженерия · Arduino · выходы</div>
+    <h1>ШИМ: как Arduino «плавно» управляет светодиодом</h1>
+    <p class="sub">Вывод Arduino умеет только 0 или 5 В. Широтно-импульсная модуляция (ШИМ, англ. PWM) быстро включает и выключает его: чем дольше импульс, тем больше среднее напряжение. Команда <span class="f">analogWrite(pin, x)</span>, x от 0 до 255.</p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Режим">
+    <button class="tab" role="tab" id="t-ex" aria-selected="true" data-mode="explore">Исследовать</button>
+    <button class="tab" role="tab" id="t-task" aria-selected="false" data-mode="task">Задача</button>
+    <button class="tab" role="tab" id="t-game" aria-selected="false" data-mode="game">Игра</button>
+  </div>
+  <div class="lab">
+    <div class="stage">
+      <canvas id="cv" width="960" height="600" aria-label="Осциллограмма ШИМ: напряжение на выводе от времени"></canvas>
+      <div class="legend"><span><i style="background:var(--traj)"></i>напряжение на выводе</span><span><i style="background:var(--target)"></i>среднее напряжение</span><span><i style="background:var(--vy)"></i>длительность импульса</span></div>
+    </div>
+    <aside class="panel">
+      <section id="p-explore" class="task">
+        <h2>Пульт</h2>
+        <div class="ctl"><label for="x"><span>analogWrite(pin, x)</span> <output id="xO" class="num"></output></label><input id="x" type="range" min="0" max="255" step="1" value="64"></div>
+        <div class="checks">
+          <label><input type="radio" name="f" id="f490" checked> вывод 3, 9, 10, 11 — 490 Гц</label>
+          <label><input type="radio" name="f" id="f980"> вывод 5, 6 — 980 Гц</label>
+        </div>
+        <dl class="read">
+          <dt>Скважность D = x/255</dt><dd id="rD"></dd>
+          <dt>Период T = 1/f</dt><dd id="rT"></dd>
+          <dt>Импульс t<sub>и</sub> = D·T</dt><dd id="rti"></dd>
+          <dt>Среднее U = D·5 В</dt><dd id="rU"></dd>
+        </dl>
+        <p class="foot">Почему светодиод не мигает? Глаз не замечает вспышек чаще ~50 раз в секунду, а здесь их 490. Где ещё ШИМ: регуляторы скорости моторов, сервоприводы (там важна длительность импульса 1–2 мс), диммеры, зарядки.</p>
+      </section>
+      <section id="p-task" class="task" hidden>
+        <h2>Задача</h2>
+        <p>Светодиод подключён к выводу 9 (490 Гц). Нужно, чтобы среднее напряжение на выводе было <b>2 В</b>. Какое число записать в <span class="f">analogWrite(9, x)</span>? Сколько микросекунд длится один импульс?</p>
+        <div class="field"><label for="ansX">x =</label><input id="ansX" inputmode="numeric" placeholder="целое 0–255" autocomplete="off"><span></span></div>
+        <div class="field"><label for="ansT">t<sub>и</sub> =</label><input id="ansT" inputmode="decimal" placeholder="число" autocomplete="off"><span>мкс</span></div>
+        <div class="btns"><button class="b" id="check">Проверить</button><button class="b ghost" id="hintBtn">Подсказка (0/3)</button></div>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        <div id="hints" class="task"></div>
+        <div class="svo" id="svo" hidden><b>Свойство.</b> Среднее напряжение ШИМ не зависит от частоты — только от доли времени «включено». Частота решает другое: заметно ли мерцание и как гудит мотор.</div>
+      </section>
+      <section id="p-game" class="task" hidden>
+        <h2>Игра</h2>
+        <p id="gText"></p>
+        <div class="field"><label for="gA" id="gLab">ответ</label><input id="gA" inputmode="decimal" placeholder="число" autocomplete="off"><span id="gU"></span></div>
+        <div class="btns"><button class="b" id="gCheck">Проверить</button><button class="b ghost" id="never">Невозможно</button><button class="b ghost" id="gNext">Другая задача</button></div>
+        <div class="msg" id="gMsg" role="status" aria-live="polite"></div>
+        <div class="score"><span>верно <b id="sHit">0</b></span><span>всего <b id="sShot">0</b></span><span>серия <b id="sStreak">0</b></span></div>
+        <p class="foot">Для x допускается ±1, для остального — 1 %. Если ШИМ этого не может — жмите «Невозможно».</p>
+      </section>
+    </aside>
+  </div>
+</div>
+<script>
+(function(){
+  const $ = id => document.getElementById(id), cv = $('cv'), ctx = cv.getContext('2d');
+  let C = {}, U = 1;
+  function resize(){ const dpr = window.devicePixelRatio || 1, w = Math.max(280, cv.clientWidth || 640);
+    const W = Math.round(w*dpr), H = Math.round(w*0.625*dpr); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; U = dpr*Math.max(0.85, Math.min(1.15, w/700)); }
+  function readColors(){ const s = getComputedStyle(document.documentElement); ['sheet','ink','ink-2','grid','grid-major','traj','mark','vy','target','env'].forEach(k => C[k] = s.getPropertyValue('--'+k).trim()); }
+  resize(); readColors();
+  new ResizeObserver(() => { const o = cv.width; resize(); if (cv.width !== o) draw(); }).observe(cv);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+  const fmt = (x, d=2) => (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).replace('.', ',');
+  const parse = s => { s = String(s == null ? '' : s).trim().replace(/,/g, '.').replace(/\s+/g,''); const m = s.match(/^(\d*\.?\d+)\/(\d*\.?\d+)$/); return m ? parseFloat(m[1])/parseFloat(m[2]) : parseFloat(s); };
+  const S = {mode:'explore', x:64, f:490, hints:0, solved:false, game:null, score:{hit:0, shot:0, streak:0}};
+
+  // осциллограмма: 3 периода, ось y 0–6 В; справа — светодиод с яркостью по среднему току
+  function draw(){
+    const x = S.mode === 'task' ? (S.solved ? 102 : null) : S.mode === 'game' && S.game ? S.game.show : S.x, f = S.mode === 'explore' ? S.f : 490;
+    ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, cv.width, cv.height);
+    const L = 44*U, R = cv.width - 150*U, T = 16*U, B = cv.height - 34*U, Tms = 1000/f, tmax = 3*Tms;
+    const X = t => L + (R - L)*t/tmax, Y = u => B - (B - T)*u/6;
+    ctx.lineWidth = 1; for (let i = 0; i <= 30; i++){ ctx.strokeStyle = i % 10 ? C.grid : C['grid-major']; ctx.beginPath(); ctx.moveTo(X(i*tmax/30)+.5, T); ctx.lineTo(X(i*tmax/30)+.5, B); ctx.stroke(); }
+    for (let u = 0; u <= 6; u++){ ctx.strokeStyle = C['grid-major']; ctx.beginPath(); ctx.moveTo(L, Y(u)+.5); ctx.lineTo(R, Y(u)+.5); ctx.stroke(); }
+    ctx.fillStyle = C['ink-2']; ctx.font = 11*U + 'px "JetBrains Mono", monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let u = 0; u <= 6; u++) ctx.fillText(u + ' В', L - 6*U, Y(u));
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top'; for (let i = 0; i <= 3; i++) ctx.fillText(fmt(i*Tms, 2) + ' мс', X(i*Tms), B + 6*U);
+    if (x == null){ ctx.fillStyle = C['ink-2']; ctx.font = 15*U + 'px "Golos Text", sans-serif'; ctx.fillText('решите задачу — здесь появится осциллограмма', (L + R)/2, (T + B)/2); led(0); return; }
+    const D = x/255;
+    ctx.strokeStyle = C.traj; ctx.lineWidth = 3*U; ctx.beginPath(); ctx.moveTo(X(0), Y(D > 0 ? 5 : 0));
+    for (let k = 0; k < 3; k++){ const t0 = k*Tms, t1 = t0 + D*Tms; if (D > 0 && D < 1){ ctx.lineTo(X(t1), Y(5)); ctx.lineTo(X(t1), Y(0)); ctx.lineTo(X(t0 + Tms), Y(0)); if (k < 2) ctx.lineTo(X(t0 + Tms), Y(5)); } else ctx.lineTo(X(t0 + Tms), Y(D >= 1 ? 5 : 0)); }
+    ctx.stroke();
+    ctx.setLineDash([8*U, 6*U]); ctx.strokeStyle = C.target; ctx.lineWidth = 2*U; ctx.beginPath(); ctx.moveTo(L, Y(5*D)); ctx.lineTo(R, Y(5*D)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C.target; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.font = '600 ' + 13*U + 'px "Golos Text", sans-serif'; ctx.fillText('U ср = ' + fmt(5*D, 2) + ' В', L + 6*U, Y(5*D) - 4*U);
+    if (D > 0 && D < 1){ ctx.strokeStyle = C.vy; ctx.fillStyle = C.vy; ctx.lineWidth = 2*U; const yy = Y(5.5); ctx.beginPath(); ctx.moveTo(X(0), yy); ctx.lineTo(X(D*Tms), yy); ctx.stroke();
+      ctx.textAlign = 'left'; ctx.fillText('tи = ' + fmt(D*Tms*1000, 0) + ' мкс', X(D*Tms) + 6*U, yy + 6*U); }
+    led(D);
+  }
+  function led(D){ const cx = cv.width - 75*U, cy = cv.height/2, r = 34*U;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r*2.4); g.addColorStop(0, 'rgba(255,60,40,' + (0.85*D) + ')'); g.addColorStop(1, 'rgba(255,60,40,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r*2.4, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = 'rgb(' + Math.round(110 + 145*D) + ',' + Math.round(30 + 40*D) + ',30)'; ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, 0); ctx.lineTo(cx + r, cy + r*1.3); ctx.lineTo(cx - r, cy + r*1.3); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 2*U; ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx - r*.4, cy + r*1.3); ctx.lineTo(cx - r*.4, cy + r*2.4); ctx.moveTo(cx + r*.4, cy + r*1.3); ctx.lineTo(cx + r*.4, cy + r*2.1); ctx.stroke();
+    ctx.fillStyle = C['ink-2']; ctx.font = 12*U + 'px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('яркость ' + Math.round(D*100) + ' %', cx, cy + r*2.6); }
+  function sync(){ S.x = +$('x').value; S.f = $('f980').checked ? 980 : 490; const D = S.x/255, T = 1/S.f;
+    $('xO').textContent = S.x; $('rD').textContent = fmt(D*100, 1) + ' %'; $('rT').textContent = fmt(T*1e6, 0) + ' мкс'; $('rti').textContent = fmt(D*T*1e6, 0) + ' мкс'; $('rU').textContent = fmt(5*D, 2) + ' В'; draw(); }
+  ['x','f490','f980'].forEach(id => $(id).addEventListener('input', sync));
+
+  // ---------- задача: x = 2/5·255 = 102; tи = 0,4·(1/490 с) ≈ 816 мкс
+  const HINTS = ['Среднее напряжение = 5 В × доля времени, когда вывод включён. Какая доля нужна, чтобы получилось 2 В?',
+    'Доля D = 2/5 = 0,4. analogWrite считает долю в «двухсотпятьдесятпятых»: x = D·255.',
+    'x = 0,4·255 = 102. Период T = 1/490 с ≈ 2041 мкс, импульс tи = D·T.'];
+  $('hintBtn').addEventListener('click', () => { if (S.hints >= 3) return; const d = document.createElement('div'); d.className = 'hint'; d.textContent = (S.hints + 1) + '. ' + HINTS[S.hints]; $('hints').appendChild(d);
+    S.hints++; $('hintBtn').textContent = 'Подсказка (' + S.hints + '/3)'; if (S.hints >= 3) $('hintBtn').disabled = true; });
+  $('check').addEventListener('click', () => { const x = parse($('ansX').value), t = parse($('ansT').value), m = $('msg'), TI = 0.4/490*1e6; m.className = 'msg bad';
+    if (isNaN(x)){ m.textContent = 'Введите x — целое число от 0 до 255.'; return; }
+    if (Math.abs(x - 40) < 0.6) { m.textContent = '40 — это проценты. analogWrite не знает процентов: шкала от 0 до 255.'; return; }
+    if (Math.abs(x - 2) < 0.6) { m.textContent = '2 — это вольты. В analogWrite передаётся доля от 255, а не напряжение.'; return; }
+    if (x > 255 || x < 0){ m.textContent = 'x может быть только от 0 до 255: analogWrite(pin, ' + x + ') сработает не так, как вы ждёте.'; return; }
+    if (Math.abs(x - 102) > 1){ m.textContent = 'При x = ' + Math.round(x) + ' среднее напряжение ' + fmt(5*x/255, 2) + ' В, а нужно 2 В.'; return; }
+    if (isNaN(t)){ m.textContent = 'x верно. Теперь длительность импульса в микросекундах.'; return; }
+    if (Math.abs(t - TI) > 0.01*TI){ m.textContent = Math.abs(t - 2041) < 25 ? 'Это весь период T. Импульс — только его часть D·T.' : Math.abs(t - 0.4/980*1e6) < 5 ? 'Это для 980 Гц, а вывод 9 работает на 490 Гц.' : 'x верно, длительность — нет. tи = D·T, T = 1/f.'; return; }
+    S.solved = true; m.className = 'msg ok'; m.textContent = 'Верно: x = 102, tи ≈ 816 мкс. Пунктир на осциллограмме — 2 В.'; $('svo').hidden = false; draw(); });
+
+  // ---------- игра
+  const rnd = (a, b) => a + Math.floor(Math.random()*(b - a + 1)), pick = a => a[rnd(0, a.length - 1)];
+  const GEN = [
+    () => { const x = pick([51, 64, 128, 153, 191, 204, 230]); return {q:'analogWrite(pin, ' + x + '). Какое среднее напряжение на выводе?', lab:'U =', u:'В', ans:5*x/255, tol:.01, show:x}; },
+    () => { const U = pick([1, 1.5, 2.5, 3, 3.5, 4]); return {q:'Нужно среднее напряжение ' + fmt(U, 1) + ' В. Какое x записать в analogWrite?', lab:'x =', u:'', ans:U/5*255, abs:1, show:Math.round(U/5*255)}; },
+    () => { const p = pick([10, 25, 50, 75, 90]), f = pick([490, 980]); return {q:'Скважность ' + p + ' %, частота ' + f + ' Гц. Сколько микросекунд длится импульс?', lab:'tи =', u:'мкс', ans:p/100/f*1e6, tol:.01, show:Math.round(p/100*255)}; },
+    () => { const U = pick([5.5, 6, 7, 9]); return {q:'Плата питается от 5 В. Хотим получить ШИМом среднее напряжение ' + fmt(U, 1) + ' В на выводе. Какое x?', lab:'x =', u:'', ans:null, show:255}; },
+    () => { const x = pick([0, 255]); return {q:'analogWrite(pin, ' + x + '). Сколько раз в секунду вывод переключается между 0 и 5 В?', lab:'n =', u:'раз/с', ans:0, abs:0.5, show:x}; }];
+  function newGame(){ S.game = pick(GEN)(); $('gText').textContent = S.game.q; $('gLab').textContent = S.game.lab; $('gU').textContent = S.game.u; $('gA').value = ''; $('gMsg').className = 'msg'; draw(); }
+  function score(ok){ S.score.shot++; if (ok){ S.score.hit++; S.score.streak++; } else S.score.streak = 0; $('sHit').textContent = S.score.hit; $('sShot').textContent = S.score.shot; $('sStreak').textContent = S.score.streak; }
+  function verdict(ok, text){ score(ok); const m = $('gMsg'); m.className = ok ? 'msg ok' : 'msg bad'; m.textContent = text; }
+  $('gCheck').addEventListener('click', () => { const g = S.game, a = parse($('gA').value);
+    if (g.ans == null) return verdict(false, 'Здесь нет подходящего x: ШИМ даёт среднее от 0 до напряжения питания, выше 5 В не поднять. Правильный ответ — «Невозможно».');
+    if (isNaN(a)){ $('gMsg').className = 'msg bad'; $('gMsg').textContent = 'Введите число.'; return; }
+    const ok = g.abs != null ? Math.abs(a - g.ans) <= g.abs : Math.abs(a - g.ans) <= g.tol*Math.abs(g.ans);
+    verdict(ok, ok ? 'Верно.' + (g.ans === 0 ? ' При 0 и 255 ШИМ не переключает вывод: он постоянно выключен или включён.' : '') : 'Нет, верно ' + fmt(g.ans, 2) + ' ' + g.u + '.'); });
+  $('never').addEventListener('click', () => { const g = S.game; verdict(g.ans == null, g.ans == null ? 'Верно: среднее напряжение ШИМ не может быть больше напряжения питания. Нужен повышающий преобразователь.' : 'Это возможно: ответ ' + fmt(g.ans, 2) + ' ' + g.u + '.'); });
+  $('gNext').addEventListener('click', newGame);
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); S.mode = t.dataset.mode;
+    ['explore','task','game'].forEach(k => $('p-' + k).hidden = k !== S.mode); if (S.mode === 'game' && !S.game) newGame(); draw(); }));
+  sync();
+})();
+</script>
+</body></html>
