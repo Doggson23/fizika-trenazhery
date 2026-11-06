@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Проволока под нагрузкой: напряжение, модуль Юнга, прочность</title>
+<link rel="stylesheet" href="../assets/sim.css">
+<style>#cv{aspect-ratio:16/10.5}@media (max-width:600px){#cv{aspect-ratio:4/4}}
+.choices{display:grid;gap:6px}.choices button{text-align:left}.choices button.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}.choices button.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">физика · сила упругости · модуль Юнга</div>
+    <h1>Проволока под нагрузкой</h1>
+    <p class="sub">Подвесьте груз к проволоке: напряжение σ = F/S, относительное удлинение ε = σ/E, удлинение Δl = Fl/(ES). Пока σ меньше предела текучести — проволока упругая, дальше растягивается необратимо, при пределе прочности рвётся. g = 10 м/с².</p>
+  </header>
+  <div class="tabs" role="tablist"><button class="tab" id="t-ex" data-tab="explore">Исследовать</button><button class="tab" id="t-task" data-tab="task">Задача</button><button class="tab" id="t-game" data-tab="game">Игра</button></div>
+
+  <section class="lab">
+    <div class="stage"><canvas id="cv" aria-label="Проволока с грузом, удлинение и шкала напряжения"></canvas>
+      <div class="legend"><span><i style="background:var(--ok)"></i>упругая зона</span><span><i style="background:var(--warn)"></i>пластическая зона</span><span><i style="background:var(--bad)"></i>разрыв</span><span><i style="background:var(--res)"></i>напряжение сейчас</span></div></div>
+
+    <div class="panel" data-pane="explore">
+      <div class="seg" role="group" aria-label="Материал"><button data-mat="st" aria-pressed="true">Сталь</button><button data-mat="tr" aria-pressed="false">Тросовая сталь</button><button data-mat="cu" aria-pressed="false">Медь</button><button data-mat="al" aria-pressed="false">Алюминий</button><button data-mat="ny" aria-pressed="false">Нейлон</button></div>
+      <div class="ctl"><label for="ll"><span>Длина l</span><output id="llO"></output></label><input id="ll" type="range" min="0.5" max="5" step="0.1" value="2"></div>
+      <div class="ctl"><label for="dd"><span>Диаметр d</span><output id="ddO"></output></label><input id="dd" type="range" min="0.2" max="3" step="0.05" value="1"></div>
+      <div class="ctl"><label for="mm"><span>Масса груза m</span><output id="mmO"></output></label><input id="mm" type="range" min="0" max="200" step="0.5" value="10"></div>
+      <dl class="read" id="rd"></dl>
+      <div class="rule"><b>Формулы.</b> S = πd²/4; σ = mg/S; ε = σ/E; Δl = εl = mgl/(ES); жёсткость проволоки k = ES/l. Запас прочности — во сколько раз предел прочности больше рабочего напряжения.</div>
+      <p class="note">Исследуйте: как изменится удлинение, если взять проволоку вдвое длиннее? Вдвое толще? Почему нейлоновая леска тянется сильнее стальной, хотя рвётся при сравнимом грузе?</p>
+    </div>
+
+    <div class="panel" data-pane="task" hidden>
+      <h2>Задача</h2>
+      <p id="tq"></p>
+      <div class="field"><span>Ответ</span><input id="tin" inputmode="decimal" aria-label="Ответ"><span class="num" id="tunit"></span></div>
+      <div class="btns"><button class="b" id="tchk">Проверить</button><button class="b ghost" id="thint">Подсказка</button><button class="b ghost" id="tnew">Новая задача</button></div>
+      <div class="msg" id="tmsg"></div>
+      <div class="hint" id="thintBox" hidden></div>
+      <div class="svo" id="tprop" hidden></div>
+      <div class="score"><span>верно <b id="sOk">0</b></span><span>попыток <b id="sAll">0</b></span><span>серия <b id="sSer">0</b></span></div>
+      <p class="note">π ≈ 3,14. Ответ числом, допуск 1,5 %.</p>
+    </div>
+
+    <div class="panel" data-pane="game" hidden>
+      <h2>Выдержит или порвётся?</h2>
+      <p id="gq"></p>
+      <div class="choices"><button class="b ghost" data-gc="el">Выдержит, деформация упругая</button><button class="b ghost" data-gc="pl">Не порвётся, но растянется необратимо</button><button class="b ghost" data-gc="br">Порвётся</button></div>
+      <div class="msg" id="gmsg"></div>
+      <div class="btns"><button class="b" id="gnext">Новое задание</button></div>
+      <div class="score"><span>верно <b id="gOk">0</b></span><span>попыток <b id="gAll">0</b></span><span>серия <b id="gSer">0</b></span></div>
+      <p class="note">Пределы текучести и прочности материалов — в таблице под заданием.</p>
+      <dl class="read" id="gtab"></dl>
+    </div>
+  </section>
+  <p class="foot">Тренажёр к главе «Сила упругости» · <a href="../uchebnik/sila-uprugosti.html#mater">теория в Учебнике</a> · <a href="../index.html">все тренажёры</a></p>
+</div>
+<script src="../assets/sim-core.js"></script>
+<script src="../assets/dinamika-tren.js"></script>
+<script>
+(function(){
+'use strict';
+const {fmt, prep, arrow, text} = SC; const {G, nf, num, close, pick, rows} = TR; const $ = id => document.getElementById(id);
+const MAT = {st: {n: 'строительная сталь', E: 200e9, sy: 250e6, su: 450e6}, tr: {n: 'тросовая сталь', E: 200e9, sy: 1500e6, su: 1800e6}, cu: {n: 'медь', E: 120e9, sy: 70e6, su: 220e6},
+  al: {n: 'алюминий', E: 70e9, sy: 30e6, su: 90e6}, ny: {n: 'нейлон', E: 3e9, sy: 50e6, su: 75e6}};
+let P = {mat: 'st', l: 2, d: 1, m: 10}, mode = 'explore', fall = 0, hide = false;
+function calc(p){ const M = MAT[p.mat], S = Math.PI * Math.pow(p.d * 1e-3, 2) / 4, F = p.m * G, sg = F / S, eel = Math.min(sg, M.sy) / M.E;
+  const zone = sg < M.sy ? 'el' : sg < M.su ? 'pl' : 'br', epl = zone === 'pl' ? 0.1 * (sg - M.sy) / (M.su - M.sy) : 0;
+  return {M, S, F, sg, eps: eel + epl, dl: (eel + epl) * p.l, zone, k: M.E * S / p.l, sf: M.su / sg}; }
+// ---------- исследование
+const readP = () => ({mat: document.querySelector('[data-mat][aria-pressed="true"]').dataset.mat, l: +$('ll').value, d: +$('dd').value, m: +$('mm').value});
+const upd = () => { if (mode === 'explore') { P = readP(); fall = 0; } };
+SC.slider(document, 'll', v => fmt(v, 1) + ' м', upd); SC.slider(document, 'dd', v => fmt(v, 2) + ' мм', upd); SC.slider(document, 'mm', v => fmt(v, 1) + ' кг', upd);
+document.querySelectorAll('[data-mat]').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('[data-mat]').forEach(x => x.setAttribute('aria-pressed', x === b)); upd(); }));
+// ---------- задачи
+let Q = null; const SCORE = TR.score('s');
+function newTask(){
+  const kind = pick(['dl', 'E', 'sg', 'dmin']); let p, R, tries = 0;
+  do { p = {mat: pick(['st', 'cu', 'al']), l: pick([1, 1.5, 2, 3]), d: pick([0.5, 0.8, 1, 1.2, 2]), m: pick([1, 2, 5, 10, 20])}; R = calc(p); tries++; } while (R.zone !== 'el' && tries < 200);
+  const q = {P: p}, Sm = Math.PI * p.d * p.d / 4, Mn = R.M.n, Eg = R.M.E / 1e9;
+  if (kind === 'dl') { q.ans = R.dl * 1e3; q.unit = 'мм'; q.text = 'К проволоке (' + Mn + ', E = ' + Eg + ' ГПа) длиной ' + nf(p.l) + ' м и диаметром ' + nf(p.d) + ' мм подвесили груз ' + p.m + ' кг. Найдите удлинение.';
+    q.wrong = [[R.dl * 250, 'Площадь круга через диаметр: S = πd²/4, а не πd².'], [R.dl * 100, 'Сила — это вес груза mg, а не масса.'], [R.dl, 'Ответ нужен в миллиметрах.']];
+    q.hints = ['Δl = Fl/(ES), где F = mg, S = πd²/4. Переведите мм в м.', 'S = ' + nf(Sm) + ' мм² = ' + fmt(Sm * 1e-6, 2) + ' м²; σ = mg/S = ' + nf(R.sg / 1e6) + ' МПа.', 'Δl = σl/E.']; }
+  if (kind === 'E') { const dl = Math.round(R.dl * 1e5) / 100; q.ans = p.m * G * p.l / (Sm * 1e-6 * dl * 1e-3) / 1e9; q.unit = 'ГПа';
+    q.text = 'В лабораторной работе проволоку длиной ' + nf(p.l) + ' м и диаметром ' + nf(p.d) + ' мм растянули грузом ' + p.m + ' кг; удлинение ' + fmt(dl, 2) + ' мм. Найдите модуль Юнга материала (в ГПа). Что это за материал?';
+    q.wrong = [[q.ans / 4, 'Площадь круга через диаметр: S = πd²/4.'], [q.ans / 10, 'Сила — это вес груза mg, а не масса.']];
+    q.hints = ['E = σ/ε = Fl/(SΔl).', 'S = πd²/4 = ' + nf(Sm) + ' мм²; ε = Δl/l.', 'Все величины — в СИ: мм² → ·10⁻⁶ м², мм → ·10⁻³ м; ответ разделите на 10⁹.']; q.P = Object.assign({}, p); }
+  if (kind === 'sg') { q.ans = R.sg / 1e6; q.unit = 'МПа'; q.text = 'Проволока диаметром ' + nf(p.d) + ' мм держит груз ' + p.m + ' кг. Найдите механическое напряжение в ней.';
+    q.wrong = [[q.ans / 10, 'Сила — это вес груза mg, а не масса.'], [q.ans / 4, 'Площадь круга через диаметр: S = πd²/4.']];
+    q.hints = ['σ = F/S, F = mg.', 'S = πd²/4 = ' + nf(Sm) + ' мм².', '1 МПа = 1 Н/мм² — можно считать сразу в мм².']; }
+  if (kind === 'dmin') { const M = MAT[p.mat], mm = pick([20, 50, 100, 200]); q.ans = Math.sqrt(4 * mm * G / (Math.PI * M.sy)) * 1e3; q.unit = 'мм'; q.P = Object.assign({}, p, {m: mm, d: Math.round(q.ans * 1.3 * 20) / 20});
+    q.text = 'Какой наименьший диаметр должна иметь проволока (' + M.n + ', предел текучести ' + M.sy / 1e6 + ' МПа), чтобы держать груз ' + mm + ' кг без остаточной деформации?';
+    q.wrong = [[q.ans / 2, 'Площадь круга через диаметр: S = πd²/4 — похоже, четвёрка потерялась.'], [q.ans / Math.sqrt(10), 'Сила — это вес груза mg, а не масса.']];
+    q.hints = ['Напряжение не должно превышать предел текучести: mg/S ≤ σт.', 'S ≥ mg/σт = ' + nf(mm * G / M.sy * 1e6) + ' мм².', 'd = √(4S/π).']; }
+  q.prop = 'Удлинение растёт с длиной и падает с площадью сечения: вдвое длиннее — вдвое больше Δl, вдвое толще — вчетверо меньше. Прочность (наибольший груз) от длины не зависит, а растёт как d².';
+  Q = q; Q.h = 0; P = Object.assign({}, q.P); fall = 0; hide = true; $('tq').textContent = q.text; $('tunit').textContent = q.unit; $('tin').value = ''; TR.clear($('tmsg')); $('thintBox').hidden = true; $('tprop').hidden = true;
+}
+$('tnew').addEventListener('click', newTask);
+$('thint').addEventListener('click', () => { if (!Q) return; Q.h = Math.min(3, Q.h + 1); const b = $('thintBox'); b.hidden = false; b.innerHTML = Q.hints.slice(0, Q.h).map((x, i) => (i + 1) + '. ' + x).join('<br>'); });
+$('tchk').addEventListener('click', () => { if (!Q) return; const x = num($('tin').value), m = $('tmsg'); if (!isFinite(x)) { TR.msg(m, 'bad', 'Введите число.'); return; }
+  const ok = close(x, Q.ans, 0.015); SCORE.add(ok);
+  if (ok) { Q.solved = true; hide = false; TR.msg(m, 'ok', 'Верно: ' + nf(Q.ans) + ' ' + Q.unit + '.' + (Q.unit === 'ГПа' ? ' Похоже на ' + (Q.ans > 150 ? 'сталь' : Q.ans > 90 ? 'медь' : 'алюминий') + '.' : '')); $('tprop').hidden = false; $('tprop').innerHTML = '<b>Свойство.</b> ' + Q.prop; }
+  else { const w = Q.wrong.find(p => close(x, p[0], 0.02)); TR.msg(m, 'bad', w ? w[1] : 'Пока нет. Проверьте площадь сечения и единицы — или возьмите подсказку.'); } });
+// ---------- игра
+const GS = TR.score('g'); let GQ = null;
+$('gtab').innerHTML = rows(Object.values(MAT).map(M => [M.n, 'σт ' + M.sy / 1e6 + ', σв ' + M.su / 1e6 + ' МПа']));
+function newRound(){ const want = pick(['el', 'pl', 'br']); let p, R;
+  for (let i = 0; i < 3000; i++) { p = {mat: pick(Object.keys(MAT)), l: 2, d: pick([0.3, 0.5, 0.8, 1, 1.5, 2]), m: pick([1, 2, 3, 5, 8, 10, 15, 20, 30, 50, 80, 100, 150])}; R = calc(p);
+    const mg = Math.min(Math.abs(R.sg / R.M.sy - 1), Math.abs(R.sg / R.M.su - 1)); if (R.zone === want && mg > 0.12) break; }
+  GQ = {p, R, ans: R.zone, done: false}; P = Object.assign({}, p); hide = true; fall = 0;
+  $('gq').innerHTML = 'Проволока: <b>' + R.M.n + '</b>, диаметр <b>' + nf(p.d) + ' мм</b>. Подвешиваем груз <b>' + p.m + ' кг</b>. Что будет?'; TR.clear($('gmsg'));
+  document.querySelectorAll('[data-gc]').forEach(b => { b.className = 'b ghost'; b.disabled = false; }); }
+document.querySelectorAll('[data-gc]').forEach(b => b.addEventListener('click', () => { if (!GQ || GQ.done) return; GQ.done = true; const ok = b.dataset.gc === GQ.ans; GS.add(ok); hide = false;
+  document.querySelectorAll('[data-gc]').forEach(x => { x.disabled = true; if (x.dataset.gc === GQ.ans) x.className = 'b ghost right'; else if (x === b) x.className = 'b ghost wrong'; });
+  const R = GQ.R; TR.msg($('gmsg'), ok ? 'ok' : 'bad', (ok ? 'Верно! ' : 'Нет. ') + 'S = ' + nf(Math.PI * GQ.p.d * GQ.p.d / 4) + ' мм², σ = mg/S = ' + nf(R.sg / 1e6) + ' МПа; σт = ' + R.M.sy / 1e6 + ', σв = ' + R.M.su / 1e6 + ' МПа.'); }));
+$('gnext').addEventListener('click', newRound);
+if (/[?&]test/.test(location.search)) { window.__ans = () => Q && Q.ans; window.__gans = () => GQ && {choose: '[data-gc="' + GQ.ans + '"]'}; }
+// ---------- вкладки
+SC.tabs(document, k => { mode = k; fall = 0; if (k === 'task') { if (!Q) newTask(); else { P = Object.assign({}, Q.P); hide = !Q.solved; } } if (k === 'game') { if (!GQ) newRound(); else { P = Object.assign({}, GQ.p); hide = !GQ.done; } } if (k === 'explore') { P = readP(); hide = false; } });
+// ---------- рисование
+const cv = $('cv');
+SC.loop(cv, dt => {
+  const {ctx, W, H} = prep(cv), C = SC.col(), R = calc(P); ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, W, H);
+  const broken = !hide && R.zone === 'br'; if (broken) fall = Math.min(1.2, fall + dt); else fall = 0;
+  const narrow = W < 560, top = 22, wx = W * (narrow ? 0.18 : 0.3), Lmax = H - top - 120, Lpx = Lmax * (0.35 + 0.65 * P.l / 5);
+  // увеличение удлинения
+  const dlpx0 = R.dl * Lpx / P.l; let mag = 1; while (dlpx0 * mag < 25 && mag < 1e6) mag *= 10; const dlpx = hide ? 0 : Math.min(dlpx0 * mag, 90);
+  const cw = narrow ? 45 : 70; ctx.strokeStyle = C.ink; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(wx - cw, top); ctx.lineTo(wx + cw, top); ctx.stroke();
+  for (let i = -cw; i < cw; i += 12) { ctx.beginPath(); ctx.moveTo(wx + i, top); ctx.lineTo(wx + i + 8, top - 8); ctx.lineWidth = 1; ctx.stroke(); }
+  const lw = Math.max(1.2, Math.min(6, P.d * 2)), yEnd = top + Lpx + dlpx, wireCol = hide ? C.ink : R.zone === 'el' ? C.ink : R.zone === 'pl' ? C.warn : C.bad;
+  ctx.strokeStyle = wireCol; ctx.lineWidth = lw;
+  if (!broken) { ctx.beginPath(); ctx.moveTo(wx, top); ctx.lineTo(wx, yEnd); ctx.stroke(); }
+  else { const ym = top + Lpx * 0.6; ctx.beginPath(); ctx.moveTo(wx, top); ctx.lineTo(wx, ym - 6); ctx.stroke(); ctx.beginPath(); ctx.moveTo(wx, ym + 6 + fall * fall * 300); ctx.lineTo(wx, yEnd + fall * fall * 300); ctx.stroke(); }
+  // линейка и метки
+  const rx = wx + (narrow ? 34 : 60); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(rx, top); ctx.lineTo(rx, top + Lpx + 100); ctx.stroke();
+  ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(wx - 30, top + Lpx); ctx.lineTo(rx + 8, top + Lpx); ctx.stroke(); ctx.setLineDash([]); text(ctx, 'l₀', rx + 12, top + Lpx, {color: C.ink2, size: 12});
+  if (!hide && !broken && dlpx > 2) { ctx.strokeStyle = C.res; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(rx, top + Lpx); ctx.lineTo(rx, yEnd); ctx.stroke(); const ly = (top + Lpx + yEnd) / 2 + 4; text(ctx, 'Δl = ' + nf(R.dl * 1e3) + ' мм', rx + 8, ly, {color: C.res, size: narrow ? 11 : 12, weight: 700}); if (mag > 1) text(ctx, 'на рисунке ×' + fmt(mag, 0), rx + 8, ly + 15, {color: C.res, size: 11}); }
+  // груз
+  const bs = Math.max(26, Math.min(70, 16 * Math.cbrt(Math.max(P.m, 0.1)))), by = yEnd + (broken ? fall * fall * 300 : 0);
+  if (P.m > 0 && by < H + bs) { ctx.fillStyle = C.grid; ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.fillRect(wx - bs / 2, by, bs, bs); ctx.strokeRect(wx - bs / 2, by, bs, bs); text(ctx, fmt(P.m, P.m < 10 ? 1 : 0) + ' кг', wx, by + bs / 2, {align: 'center', size: 11, weight: 700}); }
+  if (broken) text(ctx, 'проволока порвалась', wx, top + Lpx * 0.6 - 18, {align: 'center', color: C.bad, weight: 700, size: 14});
+  // шкала напряжения
+  const sx = W * (narrow ? 0.5 : 0.55), sw = W - sx - (narrow ? 10 : 24), sy = H * (narrow ? 0.16 : 0.25), su = R.M.su * 1.15, X = v => sx + Math.min(v, su) / su * sw;
+  text(ctx, narrow ? 'σ, МПа' : 'Напряжение в проволоке, МПа', sx, sy - 26, {weight: 700, size: 13});
+  ctx.fillStyle = C.ok; ctx.globalAlpha = 0.35; ctx.fillRect(sx, sy, X(R.M.sy) - sx, 22); ctx.fillStyle = C.warn; ctx.fillRect(X(R.M.sy), sy, X(R.M.su) - X(R.M.sy), 22); ctx.fillStyle = C.bad; ctx.fillRect(X(R.M.su), sy, sx + sw - X(R.M.su), 22); ctx.globalAlpha = 1;
+  ctx.strokeStyle = C.rule; ctx.strokeRect(sx, sy, sw, 22);
+  text(ctx, 'σт = ' + R.M.sy / 1e6, X(R.M.sy), sy + 36, {align: 'center', size: 11, color: C.ink2}); text(ctx, 'σв = ' + R.M.su / 1e6, X(R.M.su), sy + 50, {align: 'center', size: 11, color: C.ink2}); text(ctx, '0', sx, sy + 36, {align: 'center', size: 11, color: C.ink2});
+  if (!hide) { const xs = X(R.sg); ctx.fillStyle = C.res; ctx.beginPath(); ctx.moveTo(xs, sy - 2); ctx.lineTo(xs - 7, sy - 14); ctx.lineTo(xs + 7, sy - 14); ctx.closePath(); ctx.fill(); ctx.fillRect(xs - 1.5, sy, 3, 22); }
+  text(ctx, (narrow ? '' : R.M.n + ': ') + 'E = ' + nf(R.M.E / 1e9) + ' ГПа', sx, sy + 76, {size: 12, color: C.ink2});
+  const two = (a, b, col, w) => { text(ctx, a, sx, sy + 100, {size: narrow ? 11 : 13, weight: w, color: col}); text(ctx, b, sx, sy + 118, {size: narrow ? 11 : 13, weight: w, color: col}); };
+  if (!hide) { const zt = {el: ['упругая деформация:', 'после разгрузки длина вернётся'], pl: ['пластическая деформация:', 'проволока останется длиннее'], br: ['σ выше предела прочности:', 'разрыв']}; two(zt[R.zone][0], zt[R.zone][1], R.zone === 'el' ? C.ok : R.zone === 'pl' ? C.warn : C.bad, 700); }
+  else two('ответьте — и проволока', 'покажет, что будет', C.ink2, 500);
+  if (mode === 'explore') $('rd').innerHTML = rows([['площадь сечения S', nf(R.S * 1e6) + ' мм²'], ['вес груза', nf(R.F) + ' Н'], ['напряжение σ', nf(R.sg / 1e6) + ' МПа'], ['относительное удлинение ε', fmt(R.eps * 100, R.eps < 0.01 ? 3 : 1) + ' %' + (R.zone === 'pl' ? ' (≈, с пластической частью)' : '')],
+    ['удлинение Δl', R.zone === 'br' ? '— (разрыв)' : nf(R.dl * 1e3) + ' мм'], ['жёсткость k = ES/l', nf(R.k / 1000) + ' кН/м'], ['запас прочности σв/σ', R.sg > 0 ? fmt(R.sf, 1) : '—', R.zone === 'br' ? 'w' : '']]);
+});
+})();
+</script>
+</body>
+</html>

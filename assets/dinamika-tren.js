@@ -9,7 +9,7 @@
     return s === '' ? NaN : Number(s); };
   TR.close = (x, y, rel, abs) => Math.abs(x - y) <= Math.max(abs || 1e-9, (rel == null ? 0.01 : rel) * Math.abs(y));
   // число для условия задачи: целое без запятой, иначе 1–2 знака
-  TR.nf = x => { const r = Math.round(x * 100) / 100; return SC.fmt(r, Number.isInteger(r) ? 0 : Math.round(r * 10) === r * 10 ? 1 : 2); };
+  TR.nf = x => { const a = Math.abs(x); if (a >= 100) return SC.fmt(Math.round(x), 0); const r = a >= 10 ? Math.round(x * 10) / 10 : Math.round(x * 100) / 100; return SC.fmt(r, Number.isInteger(r) ? 0 : Math.round(r * 10) === r * 10 ? 1 : 2); };
   TR.pick = a => a[Math.floor(Math.random() * a.length)];
   TR.rnd = (lo, hi, step) => lo + step * Math.floor(Math.random() * (Math.round((hi - lo) / step) + 1));
   TR.rows = r => r.map(x => '<dt>' + x[0] + '</dt><dd' + (x[2] ? ' class="' + x[2] + '"' : '') + '>' + x[1] + '</dd>').join('');

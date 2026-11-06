@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Соединение пружин: последовательно, параллельно, смешанно</title>
+<link rel="stylesheet" href="../assets/sim.css">
+<style>#cv{aspect-ratio:16/11}@media (max-width:600px){#cv{aspect-ratio:4/4.4}}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px}.choices button{text-align:left}
+.choices button.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}.choices button.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">физика · сила упругости · соединения</div>
+    <h1>Соединение пружин</h1>
+    <p class="sub">Последовательно — сила общая, удлинения складываются. Параллельно — удлинение общее, силы складываются. Соберите схему, подвесьте груз и посмотрите, как нагрузка делится между пружинами. g = 10 м/с², пружины невесомые, планки не перекашиваются.</p>
+  </header>
+  <div class="tabs" role="tablist"><button class="tab" id="t-ex" data-tab="explore">Исследовать</button><button class="tab" id="t-task" data-tab="task">Задача</button><button class="tab" id="t-game" data-tab="game">Игра</button></div>
+
+  <section class="lab">
+    <div class="stage"><canvas id="cv" aria-label="Схема соединения пружин с грузом"></canvas>
+      <div class="legend"><span><i style="background:var(--ink)"></i>пружины (удлинения в масштабе)</span><span><i style="background:var(--aa)"></i>сила в пружине</span><span><i style="background:var(--f1)"></i>вес груза</span></div></div>
+
+    <div class="panel" data-pane="explore">
+      <div class="seg" role="group" aria-label="Схема" id="sch"><button data-s="one" aria-pressed="false">Одна</button><button data-s="ser" aria-pressed="true">Последовательно</button><button data-s="par" aria-pressed="false">Параллельно</button><button data-s="mixA" aria-pressed="false">1 + (2 ∥ 3)</button><button data-s="mixB" aria-pressed="false">(1 + 2) ∥ 3</button></div>
+      <div class="ctl"><label for="k1"><span>Жёсткость k₁</span><output id="k1O"></output></label><input id="k1" type="range" min="20" max="600" step="10" value="100"></div>
+      <div class="ctl"><label for="k2"><span>Жёсткость k₂</span><output id="k2O"></output></label><input id="k2" type="range" min="20" max="600" step="10" value="300"></div>
+      <div class="ctl" id="k3Box"><label for="k3"><span>Жёсткость k₃</span><output id="k3O"></output></label><input id="k3" type="range" min="20" max="600" step="10" value="200"></div>
+      <div class="ctl"><label for="ms"><span>Масса груза m</span><output id="msO"></output></label><input id="ms" type="range" min="0.1" max="5" step="0.1" value="3"></div>
+      <dl class="read" id="rd"></dl>
+      <div class="rule" id="rule"></div>
+      <p class="note">Исследуйте: может ли последовательное соединение быть жёстче самой мягкой пружины? В какой пружине параллельной пары сила больше? Как сделать систему жёсткостью ровно k₁ из трёх разных пружин?</p>
+    </div>
+
+    <div class="panel" data-pane="task" hidden>
+      <h2>Задача</h2>
+      <p id="tq"></p>
+      <div class="field"><span>Ответ</span><input id="tin" inputmode="decimal" aria-label="Ответ"><span class="num" id="tunit"></span></div>
+      <div class="btns"><button class="b" id="tchk">Проверить</button><button class="b ghost" id="thint">Подсказка</button><button class="b ghost" id="tnew">Новая задача</button></div>
+      <div class="msg" id="tmsg"></div>
+      <div class="hint" id="thintBox" hidden></div>
+      <div class="svo" id="tprop" hidden></div>
+      <div class="score"><span>верно <b id="sOk">0</b></span><span>попыток <b id="sAll">0</b></span><span>серия <b id="sSer">0</b></span></div>
+      <p class="note">Схема — на рисунке. Ответ числом, можно с запятой или дробью. Допуск 1 %.</p>
+    </div>
+
+    <div class="panel" data-pane="game" hidden>
+      <h2>Собери жёсткость</h2>
+      <p id="gq"></p>
+      <div class="choices" id="gch">
+        <button class="b ghost" data-g="1">Одна пружина</button><button class="b ghost" data-g="1/2">Две последовательно</button><button class="b ghost" data-g="2">Две параллельно</button>
+        <button class="b ghost" data-g="1/3">Три последовательно</button><button class="b ghost" data-g="3">Три параллельно</button><button class="b ghost" data-g="2/3">Одна + две параллельные</button>
+        <button class="b ghost" data-g="3/2">Две последовательные ∥ одна</button><button class="b ghost" data-g="imp">Невозможно из трёх</button>
+      </div>
+      <div class="msg" id="gmsg"></div>
+      <div class="btns"><button class="b" id="gnext">Новое задание</button></div>
+      <div class="score"><span>верно <b id="gOk">0</b></span><span>попыток <b id="gAll">0</b></span><span>серия <b id="gSer">0</b></span></div>
+      <p class="note">Все пружины одинаковые, жёсткостью k. Можно взять не больше трёх.</p>
+    </div>
+  </section>
+  <p class="foot">Тренажёр к главе «Сила упругости» · <a href="../uchebnik/sila-uprugosti.html#soed">теория в Учебнике</a> · <a href="../index.html">все тренажёры</a></p>
+</div>
+<script src="../assets/sim-core.js"></script>
+<script src="../assets/dinamika-tren.js"></script>
+<script>
+(function(){
+'use strict';
+const {fmt, prep, arrow, text} = SC; const {G, nf, num, close, pick, rows} = TR; const $ = id => document.getElementById(id);
+const NAMES = {one: 'одна пружина', ser: 'последовательно', par: 'параллельно', mixA: 'пружина 1 последовательно с параллельной парой 2 и 3', mixB: 'цепочка 1–2 параллельно с пружиной 3'};
+let P = {s: 'ser', k: [100, 300, 200], m: 3}, mode = 'explore', anim = null;
+function solve(p){
+  const [k1, k2, k3] = p.k, F = p.m * G; let keq, parts;
+  if (p.s === 'one') { keq = k1; parts = [{F, x: F / k1}]; }
+  if (p.s === 'ser') { keq = 1 / (1 / k1 + 1 / k2); parts = [{F, x: F / k1}, {F, x: F / k2}]; }
+  if (p.s === 'par') { keq = k1 + k2; const x = F / keq; parts = [{F: k1 * x, x}, {F: k2 * x, x}]; }
+  if (p.s === 'mixA') { const k23 = k2 + k3; keq = 1 / (1 / k1 + 1 / k23); const x23 = F / k23; parts = [{F, x: F / k1}, {F: k2 * x23, x: x23}, {F: k3 * x23, x: x23}]; }
+  if (p.s === 'mixB') { const k12 = 1 / (1 / k1 + 1 / k2); keq = k12 + k3; const x = F / keq, F12 = k12 * x; parts = [{F: F12, x: F12 / k1}, {F: F12, x: F12 / k2}, {F: k3 * x, x}]; }
+  return {keq, x: F / keq, F, parts};
+}
+const nSpr = s => s === 'one' ? 1 : s === 'ser' || s === 'par' ? 2 : 3;
+// ---------- исследование
+const readP = () => ({s: document.querySelector('[data-s][aria-pressed="true"]').dataset.s, k: [+$('k1').value, +$('k2').value, +$('k3').value], m: +$('ms').value});
+const RULES = {one: 'Закон Гука: x = mg/k.', ser: 'Последовательно: сила в каждой пружине одна и та же, удлинения складываются, 1/k = 1/k₁ + 1/k₂.', par: 'Параллельно: удлинение общее, силы складываются, k = k₁ + k₂. Жёсткая пружина берёт большую часть веса.',
+  mixA: 'Сначала пара: k₂₃ = k₂ + k₃. Потом цепочка: 1/k = 1/k₁ + 1/k₂₃. Пружина 1 держит весь вес, пара делит его пропорционально жёсткостям.', mixB: 'Сначала цепочка: 1/k₁₂ = 1/k₁ + 1/k₂. Потом параллельно: k = k₁₂ + k₃. Удлинения ветвей равны.'};
+function syncUI(){ $('k3Box').hidden = nSpr(P.s) < 3; $('k2').closest('.ctl').hidden = nSpr(P.s) < 2; $('rule').innerHTML = '<b>Правило.</b> ' + RULES[P.s]; }
+['k1', 'k2', 'k3'].forEach(id => SC.slider(document, id, v => v + ' Н/м', () => { if (mode === 'explore') { P = readP(); } }));
+SC.slider(document, 'ms', v => fmt(v, 1) + ' кг', () => { if (mode === 'explore') P = readP(); });
+document.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('[data-s]').forEach(x => x.setAttribute('aria-pressed', x === b)); P = readP(); syncUI(); }));
+syncUI();
+// ---------- задачи
+let Q = null; const SCORE = TR.score('s'); const KS = [50, 100, 150, 200, 300, 400, 600];
+function newTask(){
+  const s = pick(['ser', 'par', 'mixA', 'mixB']), n = nSpr(s), k = [pick(KS), pick(KS), pick(KS)], m = pick([1, 2, 3, 4, 5]), p = {s, k, m}, R = solve(p), q = {P: p};
+  const ks = 'k₁ = ' + k[0] + ' Н/м, k₂ = ' + k[1] + ' Н/м' + (n > 2 ? ', k₃ = ' + k[2] + ' Н/м' : '');
+  const kind = pick(n > 2 ? ['k', 'x', 'F', 'xi'] : ['k', 'x', 'F']), base = 'Пружины соединены: ' + NAMES[s] + ' (' + ks + '). Подвешен груз ' + m + ' кг. ';
+  const wrongK = s === 'ser' ? k[0] + k[1] : s === 'par' ? 1 / (1 / k[0] + 1 / k[1]) : null;
+  if (kind === 'k') { q.ans = R.keq; q.unit = 'Н/м'; q.text = base + 'Найдите жёсткость системы.';
+    q.wrong = wrongK ? [[wrongK, s === 'ser' ? 'Это правило параллельного соединения. Последовательно складываются обратные величины: 1/k = 1/k₁ + 1/k₂.' : 'Это правило последовательного соединения. Параллельно жёсткости складываются.']] : [[k[0] + k[1] + k[2], 'Так складываются жёсткости только при параллельном соединении всех трёх.']]; }
+  if (kind === 'x') { q.ans = R.x * 100; q.unit = 'см'; q.text = base + 'Найдите полное удлинение системы.';
+    q.wrong = [[R.x, 'Ответ нужен в сантиметрах.'], [m / R.keq * 100, 'Сила — это вес груза mg, а не масса.']].concat(wrongK ? [[R.F / wrongK * 100, 'Проверьте правило сложения жёсткостей — похоже, оно перепутано.']] : []); }
+  if (kind === 'F') { const i = s === 'ser' ? 0 : s === 'par' ? pick([0, 1]) : s === 'mixA' ? pick([1, 2]) : pick([0, 2]); q.ans = R.parts[i].F; q.unit = 'Н'; q.text = base + 'С какой силой растянута пружина ' + (i + 1) + '?';
+    q.wrong = s === 'ser' ? [[R.F / 2, 'В последовательной цепочке каждая пружина держит весь вес груза.']] : [[R.F / n, 'Нагрузка делится поровну, только если жёсткости равны. Параллельные пружины делят вес пропорционально жёсткостям.'], [R.F, 'Эта пружина держит не весь вес: часть берёт соседняя ветвь.']]; }
+  if (kind === 'xi') { const i = pick([0, 1, 2]); q.ans = R.parts[i].x * 100; q.unit = 'см'; q.text = base + 'На сколько удлинилась пружина ' + (i + 1) + '?';
+    q.wrong = [[R.x * 100, 'Это удлинение всей системы, а не одной пружины.'], [R.parts[i].x, 'Ответ нужен в сантиметрах.']]; }
+  q.hints = [RULES[s], 'Жёсткость системы k = ' + nf(R.keq) + ' Н/м, полное удлинение x = mg/k = ' + nf(R.x * 100) + ' см.', kind === 'F' || kind === 'xi' ? 'В параллельных пружинах удлинение общее: F = k·x; в последовательной цепочке сила общая: x = F/k.' : 'Подставьте числа в формулу из подсказки 1.'];
+  q.prop = s === 'ser' ? 'Последовательное соединение мягче самой мягкой пружины.' : s === 'par' ? 'Параллельное соединение жёстче самой жёсткой; жёсткая пружина держит больше.' : 'Смешанную схему сворачивают по шагам: каждую параллельную группу и каждую цепочку заменяют одной пружиной.';
+  Q = q; Q.h = 0; P = Object.assign({}, p, {k: p.k.slice(), nolab: true}); $('tq').textContent = q.text; $('tunit').textContent = q.unit; $('tin').value = ''; TR.clear($('tmsg')); $('thintBox').hidden = true; $('tprop').hidden = true;
+}
+$('tnew').addEventListener('click', newTask);
+$('thint').addEventListener('click', () => { if (!Q) return; Q.h = Math.min(3, Q.h + 1); const b = $('thintBox'); b.hidden = false; b.innerHTML = Q.hints.slice(0, Q.h).map((x, i) => (i + 1) + '. ' + x).join('<br>'); });
+$('tchk').addEventListener('click', () => { if (!Q) return; const x = num($('tin').value), m = $('tmsg'); if (!isFinite(x)) { TR.msg(m, 'bad', 'Введите число.'); return; }
+  const ok = close(x, Q.ans); SCORE.add(ok);
+  if (ok) { Q.solved = true; P = Object.assign({}, Q.P); TR.msg(m, 'ok', 'Верно: ' + nf(Q.ans) + ' ' + Q.unit + '.'); $('tprop').hidden = false; $('tprop').innerHTML = '<b>Свойство.</b> ' + Q.prop; }
+  else { const w = Q.wrong.find(p => close(x, p[0], 0.015)); TR.msg(m, 'bad', w ? w[1] : 'Пока нет. Сверните схему по шагам — или возьмите подсказку.'); } });
+// ---------- игра
+const GS = TR.score('g'); let GQ = null; const VAL = {'1': 1, '1/2': 0.5, '2': 2, '1/3': 1 / 3, '3': 3, '2/3': 2 / 3, '3/2': 1.5};
+const GSCH = {'1': {s: 'one', k: [100, 100, 100]}, '1/2': {s: 'ser', k: [100, 100, 100]}, '2': {s: 'par', k: [100, 100, 100]}, '2/3': {s: 'mixA', k: [100, 100, 100]}, '3/2': {s: 'mixB', k: [100, 100, 100]}};
+const TXT = {'1': 'k', '1/2': 'k/2', '2': '2k', '1/3': 'k/3', '3': '3k', '2/3': '2k/3', '3/2': '3k/2', '3/4': '3k/4', '4/3': '4k/3', '4': '4k', '1/4': 'k/4', '5/2': '5k/2'};
+function newRound(){ const key = Math.random() < 0.3 ? pick(['3/4', '4/3', '4', '1/4', '5/2']) : pick(Object.keys(VAL)); GQ = {key, ans: VAL[key] ? key : 'imp', done: false};
+  $('gq').innerHTML = 'Нужна система жёсткостью <b>' + TXT[key] + '</b>. Какую схему собрать?'; TR.clear($('gmsg'));
+  document.querySelectorAll('[data-g]').forEach(b => { b.className = 'b ghost'; b.disabled = false; }); P = {s: 'one', k: [100, 100, 100], m: 2, hide: true}; }
+document.querySelectorAll('[data-g]').forEach(b => b.addEventListener('click', () => { if (!GQ || GQ.done) return; GQ.done = true; const ok = b.dataset.g === GQ.ans; GS.add(ok);
+  document.querySelectorAll('[data-g]').forEach(x => { x.disabled = true; if (x.dataset.g === GQ.ans) x.className = 'b ghost right'; else if (x === b) x.className = 'b ghost wrong'; });
+  const why = GQ.ans === 'imp' ? 'Из одной, двух или трёх одинаковых пружин получаются только k, 2k, k/2, 3k, k/3, 2k/3 и 3k/2; ' + TXT[GQ.key] + ' среди них нет.' : 'Схема «' + document.querySelector('[data-g="' + GQ.ans + '"]').textContent + '» даёт ' + TXT[GQ.ans] + '.';
+  TR.msg($('gmsg'), ok ? 'ok' : 'bad', (ok ? 'Верно! ' : 'Нет. ') + why);
+  const g = GSCH[GQ.ans]; P = g ? {s: g.s, k: g.k.slice(), m: 2} : GQ.ans === '1/3' || GQ.ans === '3' ? {s: GQ.ans === '3' ? 'par3' : 'ser3', k: [100, 100, 100], m: 2} : {s: 'one', k: [100, 100, 100], m: 2, hide: true}; }));
+$('gnext').addEventListener('click', newRound);
+if (/[?&]test/.test(location.search)) { window.__ans = () => Q && Q.ans; window.__gans = () => GQ && {choose: '[data-g="' + GQ.ans + '"]'}; }
+// ---------- вкладки
+SC.tabs(document, k => { mode = k; if (k === 'task') { if (!Q) newTask(); else P = Object.assign({}, Q.P, {nolab: !Q.solved}); } if (k === 'game') { if (!GQ) newRound(); } if (k === 'explore') { P = readP(); syncUI(); } });
+// ---------- рисование
+const cv = $('cv');
+function spring(ctx, x, y1, y2, n, C, lw){ const L = y2 - y1, lead = Math.min(10, L * 0.15), w = 9; ctx.strokeStyle = C.ink; ctx.lineWidth = lw || 2; ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y1 + lead);
+  for (let i = 0; i < n; i++) ctx.lineTo(x + (i % 2 ? -w : w), y1 + lead + (L - 2 * lead) * (i + 0.5) / n); ctx.lineTo(x, y2 - lead); ctx.lineTo(x, y2); ctx.stroke(); }
+SC.loop(cv, dt => {
+  const {ctx, W, H} = prep(cv), C = SC.col(); ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, W, H);
+  const top = 24, cx = W / 2, Ln = Math.min(90, H * 0.2), box = 40;
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx - 120, top); ctx.lineTo(cx + 120, top); ctx.stroke();
+  for (let i = -120; i < 120; i += 12) { ctx.beginPath(); ctx.moveTo(cx + i, top); ctx.lineTo(cx + i + 8, top - 8); ctx.lineWidth = 1; ctx.stroke(); }
+  if (P.hide) { text(ctx, '?', cx, H / 2, {align: 'center', size: 48, weight: 700, color: C.ink2}); return; }
+  let p = P, s = p.s, R; if (s === 'ser3' || s === 'par3') { const k = p.k[0], F = p.m * G; R = s === 'ser3' ? {keq: k / 3, x: 3 * F / k, F, parts: [0, 1, 2].map(() => ({F, x: F / k}))} : {keq: 3 * k, x: F / (3 * k), F, parts: [0, 1, 2].map(() => ({F: F / 3, x: F / (3 * k)}))}; } else R = solve(p);
+  const chainN = s === 'ser' ? 2 : s === 'ser3' ? 3 : s === 'mixA' ? 2 : 1, avail = H - top - box - 40 - Ln * chainN, S = Math.max(40, Math.min(3000, avail / Math.max(R.x, 0.005)));
+  const kF = Math.min(60, H * 0.12) / Math.max(R.F, 1), hideF = !!p.nolab;
+  const labF = (x, y, f, i, side) => { side = side || 1; const ax = x + side * 18; arrow(ctx, ax, y + 26, ax, y + 26 - Math.max(8, f * kF), C.a, 2.5); text(ctx, hideF ? 'F' + (i + 1) + ' = ?' : 'F' + (i + 1) + ' = ' + nf(f) + ' Н', ax + side * 8, y + 14, {align: side > 0 ? 'left' : 'right', color: C.a, size: 12, weight: 600}); };
+  const lab = (x, y, i, kv, side) => { side = side || -1; text(ctx, 'k' + (i + 1) + ' = ' + kv, x + side * 14, y - 12, {align: side < 0 ? 'right' : 'left', size: 12, weight: 600}); };
+  let yLoad, xs = [];
+  const plate = (y, w) => { ctx.fillStyle = C.ink2; ctx.fillRect(cx - w / 2, y, w, 6); };
+  if (s === 'one') { const y2 = top + Ln + R.parts[0].x * S; spring(ctx, cx, top, y2, 9, C); lab(cx, (top + y2) / 2, 0, p.k[0]); labF(cx, (top + y2) / 2, R.parts[0].F, 0); yLoad = y2; }
+  if (s === 'ser' || s === 'ser3') { let y = top; R.parts.forEach((pt, i) => { const y2 = y + Ln + pt.x * S; spring(ctx, cx, y, y2, 8, C); lab(cx, (y + y2) / 2, i, p.k[i]); labF(cx, (y + y2) / 2, pt.F, i); if (i < R.parts.length - 1) plate(y2, 30); y = y2 + (i < R.parts.length - 1 ? 6 : 0); }); yLoad = y; }
+  if (s === 'par' || s === 'par3') { const n = R.parts.length, sp = Math.min(150, W * 0.22), y2 = top + Ln + R.x * S; R.parts.forEach((pt, i) => { const x = cx + (i - (n - 1) / 2) * sp, side = i < (n - 1) / 2 ? -1 : i > (n - 1) / 2 ? 1 : 1; spring(ctx, x, top, y2, 9, C); lab(x, (top + y2) / 2, i, p.k[i], side); labF(x, (top + y2) / 2, pt.F, i, side); }); plate(y2, sp * (n - 1) + 40); yLoad = y2 + 6; }
+  if (s === 'mixA') { const y1 = top + Ln + R.parts[0].x * S; spring(ctx, cx, top, y1, 8, C); lab(cx, (top + y1) / 2, 0, p.k[0]); labF(cx, (top + y1) / 2, R.parts[0].F, 0); plate(y1, 2 * Math.min(70, W * 0.11) + 30);
+    const y2 = y1 + 6 + Ln + R.parts[1].x * S, sp = Math.min(70, W * 0.11); [1, 2].forEach((i, j) => { const x = cx + (j ? sp : -sp), side = j ? 1 : -1; spring(ctx, x, y1 + 6, y2, 8, C); lab(x, (y1 + y2) / 2, i, p.k[i], side); labF(x, (y1 + y2) / 2, R.parts[i].F, i, side); }); plate(y2, 2 * sp + 40); yLoad = y2 + 6; }
+  if (s === 'mixB') { const yb = top + Ln + R.x * S, xl = cx - Math.min(75, W * 0.12), xr = cx + Math.min(75, W * 0.12), ym = top + Ln / 2 + R.parts[0].x * S;
+    spring(ctx, xl, top, ym, 5, C); plate(ym, 0); ctx.fillStyle = C.ink2; ctx.fillRect(xl - 14, ym, 28, 5); spring(ctx, xl, ym + 5, yb, 5, C); spring(ctx, xr, top, yb, 9, C);
+    lab(xl, (top + ym) / 2, 0, p.k[0]); lab(xl, (ym + yb) / 2, 1, p.k[1]); lab(xr, (top + yb) / 2, 2, p.k[2], 1);
+    labF(xl, (top + ym) / 2, R.parts[0].F, 0, -1); labF(xl, (ym + yb) / 2, R.parts[1].F, 1, -1); labF(xr, (top + yb) / 2, R.parts[2].F, 2, 1); plate(yb, xr - xl + 40); yLoad = yb + 6; }
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(cx, yLoad); ctx.lineTo(cx, yLoad + 8); ctx.stroke();
+  ctx.fillStyle = C.grid; ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.fillRect(cx - box / 2, yLoad + 8, box, box); ctx.strokeRect(cx - box / 2, yLoad + 8, box, box);
+  text(ctx, fmt(p.m, 1) + ' кг', cx, yLoad + 8 + box / 2, {align: 'center', size: 11, weight: 700}); arrow(ctx, cx, yLoad + 8 + box, cx, yLoad + 8 + box + Math.min(28, R.F * kF * 0.5), C.f1, 3, 'mg', [18, 0]);
+  if (mode === 'explore') $('rd').innerHTML = rows([['жёсткость системы', nf(R.keq) + ' Н/м'], ['вес груза', nf(R.F) + ' Н'], ['полное удлинение', nf(R.x * 100) + ' см']].concat(R.parts.map((pt, i) => ['пружина ' + (i + 1), nf(pt.F) + ' Н, ' + nf(pt.x * 100) + ' см'])));
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Сила упругости, закон Гука, модуль Юнга — Учебник</title>
+<link rel="stylesheet" href="../assets/sim.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<style>
+/* Учебник: одна колонка ~76ch, тренажёры и таблицы — на всю ширину 1180px. Шаги мышления — цветные метки (как в «Движении по окружности»). */
+.book{max-width:1180px;margin:0 auto;display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+.book > *{min-width:0}
+.txt{max-width:76ch;display:grid;gap:12px;font-size:16.5px;line-height:1.6}
+.txt p{margin:0} .txt ul,.txt ol{margin:0;padding-left:22px;display:grid;gap:4px}
+h2.sec{font:700 clamp(21px,3vw,27px)/1.2 var(--body);margin:26px 0 0;scroll-margin-top:12px}
+h3.sub3{font:700 17px var(--body);margin:8px 0 0;scroll-margin-top:12px}
+.step{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:999px;border:1px solid currentColor;margin-right:6px;vertical-align:middle}
+.s1{color:#1D4ED8}.s2{color:#B91C1C}.s3{color:#6D28D9}.s4{color:#047857}.s5{color:#B45309}.s6{color:#475569}
+@media (prefers-color-scheme:dark){.s1{color:#8AB4F8}.s2{color:#F7A3A3}.s3{color:#C4B5FD}.s4{color:#6EE7B7}.s5{color:#FCD34D}.s6{color:#CBD5E1}}
+.def{border-left:4px solid #1D4ED8;background:var(--sheet);border-radius:0 8px 8px 0;padding:10px 14px}
+.law{border-left:4px solid #B91C1C;background:var(--sheet);border-radius:0 8px 8px 0;padding:10px 14px}
+.law b:first-child,.def b:first-child{display:block;margin-bottom:2px}
+.prop{border:1px solid var(--res);background:var(--res-soft);border-radius:8px;padding:10px 14px}
+.prop b:first-child{display:block;font:600 11.5px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--res);margin-bottom:4px}
+.err{border:1px solid var(--bad);background:var(--bad-soft);border-radius:8px;padding:10px 14px}
+.err b:first-child{display:block;font:600 11.5px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--bad);margin-bottom:4px}
+.der{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:12px 16px;display:grid;gap:8px}
+.der ol{padding-left:22px}
+.toc{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:14px 18px;columns:2 260px;column-gap:28px;font-size:15px}
+.toc a{display:block;padding:3px 0;color:var(--ink);text-decoration:none;break-inside:avoid} .toc a:hover{color:var(--f1)}
+.frame{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.frame iframe{display:block;width:100%;height:min(1020px,94vh);border:0}
+.frame .cap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;border-top:1px solid var(--rule);font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.card{display:grid;gap:6px;text-decoration:none;color:inherit;background:var(--sheet);border:1px solid var(--rule);border-left:5px solid var(--f1);border-radius:10px;padding:14px}
+.card:hover{border-color:var(--f1)} .card b{font-size:16px} .card span{font-size:14px;color:var(--ink-2)}
+details.qz{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px 14px}
+details.qz summary{cursor:pointer;font-weight:600}
+details.qz p{margin:8px 0 0}
+figure.fg{margin:0;background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:10px;max-width:520px}
+figure.fg svg{display:block;width:100%;height:auto}
+figure.fg figcaption{font-size:13.5px;color:var(--ink-2);padding-top:6px}
+figure.ph{margin:0;max-width:420px} figure.ph img{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--rule);background:#fff}
+figure.ph figcaption{font-size:13px;color:var(--ink-2);padding-top:6px}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;align-items:start;max-width:1060px}
+.txt > *,.zd > *,.zd details > div > *,.der > *,.der li{min-width:0}
+.katex{font-size:1.06em} .katex-display{margin:.4em 0;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+@media (max-width:600px){[data-sim=lift] canvas{aspect-ratio:4/3.6}}
+.crumbs{font-size:14px;color:var(--ink-2)} .crumbs a{color:var(--f1);text-decoration:none}
+/* задачи */
+.zgr{font:700 15px var(--body);margin:14px 0 0;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em}
+.zd{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:12px 16px;display:grid;gap:8px;scroll-margin-top:12px}
+.zd > p{margin:0}
+.zd .n{font:700 15px var(--mono);margin-right:6px}
+.lv{font:600 11px/1 var(--mono);padding:3px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--ink-2);vertical-align:middle;margin-left:4px;white-space:nowrap}
+.lv.st{border-color:var(--res);color:var(--res)}
+.zd details{border-top:1px dashed var(--rule);padding-top:6px}
+.zd details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--f1)}
+.zd details > div{display:grid;gap:8px;padding-top:6px}
+.zd details p{margin:0}
+.chk{font-size:14.5px;color:var(--ink-2)}
+/* рисунки: цвета сил */
+svg .ln{stroke:currentColor;fill:none;stroke-width:1.6}
+svg .sh{fill:var(--grid);stroke:currentColor;stroke-width:1.6}
+svg .ar{stroke-width:2.6;stroke-linecap:round}
+svg .dsh{stroke-dasharray:5 4;stroke-width:1.8}
+svg .cg{stroke:var(--f1);fill:var(--f1)} svg .cn{stroke:var(--f2);fill:var(--f2)} svg .ct{stroke:var(--aa);fill:var(--aa)}
+svg .cf{stroke:var(--an);fill:var(--an)} svg .cF{stroke:var(--res);fill:var(--res)} svg .ca{stroke:var(--ink-2);fill:var(--ink-2)}
+svg text{font:italic 600 14px var(--body);fill:currentColor;stroke:none} svg text.u{font-style:normal;font-weight:500;font-size:12.5px}
+svg text.cg{fill:var(--f1)} svg text.cn{fill:var(--f2)} svg text.ct{fill:var(--aa)} svg text.cf{fill:var(--an)} svg text.cF{fill:var(--res)}
+
+/* упругость: пружины и демпферы в рисунках строит скрипт по data-spring / data-damper */
+svg .spr{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+svg .dmp{fill:none;stroke:currentColor;stroke-width:1.8}
+svg .hat{fill:none;stroke:currentColor;stroke-width:1.2}
+.figrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;max-width:1060px}
+.figrow figure.fg{max-width:none}
+</style>
+</head>
+<body>
+<div class="book">
+<header class="txt">
+  <div class="crumbs"><a href="index.html">Учебник</a> · Механика · Динамика</div>
+  <h1>Сила упругости. Закон Гука и модуль Юнга</h1>
+  <p class="sub">Откуда берётся сила упругости и почему для материала важна не сила, а напряжение. Виды деформаций, диаграммы растяжения разных материалов, модуль Юнга и коэффициент Пуассона, соединения пружин, вязкоупругость и переход к нерастяжимым нитям и связям. Для 9–10 класса, углублённый уровень.</p>
+  <p class="note">Метки шагов мышления: <span class="step s1">≡ понятие</span><span class="step s2">! закон</span><span class="step s3">↓ вывод · опыт</span><span class="step s4">□ устройство мира</span><span class="step s5">▷ как решать</span><span class="step s6">? проверка</span> · ★ — для 10 класса и тех, кому мало. Продолжение главы <a href="zakony-nyutona.html">«Законы Ньютона»</a>.</p>
+  <p class="note">Во всех числовых примерах $g = 10~\text{м/с}^2$; пружины и нити невесомые, если не сказано иначе.</p>
+</header>
+
+<nav class="toc" aria-label="Содержание">
+  <a href="#deform">1. Деформация и сила упругости</a><a href="#guk">2. Закон Гука</a><a href="#napr">3. Напряжение и относительная деформация</a>
+  <a href="#vidy">4. Виды деформаций и напряжений</a><a href="#diagr">5. Диаграмма растяжения</a><a href="#mater">6. Материалы: модуль Юнга и прочность</a>
+  <a href="#puasson">7. Коэффициент Пуассона</a><a href="#soed">8. Соединения упругих элементов</a><a href="#vyaz">9. Упругость, эластичность, вязкоупругость</a>
+  <a href="#svyazi">10. От пружины к нити: системы со связями</a><a href="#vokrug">11. Упругость вокруг нас</a><a href="#oshibki">12. Типичные ошибки</a>
+  <a href="#zadachi">13. Задачи с решениями</a><a href="#proverka">14. Проверь себя</a><a href="#materialy">Тренажёры по теме</a>
+</nav>
+
+<!-- 1 -->
+<section class="txt">
+  <h2 class="sec" id="deform"><span class="step s1">≡</span><span class="step s1">◇</span>1. Деформация и сила упругости</h2>
+  <div class="def"><b>Деформация</b> — изменение формы или размеров тела под действием сил. <b>Упругая</b> деформация исчезает, когда силу убирают (пружина, мяч, линейка). <b>Пластическая</b> (остаточная) остаётся (пластилин, согнутый гвоздь, вмятина на машине).</div>
+  <div class="def"><b>Сила упругости</b> — сила, с которой деформированное тело действует на тела, вызывающие деформацию. Она направлена против деформации — стремится вернуть телу прежнюю форму.</div>
+  <p><b>Откуда она берётся.</b> Твёрдое тело — решётка атомов, которые держатся друг за друга электрическими силами. В равновесии притяжение и отталкивание соседних атомов уравновешены. Растянули тело — атомы чуть раздвинулись, и притяжение перевесило: тело тянет назад. Сжали — перевесило отталкивание. Поэтому кристалл удобно представлять как <b>шарики на пружинках</b>: вся макроскопическая упругость — это сумма миллиардов микроскопических «пружинок».</p>
+  <div class="der"><b>≈ Оценка: насколько сдвигаются атомы.</b> Расстояние между атомами в стали — около $0{,}25$ нм. Стальная проволока под рабочей нагрузкой удлиняется примерно на $0{,}1~\%$. Значит, каждое межатомное расстояние выросло на $0{,}00025$ нм — в тысячу раз меньше размера атома. Упругие деформации металлов очень малы; заметны они только у резины и пружин, где работает форма, а не сам материал.</div>
+  <div class="prop"><b>Свойство</b>Сила натяжения нити, сила реакции опоры, сила давления на опору и вес — всё это силы упругости. Стол прогибается под книгой на ничтожную долю миллиметра, но именно этот прогиб создаёт силу $N$.</div>
+</section>
+
+<!-- 2 -->
+<section class="txt">
+  <h2 class="sec" id="guk"><span class="step s3">✱</span><span class="step s2">!</span><span class="step s4">⧖</span>2. Закон Гука</h2>
+  <p><b>Опыт.</b> К пружине подвешивают грузы по 100 г и каждый раз измеряют удлинение. Точки на графике «сила — удлинение» ложатся на прямую, проходящую через начало координат. Снимаем грузы — пружина возвращается к прежней длине. Наклон прямой у разных пружин разный: у жёсткой — круче.</p>
+  <div class="law"><b>! Закон Гука.</b> При малых упругих деформациях сила упругости прямо пропорциональна удлинению:
+    $$F_{\text{упр}} = k\,\lvert\Delta l\rvert,\qquad F_{\text{упр},x} = -kx.$$
+    $\Delta l = l - l_0$ — удлинение (изменение длины, а не сама длина), $x$ — смещение конца пружины от положения, где она не деформирована; минус означает, что сила направлена против смещения.</div>
+  <div class="def"><b>Жёсткость</b> $k$ — коэффициент пропорциональности в законе Гука, Н/м. Жёсткость 100 Н/м означает: чтобы растянуть пружину на 1 см, нужна сила 1 Н. Жёсткость — свойство <b>тела</b>: зависит от материала, формы и размеров.</div>
+  <p><b>Из истории.</b> Роберт Гук (1635–1703) открыл закон около 1660 года, а в 1676 году опубликовал его в виде анаграммы — набора букв <i>ceiiinosssttuv</i>, чтобы закрепить первенство и при этом не раскрыть секрет. Разгадку он напечатал в 1678 году в «Лекциях о восстанавливающей силе, или О пружине»: <i>Ut tensio, sic vis</i> — «каково растяжение, такова и сила». Свой закон Гук применял к пружинным часам — спиральная пружина-волосок сделала карманные часы точными.</p>
+  <div class="der"><b>★ Жёсткость витой пружины.</b> Витки цилиндрической пружины работают не на растяжение, а на кручение. Расчёт даёт $$k = \dfrac{G\,d^4}{8\,D^3\,n},$$ где $d$ — диаметр проволоки, $D$ — диаметр витка, $n$ — число витков, $G$ — модуль сдвига материала (раздел 4). Видно: проволока вдвое толще — пружина в 16 раз жёстче; витков вдвое больше — вдвое мягче (это последовательное соединение витков, раздел 8).</div>
+  <div class="prop"><b>Свойство</b>Закон Гука верен, пока деформация мала. Для стали это доли процента, для резины — несколько процентов (дальше её кривая сильно изгибается). За пределом пропорциональности сила растёт уже не линейно, а за пределом упругости появляется остаточная деформация (раздел 5).</div>
+</section>
+
+<!-- 3 -->
+<section class="txt">
+  <h2 class="sec" id="napr"><span class="step s3">↓</span><span class="step s1">[ ]</span>3. Напряжение и относительная деформация</h2>
+  <p>Жёсткость описывает конкретную пружину или конкретный стержень. Толстый трос жёстче тонкого из той же стали, длинный — мягче короткого. Как получить число, которое описывает <b>сам материал</b>? Представим стержень как пучок волокон, а каждое волокно — как цепочку одинаковых пружинок.</p>
+</section>
+<div class="pair">
+  <figure class="fg"><svg viewBox="0 0 460 200" role="img" aria-label="Стержень как пучок пружин: два параллельных вдвое жёстче, два последовательных вдвое мягче">
+    <line class="ln" x1="30" y1="18" x2="110" y2="18" stroke-width="2.5"/><polyline class="spr" data-spring="70,18,70,128,8,8"/><rect x="52" y="128" width="36" height="22" class="sh"/>
+    <text x="84" y="76" class="u">k</text><text x="70" y="182" class="u" text-anchor="middle">один стержень</text>
+    <line class="ln" x1="170" y1="18" x2="290" y2="18" stroke-width="2.5"/><polyline class="spr" data-spring="200,18,200,128,8,8"/><polyline class="spr" data-spring="260,18,260,128,8,8"/>
+    <rect x="186" y="128" width="88" height="7" class="sh"/><rect x="212" y="135" width="36" height="22" class="sh"/>
+    <text x="230" y="182" class="u" text-anchor="middle">S вдвое больше → 2k</text>
+    <line class="ln" x1="350" y1="18" x2="430" y2="18" stroke-width="2.5"/><polyline class="spr" data-spring="390,18,390,78,6,8"/><rect x="380" y="78" width="20" height="5" class="sh"/><polyline class="spr" data-spring="390,83,390,143,6,8"/><rect x="372" y="143" width="36" height="22" class="sh"/>
+    <text x="390" y="182" class="u" text-anchor="middle">l вдвое больше → k/2</text></svg>
+    <figcaption>Два волокна рядом при том же удлинении тянут вдвое сильнее; два куска подряд при той же силе удлиняются вдвое больше.</figcaption></figure>
+  <div class="der"><b>Вывод: $k = ES/l$.</b>
+    <ol><li>Два одинаковых стержня рядом (площадь сечения $S$ удвоилась) при одном и том же удлинении создают вдвое большую силу: $k \propto S$.</li>
+    <li>Два стержня подряд (длина $l$ удвоилась) под одной и той же силой удлиняются каждый на $\Delta l$, вместе — на $2\Delta l$: $k \propto \dfrac1l$.</li>
+    <li>Значит, $k = E\,\dfrac{S}{l}$, где $E$ зависит только от материала. Это <b>модуль Юнга</b>.</li>
+    <li>Подставим в закон Гука $F = k\Delta l$ и перегруппируем: $$\dfrac{F}{S} = E\,\dfrac{\Delta l}{l}.$$ Слева — величина, характеризующая нагрузку на материал, справа — его деформацию.</li></ol></div>
+</div>
+<section class="txt">
+  <div class="def"><b>[ ] Механическое напряжение</b> $\sigma = \dfrac{F}{S}$ — сила упругости, приходящаяся на единицу площади сечения. Единица — паскаль: $1~\text{Па} = 1~\text{Н/м}^2$. На практике — мегапаскали: $1~\text{МПа} = 10^6~\text{Па} = 1~\text{Н/мм}^2$ — удобно, потому что сечения проволок и стержней меряют в мм².</div>
+  <div class="def"><b>[ ] Относительная деформация</b> $\varepsilon = \dfrac{\Delta l}{l_0}$ — во сколько раз удлинение меньше начальной длины. Величина безразмерная; часто её выражают в процентах.</div>
+  <div class="law"><b>! Закон Гука для материала.</b> При малых деформациях напряжение пропорционально относительной деформации: $$\sigma = E\,\varepsilon.$$ <b>Модуль Юнга</b> $E$ (Па) — мера жёсткости материала: какое напряжение нужно, чтобы растянуть его на заданную долю длины. Формально $E$ — напряжение, при котором длина удвоилась бы ($\varepsilon = 1$), если бы закон Гука действовал так далеко; на деле сталь порвётся гораздо раньше. Для стали $E \approx 2\cdot10^{11}~\text{Па} = 200$ ГПа.</div>
+  <p><b>Почему напряжение — отдельная величина, а не просто «сила».</b> Разрушается материал не при определённой силе, а при определённом <b>напряжении</b>. Канат вдвое большего сечения выдерживает вдвое больший груз — напряжение в нём при этом то же. Конструктор считает так: какое напряжение выдержит материал → какое сечение нужно под нагрузку. Напряжение похоже на давление (тоже Н/м²), но давление — частный случай: это сжимающее напряжение, одинаковое во все стороны. Напряжение может быть и растягивающим, и направленным вдоль поверхности (сдвиг).</p>
+  <div class="prop"><b>Свойство</b>Удлинение стержня $\Delta l = \dfrac{Fl}{ES}$: оно растёт с силой и длиной и убывает с сечением и модулем Юнга. Эту формулу проверяют в лабораторной работе «Определение модуля Юнга» — проволоку нагружают и меряют удлинение микрометром или индикатором.</div>
+</section>
+
+<!-- 4 -->
+<section class="txt">
+  <h2 class="sec" id="vidy"><span class="step s1">≡</span>4. Виды деформаций и напряжений</h2>
+  <p>Нагрузить тело можно по-разному. Инженеры говорят о <b>напряжённо-деформированном состоянии</b> (НДС): какие напряжения и деформации возникают в каждой точке. Любое НДС складывается из двух простейших: растяжения-сжатия (напряжение перпендикулярно площадке, «нормальное» $\sigma$) и сдвига (напряжение вдоль площадки, «касательное» $\tau$).</p>
+</section>
+<div class="figrow">
+  <figure class="fg"><svg viewBox="0 0 160 110" role="img" aria-label="Растяжение"><rect x="50" y="40" width="60" height="30" class="ln dsh" opacity=".6"/><rect x="40" y="40" width="80" height="30" class="sh"/>
+    <line class="ar cF" x1="40" y1="55" x2="12" y2="55"/><line class="ar cF" x1="120" y1="55" x2="148" y2="55"/><text x="72" y="92" class="u">σ = F/S</text></svg>
+    <figcaption><b>Растяжение и сжатие.</b> $\sigma = F/S$, $\varepsilon = \Delta l/l$, модуль Юнга $E$. Тросы, колонны, спицы.</figcaption></figure>
+  <figure class="fg"><svg viewBox="0 0 160 110" role="img" aria-label="Сдвиг"><line class="ln" x1="20" y1="85" x2="140" y2="85" stroke-width="2.5"/>
+    <rect x="45" y="35" width="50" height="50" class="ln dsh" opacity=".6"/><polygon points="45,85 95,85 115,35 65,35" class="sh"/>
+    <line class="ar cF" x1="68" y1="27" x2="118" y2="27"/><line class="ar cF" x1="92" y1="94" x2="42" y2="94"/><path class="ln" d="M45 62 A23 23 0 0 1 53.5 63.5"/><text x="49" y="56" class="u">γ</text></svg>
+    <figcaption><b>Сдвиг.</b> Слои скользят друг относительно друга: $\tau = F/S$, угол сдвига $\gamma$, $\tau = G\gamma$ ($G$ — модуль сдвига). Болты, заклёпки, ножницы.</figcaption></figure>
+  <figure class="fg"><svg viewBox="0 0 160 110" role="img" aria-label="Кручение"><rect x="30" y="35" width="100" height="40" class="sh"/><ellipse cx="30" cy="55" rx="8" ry="20" style="fill:var(--sheet);stroke:currentColor;stroke-width:1.6"/><ellipse cx="130" cy="55" rx="8" ry="20" class="ln"/>
+    <path class="ln" d="M30 35 C 70 40, 90 70, 130 75" stroke-dasharray="4 3"/><text x="10" y="100" class="cF" font-size="22">↺</text><text x="130" y="100" class="cF" font-size="22">↻</text></svg>
+    <figcaption><b>Кручение.</b> Сечения поворачиваются друг относительно друга — это сдвиг, растущий от оси к поверхности. Валы, сверло, витки пружины.</figcaption></figure>
+  <figure class="fg"><svg viewBox="0 0 160 110" role="img" aria-label="Изгиб"><path class="ln" d="M15 38 Q80 70 145 38" stroke-width="2"/><path class="ln" d="M15 58 Q80 90 145 58" stroke-width="2"/><path class="ln dsh" d="M15 48 Q80 80 145 48" opacity=".7"/>
+    <line class="ln" x1="15" y1="38" x2="15" y2="58"/><line class="ln" x1="145" y1="38" x2="145" y2="58"/><polygon points="22,62 14,76 30,76" class="ln"/><polygon points="138,62 130,76 146,76" class="ln"/>
+    <line class="ar cF" x1="80" y1="14" x2="80" y2="46"/><text x="96" y="50" class="cf">−</text><text x="96" y="92" class="cn">+</text></svg>
+    <figcaption><b>Изгиб.</b> Верх сжат (−), низ растянут (+), посередине — нейтральный слой без напряжения. Балки, мосты, линейка, шест прыгуна.</figcaption></figure>
+  <figure class="fg"><svg viewBox="0 0 160 110" role="img" aria-label="Всестороннее сжатие"><rect x="48" y="18" width="64" height="64" class="ln dsh" opacity=".6"/><rect x="56" y="26" width="48" height="48" class="sh"/>
+    <line class="ar cF" x1="80" y1="2" x2="80" y2="24"/><line class="ar cF" x1="80" y1="100" x2="80" y2="76"/><line class="ar cF" x1="28" y1="50" x2="54" y2="50"/><line class="ar cF" x1="132" y1="50" x2="106" y2="50"/></svg>
+    <figcaption><b>Всестороннее сжатие.</b> Форма прежняя, меняется объём: $\Delta p = -K\,\dfrac{\Delta V}{V}$ ($K$ — модуль объёмного сжатия). Тела в глубине океана, гидравлика.</figcaption></figure>
+</div>
+<section class="txt">
+  <div class="prop"><b>Свойство</b>При изгибе почти всю нагрузку несут слои, далёкие от нейтрального, а середина «бездельничает». Поэтому балки делают двутавровыми, велосипедные рамы и кости — трубчатыми, а стебли злаков и бамбука — полыми: та же прочность на изгиб при гораздо меньшей массе.</div>
+  <div class="der"><b>★ Модули связаны.</b> У изотропного материала (одинаковые свойства во всех направлениях) только две независимые упругие постоянные. Если известны $E$ и коэффициент Пуассона $\nu$ (раздел 7), то модуль сдвига $G = \dfrac{E}{2(1 + \nu)}$, а модуль объёмного сжатия $K = \dfrac{E}{3(1 - 2\nu)}$. Для стали $G \approx 80$ ГПа, $K \approx 170$ ГПа.</div>
+</section>
+
+<!-- 5 -->
+<section class="txt">
+  <h2 class="sec" id="diagr"><span class="step s3">✱</span><span class="step s1">≡</span>5. Диаграмма растяжения: от упругости до разрыва</h2>
+  <p><b>Опыт.</b> Стандартный образец — стержень с утолщёнными головками — закрепляют в разрывной машине и медленно растягивают, записывая силу и удлинение. В пересчёте на напряжение и относительную деформацию получается <b>диаграмма растяжения</b> $\sigma(\varepsilon)$ — «паспорт» материала. Для мягкой стали на ней видны характерные точки:</p>
+  <ul>
+    <li><b>Предел пропорциональности</b> $\sigma_{\text{пц}}$ — до него график прямой, работает закон Гука, наклон равен $E$.</li>
+    <li><b>Предел упругости</b> $\sigma_{\text{у}}$ — до него после разгрузки образец возвращается к исходной длине. У стали он почти совпадает с $\sigma_{\text{пц}}$.</li>
+    <li><b>Предел текучести</b> $\sigma_{\text{т}}$ — «площадка текучести»: образец удлиняется почти без роста нагрузки, в металле скользят слои кристаллов. У строительной стали около 250 МПа.</li>
+    <li><b>Упрочнение</b> — после площадки материалу снова нужна растущая нагрузка: дефекты кристаллов мешают друг другу.</li>
+    <li><b>Предел прочности</b> $\sigma_{\text{в}}$ — наибольшее напряжение. Дальше на образце образуется <b>шейка</b>, сечение быстро уменьшается, и он рвётся.</li>
+  </ul>
+  <div class="prop"><b>Свойство</b>Если разгрузить образец за пределом упругости, напряжение спадает по прямой, параллельной начальному участку, и остаётся <b>остаточная деформация</b>. При повторной нагрузке материал работает упруго уже до прежней точки разгрузки — стал «прочнее». Это <b>наклёп</b>: так упрочняют проволоку волочением, а медную трубку — многократным изгибом (заметьте, как она «дубеет»).</div>
+  <p><b>Форма диаграммы зависит от материала.</b> Мягкая сталь — площадка текучести и удлинение до разрыва 20–30 %. Алюминий и медь — плавная кривая без площадки; предел текучести определяют условно, по остаточной деформации 0,2 % ($\sigma_{0{,}2}$). Чугун, стекло, бетон, керамика — <b>хрупкие</b>: почти прямая до самого разрыва при деформации меньше процента, без шейки; на сжатие они в несколько раз прочнее, чем на растяжение. Резина — S-образная кривая: мягкая в начале, жёсткая в конце, упругая до сотен процентов, а при разгрузке идёт по другой линии (петля гистерезиса — часть энергии уходит в тепло). Полиэтилен и нейлон — шейка «бежит» вдоль образца (холодное течение): длинные молекулы распрямляются и выстраиваются вдоль нагрузки, после чего материал упрочняется.</p>
+  <div class="prop"><b>Свойство</b>Пластичный материал предупреждает о разрушении — тянется, гнётся, появляется шейка. Хрупкий ломается внезапно. Поэтому для мостов, сосудов под давлением и тросов выбирают пластичные стали, а хрупкий бетон армируют стальными прутьями, которые берут на себя растяжение.</div>
+</section>
+<section class="lab" data-sim="tensile">
+  <div class="stage"><canvas class="wide" aria-label="Образец в разрывной машине и диаграмма растяжения"></canvas>
+    <div class="legend"><span><i style="background:var(--f1)"></i>диаграмма σ(ε)</span><span><i style="background:var(--res)"></i>текущая точка</span><span><i style="background:var(--aa)"></i>разгрузка</span><span><i style="background:var(--ink-2)"></i>характерные точки</span></div></div>
+  <div class="panel"><h2>Разрывная машина</h2>
+    <div class="seg" role="group" aria-label="Материал" id="tsMat"><button data-m="steel" aria-pressed="true">Сталь</button><button data-m="al" aria-pressed="false">Алюминий</button><button data-m="iron" aria-pressed="false">Чугун</button><button data-m="glass" aria-pressed="false">Стекло</button><button data-m="rubber" aria-pressed="false">Резина</button><button data-m="pe" aria-pressed="false">Полиэтилен</button></div>
+    <div class="ctl"><label for="tsE"><span>Растяжение образца ε</span><output id="tsEO"></output></label><input id="tsE" type="range" min="0" max="1000" step="1" value="0"></div>
+    <div class="btns"><button class="b" id="tsPlay">Тянуть</button><button class="b ghost" id="tsUnload">Разгрузить</button><button class="b ghost" id="tsReset">Новый образец</button></div>
+    <dl class="read" id="tsRead"></dl>
+    <p class="note">Растяните сталь за площадку текучести и нажмите «Разгрузить»: какая деформация останется? Сравните, при каких ε рвутся чугун и полиэтилен. Шкала ε у каждого материала своя.</p></div>
+</section>
+
+<!-- 6 -->
+<section class="txt">
+  <h2 class="sec" id="mater"><span class="step s4">□</span>6. Материалы: модуль Юнга и прочность</h2>
+  <p>Модуль Юнга и прочность — <b>разные</b> свойства. $E$ отвечает на вопрос «насколько тянется», предел прочности — «когда порвётся». У стекла и алюминия модули почти одинаковы (≈ 70 ГПа), но стекло хрупкое, а алюминий пластичный. Резина мягче стали в десятки тысяч раз, но её трудно порвать.</p>
+</section>
+<div class="tblwrap"><table class="cmp">
+  <thead><tr><th>Материал</th><th>$E$, ГПа</th><th>Прочность на растяжение, МПа</th><th>$\nu$</th><th>Особенности</th></tr></thead>
+  <tbody>
+  <tr><td><b>Алмаз</b></td><td>≈ 1000–1200</td><td>—</td><td>≈ 0,1</td><td>самый жёсткий природный материал; хрупкий, раскалывается по плоскостям</td></tr>
+  <tr><td><b>Вольфрам</b></td><td>≈ 400</td><td>≈ 1000–1500</td><td>0,28</td><td>нити ламп накаливания, сверхтвёрдые сплавы</td></tr>
+  <tr><td><b>Сталь</b></td><td>200–210</td><td>400–500 (строительная), до 2000 (пружинная, тросовая)</td><td>0,28–0,30</td><td>предел текучести строительной стали ≈ 250 МПа</td></tr>
+  <tr><td><b>Медь</b></td><td>110–130</td><td>≈ 220</td><td>0,34</td><td>очень пластичная: тянется в тонкую проволоку</td></tr>
+  <tr><td><b>Титан и сплавы</b></td><td>≈ 110</td><td>400–1000</td><td>0,32</td><td>прочный и лёгкий (плотность 4500 кг/м³) — авиация, импланты</td></tr>
+  <tr><td><b>Алюминий</b></td><td>≈ 70</td><td>70–100 (чистый), ≈ 450 (дюраль)</td><td>0,33</td><td>втрое мягче стали при втрое меньшей плотности</td></tr>
+  <tr><td><b>Стекло</b></td><td>≈ 70</td><td>30–100</td><td>0,22</td><td>хрупкое; прочность определяют микротрещины на поверхности</td></tr>
+  <tr><td><b>Бетон</b></td><td>25–40</td><td>2–5 (на сжатие 20–60)</td><td>0,2</td><td>на растяжении слабый — армируют сталью</td></tr>
+  <tr><td><b>Кость</b></td><td>15–20</td><td>≈ 130</td><td>≈ 0,3</td><td>композит: белок коллаген + минерал; трубчатая форма</td></tr>
+  <tr><td><b>Дерево (сосна)</b></td><td>≈ 10 вдоль волокон</td><td>≈ 80 вдоль волокон</td><td>—</td><td>поперёк волокон в 10–20 раз мягче и слабее</td></tr>
+  <tr><td><b>Паутина</b> (каркасная нить)</td><td>≈ 10</td><td>≈ 1000</td><td>—</td><td>прочна как хорошая сталь при плотности в 6 раз меньше; тянется на 25–30 %</td></tr>
+  <tr><td><b>Нейлон</b></td><td>2–4</td><td>50–80</td><td>≈ 0,4</td><td>леска, струны, канаты</td></tr>
+  <tr><td><b>Полиэтилен</b></td><td>0,2–1</td><td>10–30</td><td>≈ 0,45</td><td>пакеты, трубы; холодное течение</td></tr>
+  <tr><td><b>Резина</b></td><td>0,001–0,1</td><td>15–25</td><td>≈ 0,5</td><td>упругая до сотен процентов, объём почти не меняет</td></tr>
+  <tr><td><b>Пробка</b></td><td>≈ 0,02</td><td>—</td><td>≈ 0</td><td>при сжатии почти не раздаётся в стороны</td></tr>
+  </tbody></table></div>
+<section class="txt">
+  <p class="note">Значения типичные: у реальных образцов они зависят от марки, обработки и температуры.</p>
+  <div class="der"><b>≈ Оценка: разрывная длина.</b> Какой длины проволока оборвётся под собственным весом? Вес куска длиной $L$ равен $\rho SLg$, напряжение у верхнего конца $\sigma = \rho gL$ — площадь сечения сократилась. Обрыв при $\sigma = \sigma_{\text{в}}$: $$L = \dfrac{\sigma_{\text{в}}}{\rho g}.$$ Для строительной стали ($500$ МПа, $7800~\text{кг/м}^3$) — около 6 км, для тросовой ($2000$ МПа) — около 25 км, для кевлара ($3000$ МПа, $1440~\text{кг/м}^3$) — около 200 км. Для «космического лифта» на геостационарную орбиту нужны тысячи километров: в теории такое могут дать только углеродные нанотрубки.</div>
+</section>
+<div class="frame"><iframe src="../trenazhery/provoloka.html" title="Тренажёр «Проволока: модуль Юнга и прочность»" loading="lazy"></iframe>
+  <div class="cap"><span>Тренажёр «Проволока»: материал, длина, диаметр, груз → напряжение и удлинение; задачи «найдите E» и «подберите сечение», игра «Выдержит или порвётся?».</span><a href="../trenazhery/provoloka.html">Открыть отдельно →</a></div></div>
+
+<!-- 7 -->
+<section class="txt">
+  <h2 class="sec" id="puasson"><span class="step s1">≡</span><span class="step s3">↓</span>7. Коэффициент Пуассона</h2>
+  <p>Растяните резинку — она станет тоньше. Сожмите ластик — он раздастся в стороны. Продольная деформация почти всегда сопровождается поперечной противоположного знака.</p>
+  <div class="def"><b>Коэффициент Пуассона</b> $\nu$ — отношение поперечной относительной деформации к продольной, взятое с минусом: $$\nu = -\dfrac{\varepsilon_{\perp}}{\varepsilon},\qquad \varepsilon_{\perp} = \dfrac{\Delta d}{d}.$$ Величина безразмерная. Для стали $\nu \approx 0{,}3$: если проволоку растянуть на 1 %, её диаметр уменьшится на 0,3 %.</div>
+  <div class="der"><b>Вывод: как меняется объём.</b>
+    <ol><li>Объём стержня $V \propto l\,d^2$. После деформации $l \to l(1 + \varepsilon)$, $d \to d(1 + \varepsilon_\perp)$.</li>
+    <li>$\dfrac{V'}{V} = (1 + \varepsilon)(1 + \varepsilon_\perp)^2 \approx 1 + \varepsilon + 2\varepsilon_\perp$ — при малых деформациях произведения малых величин отбрасываем.</li>
+    <li>Подставим $\varepsilon_\perp = -\nu\varepsilon$: $$\dfrac{\Delta V}{V} \approx \varepsilon\,(1 - 2\nu).$$</li>
+    <li>При $\nu = 0{,}5$ объём не меняется — так ведут себя резина и жидкости. При $\nu &lt; 0{,}5$ растянутое тело немного увеличивает объём. Теория упругости для изотропных материалов допускает $-1 &lt; \nu \le 0{,}5$.</li></ol></div>
+  <ul>
+    <li><b>Резина</b>, $\nu \approx 0{,}5$ — почти несжимаема: сожмёшь — раздаётся в стороны ровно настолько, чтобы сохранить объём.</li>
+    <li><b>Пробка</b>, $\nu \approx 0$ — сжимается почти без расширения в стороны. Поэтому пробку легко вдавить в горлышко бутылки, а резиновую — гораздо труднее: она распирает горлышко.</li>
+    <li><b>Ауксетики</b>, $\nu &lt; 0$ — при растяжении становятся <i>толще</i>. Это специальные пены и сотовые структуры с «вогнутыми» ячейками: при растяжении ячейки распрямляются во все стороны. Их используют в защитной экипировке и медицинских стентах.</li>
+  </ul>
+  <p><b>Из истории.</b> Симеон Дени Пуассон в 1829 году, исходя из модели атомов, связанных центральными силами, получил, что для всех тел $\nu = \tfrac14$. Опыты не подтвердили «универсального» значения: у металлов оказалось около 0,3, у резины — почти 0,5. Ошибка подсказала, что силы между атомами устроены сложнее, чем думал Пуассон.</p>
+</section>
+<section class="lab" data-sim="poisson">
+  <div class="stage"><canvas class="wide" aria-label="Растяжение бруска и его поперечное сужение"></canvas>
+    <div class="legend"><span><i style="background:var(--ink-2)"></i>до деформации</span><span><i style="background:var(--f1)"></i>после</span><span><i style="background:var(--res)"></i>сила</span></div></div>
+  <div class="panel"><h2>Брусок под нагрузкой</h2>
+    <div class="seg" role="group" aria-label="Материал" id="psMat"><button data-nu="0.3" aria-pressed="true">Сталь 0,3</button><button data-nu="0.49" aria-pressed="false">Резина 0,49</button><button data-nu="0" aria-pressed="false">Пробка 0</button><button data-nu="-0.4" aria-pressed="false">Ауксетик −0,4</button></div>
+    <div class="ctl"><label for="psE"><span>Продольная деформация ε (+ растяжение, − сжатие)</span><output id="psEO"></output></label><input id="psE" type="range" min="-20" max="30" step="1" value="15"></div>
+    <div class="ctl"><label for="psN"><span>Коэффициент Пуассона ν</span><output id="psNO"></output></label><input id="psN" type="range" min="-0.9" max="0.5" step="0.01" value="0.3"></div>
+    <dl class="read" id="psRead"></dl>
+    <p class="note">Деформации для наглядности сильно преувеличены. Найдите ν, при котором объём не меняется. Что происходит с объёмом ауксетика при растяжении?</p></div>
+</section>
+
+<!-- 8 -->
+<section class="txt">
+  <h2 class="sec" id="soed"><span class="step s3">↓</span><span class="step s5">▷</span>8. Соединения упругих элементов</h2>
+  <p>Пружины, тросы, стержни и подвески соединяют друг с другом. Систему можно заменить одной эквивалентной пружиной — её жёсткость находят из двух правил: где одна и та же сила и где одно и то же удлинение.</p>
+</section>
+<div class="pair">
+  <figure class="fg"><svg viewBox="0 0 480 230" role="img" aria-label="Последовательное, параллельное соединение и брусок между двумя пружинами">
+    <line class="ln" x1="30" y1="14" x2="100" y2="14" stroke-width="2.5"/><polyline class="spr" data-spring="65,14,65,84,6,8"/><rect x="55" y="84" width="20" height="5" class="sh"/><polyline class="spr" data-spring="65,89,65,160,6,8"/><rect x="50" y="160" width="30" height="24" class="sh"/>
+    <text x="80" y="52" class="u">k₁</text><text x="80" y="126" class="u">k₂</text><text x="65" y="212" class="u" text-anchor="middle">последовательно</text>
+    <line class="ln" x1="150" y1="14" x2="260" y2="14" stroke-width="2.5"/><polyline class="spr" data-spring="175,14,175,140,8,8"/><polyline class="spr" data-spring="235,14,235,140,8,8"/>
+    <rect x="160" y="140" width="90" height="7" class="sh"/><rect x="190" y="147" width="30" height="24" class="sh"/><text x="152" y="80" class="u">k₁</text><text x="244" y="80" class="u">k₂</text><text x="205" y="212" class="u" text-anchor="middle">параллельно</text>
+    <line class="ln" x1="300" y1="100" x2="300" y2="176" stroke-width="2.5"/><line class="ln" x1="470" y1="100" x2="470" y2="176" stroke-width="2.5"/><line class="ln" x1="300" y1="176" x2="470" y2="176"/>
+    <polyline class="spr" data-spring="300,150,362,150,5,8"/><rect x="362" y="132" width="40" height="44" class="sh"/><polyline class="spr" data-spring="402,150,470,150,5,8"/>
+    <text x="325" y="132" class="u">k₁</text><text x="430" y="132" class="u">k₂</text><text x="385" y="212" class="u" text-anchor="middle">тоже параллельно!</text></svg>
+    <figcaption>Последовательно — общая сила, удлинения складываются. Параллельно — общее удлинение, силы складываются. Брусок между двумя пружинами: при сдвиге одна растягивается, другая сжимается, удлинения одинаковы, а силы складываются.</figcaption></figure>
+  <div class="der"><b>Вывод.</b>
+    <ol><li><b>Последовательно.</b> Пружины невесомые, поэтому сила в каждой одна и та же — $F$ (на невесомую пружину равнодействующая обязана быть нулём). Удлинения складываются: $$x = x_1 + x_2 = \dfrac{F}{k_1} + \dfrac{F}{k_2} \;\Rightarrow\; \dfrac{1}{k} = \dfrac{1}{k_1} + \dfrac{1}{k_2}.$$</li>
+    <li><b>Параллельно</b> (планка не перекашивается): удлинение одно и то же, силы складываются: $$F = k_1x + k_2x \;\Rightarrow\; k = k_1 + k_2.$$</li>
+    <li>Последовательное соединение мягче самой мягкой пружины, параллельное — жёстче самой жёсткой.</li></ol></div>
+</div>
+<section class="txt">
+  <div class="prop"><b>Свойство</b>Разрезанная пополам пружина вдвое жёстче целой: целая — это две половинки последовательно. Кусок длиной $\tfrac1n$ имеет жёсткость $nk$. Это то же самое, что $k = ES/l$: стержень — пучок волокон (площади складываются, как у параллельных пружин) и цепочка кусков (длины складываются, как у последовательных).</div>
+  <p>Те же формулы встретятся в электричестве: так соединяются конденсаторы. Последовательное соединение пружин похоже на параллельное соединение резисторов, а не на последовательное.</p>
+</section>
+<div class="frame"><iframe src="../trenazhery/pruzhiny.html" title="Тренажёр «Соединение пружин»" loading="lazy"></iframe>
+  <div class="cap"><span>Тренажёр «Соединение пружин»: последовательно, параллельно и смешанно; силы и удлинения каждой пружины; задачи; игра «Собери жёсткость».</span><a href="../trenazhery/pruzhiny.html">Открыть отдельно →</a></div></div>
+
+<!-- 9 -->
+<section class="txt">
+  <h2 class="sec" id="vyaz"><span class="step s1">≡</span><span class="step s3">↓</span>9. Упругость, эластичность, вязкоупругость</h2>
+  <p><b>Упругость — это и есть эластичность.</b> Слово пришло от латинского <i>elasticus</i>; по-английски закон Гука — закон <i>elasticity</i>, модуль Юнга — <i>elastic modulus</i>. В быту «эластичный» значит «легко тянется»: резинка, трикотаж. В физике упругость — способность <b>вернуть</b> форму, и по этой мерке сталь — превосходно упругий материал: возвращается точно и почти без потерь энергии. Поэтому из стали делают пружины и камертоны, а не из резины, хотя резина «эластичнее».</p>
+  <p>Идеально упругих тел нет. У реальных материалов деформация чуть запаздывает за силой, и часть энергии уходит в тепло — это <b>внутреннее трение</b>. Мяч не подпрыгивает до прежней высоты, натянутая гитарная струна со временем «садится», пластилиновая модель оплывает. Чтобы это описать, к пружине добавляют второй элемент.</p>
+  <div class="def"><b>◇ Демпфер</b> (вязкий элемент) — поршень в цилиндре с маслом. Сила сопротивления пропорциональна скорости растяжения: $F = b\,v$, где $b$ — коэффициент вязкого сопротивления, Н·с/м. Пружина «помнит» деформацию, демпфер — только скорость: остановили — и сила исчезла.</div>
+</section>
+<div class="pair">
+  <figure class="fg"><svg viewBox="0 0 480 160" role="img" aria-label="Модели Максвелла и Кельвина–Фойгта">
+    <line class="ln" x1="20" y1="35" x2="20" y2="105" stroke-width="2.5"/><polyline class="spr" data-spring="20,70,110,70,6,9"/><g data-damper="110,70,200,70,22"></g><circle cx="200" cy="70" r="3" fill="currentColor"/><line class="ar cF" x1="200" y1="70" x2="235" y2="70"/>
+    <text x="110" y="135" class="u" text-anchor="middle">Максвелл: последовательно</text>
+    <line class="ln" x1="270" y1="25" x2="270" y2="115" stroke-width="2.5"/><polyline class="spr" data-spring="270,45,420,45,7,9"/><g data-damper="270,95,420,95,22"></g><line class="ln" x1="420" y1="38" x2="420" y2="102" stroke-width="2.5"/><line class="ar cF" x1="420" y1="70" x2="458" y2="70"/>
+    <text x="365" y="135" class="u" text-anchor="middle">Кельвин–Фойгт: параллельно</text></svg>
+    <figcaption>Две простейшие модели вязкоупругости. Пружина — упругость, демпфер — вязкость.</figcaption></figure>
+  <div class="txt" style="font-size:15.5px">
+    <p><b>Модель Максвелла</b> (последовательно). Резко потянули — сначала растягивается пружина: тело ведёт себя как твёрдое. Держим растяжение — демпфер понемногу уступает, пружина сокращается, и сила спадает: <b>релаксация напряжения</b>. Держим постоянную силу — тело течёт без конца, как жидкость.</p>
+    <p><b>Модель Кельвина–Фойгта</b> (параллельно). Мгновенно растянуть нельзя — мешает демпфер. Под постоянной силой тело ползёт к удлинению $F/k$ всё медленнее: <b>ползучесть</b>. Убрали силу — так же плавно возвращается.</p></div>
+</div>
+<section class="txt">
+  <div class="der"><b>★ Вывод: релаксация в модели Максвелла.</b>
+    <ol><li>Общее растяжение держим постоянным: $x_{\text{пр}} + x_{\text{д}} = \text{const}$. Значит, пружина сокращается с той же скоростью, с какой удлиняется демпфер: $\dfrac{dx_{\text{пр}}}{dt} = -v_{\text{д}}$.</li>
+    <li>Сила в обоих элементах одна (они последовательно): $F = kx_{\text{пр}} = bv_{\text{д}}$.</li>
+    <li>Отсюда $\dfrac{dF}{dt} = k\dfrac{dx_{\text{пр}}}{dt} = -\dfrac{k}{b}F$: сила убывает тем быстрее, чем она больше.</li>
+    <li>Решение — экспонента: $$F(t) = F_0\,e^{-t/\tau},\qquad \tau = \dfrac{b}{k}.$$ Проверьте подстановкой: производная $e^{-t/\tau}$ равна $-\tfrac1\tau e^{-t/\tau}$. За каждое время $\tau$ (<b>время релаксации</b>) сила уменьшается в $e \approx 2{,}7$ раза.</li>
+    <li>Для модели Кельвина–Фойгта под постоянной силой $F$ так же получается $x(t) = \dfrac{F}{k}\left(1 - e^{-t/\tau}\right)$ с тем же $\tau = b/k$; начальная скорость $F/b$.</li></ol></div>
+  <div class="prop"><b>Свойство</b>Твёрдое тело или жидкость — зависит от того, <b>как долго смотреть</b>. Если нагрузка действует гораздо меньше времени релаксации $\tau$, вязкоупругое тело ведёт себя как упругое; если гораздо дольше — течёт. Это отношение называют числом Деборы — в честь библейской пророчицы, певшей, что «горы текли пред Господом»: на геологических временах текут и горы.</div>
+  <ul>
+    <li><b>«Умный пластилин»</b> (хендгам): брошенный об пол, отскакивает как мяч — удар короче $\tau$; оставленный на столе, за ночь растекается в лужицу. Модель Максвелла.</li>
+    <li><b>Пек в Брисбене.</b> С 1927 года в Университете Квинсленда стоит воронка с битумным пеком — его можно расколоть молотком, но он течёт: капля падает примерно раз в десять лет.</li>
+    <li><b>Асфальт</b> летом медленно продавливается колёсами грузовиков — образуется колея; <b>ледники</b> текут вниз по долинам.</li>
+    <li><b>Матрас и подушка с «памятью формы»</b> из вязкоупругой пены, <b>подвеска автомобиля</b> (пружина + амортизатор), <b>мышцы, сухожилия и хрящи</b>, подошвы кроссовок — модель Кельвина–Фойгта: мягко принимают нагрузку и не раскачиваются.</li>
+  </ul>
+</section>
+<section class="lab" data-sim="visco">
+  <div class="stage"><canvas class="wide" aria-label="Модели вязкоупругости: схема и графики"></canvas>
+    <div class="legend"><span><i style="background:var(--f1)"></i>удлинение x(t)</span><span><i style="background:var(--res)"></i>сила F(t)</span><span><i style="background:var(--ink-2)"></i>чистая пружина</span></div></div>
+  <div class="panel"><h2>Пружина и демпфер</h2>
+    <div class="seg" role="group" aria-label="Модель"><button data-vm="mx" aria-pressed="true">Максвелл</button><button data-vm="kv" aria-pressed="false">Кельвин–Фойгт</button></div>
+    <div class="seg" role="group" aria-label="Опыт"><button data-vx="hold" aria-pressed="true">Растянуть и держать</button><button data-vx="force" aria-pressed="false">Постоянная сила</button></div>
+    <div class="ctl"><label for="vsK"><span>Жёсткость пружины k</span><output id="vsKO"></output></label><input id="vsK" type="range" min="50" max="500" step="10" value="200"></div>
+    <div class="ctl"><label for="vsB"><span>Вязкость демпфера b</span><output id="vsBO"></output></label><input id="vsB" type="range" min="20" max="1000" step="10" value="400"></div>
+    <div class="btns"><button class="b" id="vsGo">Начать опыт</button></div>
+    <dl class="read" id="vsRead"></dl>
+    <p class="note">Опыт длится 8 с. «Растянуть и держать» — конец мгновенно смещают на 5 см (у Кельвина–Фойгта мгновенно не выйдет — посмотрите, что покажет сила). «Постоянная сила» — 10 Н в течение 4 с, затем силу убирают.</p></div>
+</section>
+
+<!-- 10 -->
+<section class="txt">
+  <h2 class="sec" id="svyazi"><span class="step s1">◇</span><span class="step s3">↓</span><span class="step s5">#</span>10. От пружины к нити: системы со связями</h2>
+  <p>В главе «Законы Ньютона» нити были нерастяжимыми, а поверхности — недеформируемыми. Как это согласуется с законом Гука?</p>
+  <div class="der"><b>≈ Нить — очень жёсткая пружина.</b> Стальная нить длиной 1 м и сечением $0{,}5~\text{мм}^2$: $k = \dfrac{ES}{l} = \dfrac{2\cdot10^{11}\cdot5\cdot10^{-7}}{1} = 10^5~\text{Н/м}$. Под силой 10 Н она удлинится на $0{,}1$ мм — на фоне метровых перемещений грузов это ничто. Поэтому модель «нерастяжимая нить» почти всегда хороша.</div>
+  <p><b>Парадокс.</b> Если нить совсем не растягивается, закон Гука даёт $T = k\cdot0$? Нет: при $k \to \infty$ удлинение $\Delta l = T/k \to 0$, а сила $T$ остаётся конечной. Произведение «бесконечность × ноль» закон Гука вычислить не может — <b>натяжение нерастяжимой нити закон Гука не определяет</b>. Его находят иначе: из второго закона Ньютона и условия связи (тела на нити движутся с равными ускорениями).</p>
+  <div class="def"><b>◇ Идеальная связь</b> — ограничение на движение тел (нерастяжимая нить, недеформируемая опора, шарнир), которое создаёт <b>силу реакции связи</b>: натяжение $T$, реакцию опоры $N$. Величина этой силы заранее не известна — она <b>подстраивается</b> и оказывается ровно такой, какая нужна, чтобы связь выполнялась. Так же ведёт себя сила трения покоя.</div>
+  <p>Тренажёр ниже показывает переход «пружина → нить». Два бруска связаны пружиной, передний тянут силой $F$. У мягкой пружины бруски заметно колеблются друг относительно друга, а натяжение «гуляет». Чем жёстче пружина, тем быстрее и мельче колебания, а среднее натяжение всё время равно одному и тому же числу $\dfrac{m_{\text{задн}}}{m_1 + m_2}F$ — ответу для нерастяжимой нити. Добавьте вязкость — колебания затухнут, и останется ровно решение со связью.</p>
+</section>
+<div class="frame"><iframe src="../trenazhery/nit.html" title="Тренажёр «От пружины к нити»" loading="lazy"></iframe>
+  <div class="cap"><span>Тренажёр «От пружины к нити»: жёсткость от мягкой пружины до стальной нити, колебания и среднее натяжение; задачи; игра «Порвётся ли нить?».</span><a href="../trenazhery/nit.html">Открыть отдельно →</a></div></div>
+<section class="txt">
+  <h3 class="sub3">★ Когда жёсткой модели не хватает: статически неопределимые системы</h3>
+  <p>Иногда связей больше, чем нужно, чтобы удержать тело. Груз висит на двух проволоках, а планка, к которой он подвешен, опускается без перекоса. Законы Ньютона дают одно уравнение $T_1 + T_2 = mg$ и две неизвестные силы. Если проволоки «абсолютно жёсткие», задача не решается: нагрузку можно поделить между ними как угодно. Решение даёт упругость: удлинения проволок одинаковы, значит, $$\dfrac{T_1}{k_1} = \dfrac{T_2}{k_2}:$$ <b>нагрузку берёт на себя более жёсткий элемент.</b> Это условие совместности деформаций.</p>
+</section>
+<div class="pair">
+  <figure class="fg"><svg viewBox="0 0 300 220" role="img" aria-label="Груз на планке, подвешенной на стальной и медной проволоках">
+    <line class="ln" x1="40" y1="15" x2="260" y2="15" stroke-width="2.5"/><line class="ln" x1="80" y1="15" x2="80" y2="130" stroke-width="2"/><line class="ln" x1="220" y1="15" x2="220" y2="130" stroke-width="2" style="stroke:var(--an)"/>
+    <text x="86" y="60" class="u">сталь</text><text x="226" y="60" class="u">медь</text><rect x="60" y="130" width="180" height="9" class="sh"/>
+    <line class="ln" x1="127" y1="139" x2="127" y2="168"/><rect x="107" y="168" width="40" height="30" class="sh"/><text x="127" y="188" class="u" text-anchor="middle">m</text>
+    <line class="ar ct" x1="66" y1="128" x2="66" y2="80"/><text x="48" y="88" class="ct">T₁</text><line class="ar ct" x1="234" y1="128" x2="234" y2="104"/><text x="242" y="112" class="ct">T₂</text>
+    <line class="ar cg" x1="160" y1="183" x2="160" y2="214"/><text x="166" y="210" class="cg">mg</text></svg>
+    <figcaption>Стальная проволока вдвое жёстче медной той же длины и сечения — и тянет вдвое больше. Груз висит ближе к стальной, на трети расстояния, иначе планка перекосится.</figcaption></figure>
+  <div class="txt" style="font-size:15.5px">
+    <p>Так же устроены <b>стол на четырёх ножках</b> (почему он качается на неровном полу и какая ножка сколько держит, определяют деформации пола и ножек), <b>балка на трёх опорах</b>, <b>железобетон</b> (сталь и бетон удлиняются одинаково, и сталь, будучи в 7–8 раз жёстче, берёт основную часть растягивающей нагрузки).</p>
+    <p>Модели «абсолютно твёрдого тела» и «нерастяжимой нити» отвечают на вопросы о движении. Вопрос «как распределится нагрузка по лишним связям» заставляет вернуться к упругости.</p></div>
+</div>
+
+<!-- 11 -->
+<section class="txt">
+  <h2 class="sec" id="vokrug"><span class="step s4">□</span><span class="step s4">↗</span>11. Упругость вокруг нас</h2>
+</section>
+<div class="tblwrap"><table class="cmp">
+  <thead><tr><th>Где</th><th>Что работает</th><th>Как это устроено</th></tr></thead>
+  <tbody>
+  <tr><td><b>Динамометр, пружинные весы, безмен</b></td><td>закон Гука</td><td>удлинение пружины пропорционально силе — шкала равномерная</td></tr>
+  <tr><td><b>Электронные весы, датчики веса в лифтах и на мостах</b></td><td>$\sigma = E\varepsilon$</td><td>тензодатчик — решётка из тонкой фольги, наклеенная на упругий элемент: при деформации на доли процента меняется её электрическое сопротивление</td></tr>
+  <tr><td><b>Вантовые и висячие мосты</b></td><td>растяжение стальных канатов</td><td>Русский мост во Владивостоке держится на вантах из тысяч стальных проволок; его центральный пролёт — 1104 м</td></tr>
+  <tr><td><b>Сейсмоизоляция зданий</b></td><td>сдвиг резины</td><td>здание стоит на слоёных резинометаллических опорах: при землетрясении резина работает на сдвиг, и колебания грунта почти не передаются вверх</td></tr>
+  <tr><td><b>Прыжок с шестом</b></td><td>изгиб</td><td>стекло- или углепластиковый шест сгибается почти в дугу, запасает энергию разбега и распрямляясь поднимает спортсмена выше 6 м</td></tr>
+  <tr><td><b>Лук, арбалет, батут, теннисная ракетка</b></td><td>упругая деформация, изгиб и растяжение</td><td>деформированное тело возвращает энергию стреле, прыгуну, мячу</td></tr>
+  <tr><td><b>Гитара и скрипка</b></td><td>натяжение струн</td><td>высота звука зависит от натяжения: колки растягивают струну, а дерево корпуса выдерживает суммарную силу в сотни ньютонов</td></tr>
+  <tr><td><b>Кроссовки, матрасы, наушники</b></td><td>вязкоупругость</td><td>вязкоупругие пены гасят удар и медленно принимают форму тела</td></tr>
+  </tbody></table></div>
+<section class="txt">
+  <p><b>Из истории.</b> Модуль, который носит имя Томаса Юнга, описывали ещё Эйлер и Риккати в XVIII веке, но именно Юнг в «Лекциях по натуральной философии» (1807) ввёл характеристику жёсткости материала, не зависящую от размеров образца. Юнг был врачом, физиком (интерференция света — его опыт с двумя щелями) и одним из первых, кто начал расшифровывать египетские иероглифы.</p>
+</section>
+
+<!-- 12 -->
+<section class="txt">
+  <h2 class="sec" id="oshibki"><span class="step s5">✗</span>12. Типичные ошибки</h2>
+  <div class="err"><b>Ошибка 1. «В законе Гука — длина пружины»</b>В законе Гука — удлинение $\Delta l = l - l_0$. Пружина длиной 10 см в недеформированном состоянии, растянутая до 12 см, тянет силой $k\cdot0{,}02$ м, а не $k\cdot0{,}12$ м.</div>
+  <div class="err"><b>Ошибка 2. «Жёсткость — свойство материала»</b>Жёсткость — свойство тела: короткий кусок той же пружины жёстче. Свойство материала — модуль Юнга $E$; связь $k = ES/l$.</div>
+  <div class="err"><b>Ошибка 3. «Две пружины последовательно — жёстче одной»</b>Мягче: удлинения складываются при той же силе. Жёстче — параллельное соединение.</div>
+  <div class="err"><b>Ошибка 4. «Брусок между двумя пружинами — последовательное соединение»</b>Это параллельное соединение: удлинения пружин (растяжение одной и сжатие другой) одинаковы, а силы на брусок складываются, $k = k_1 + k_2$.</div>
+  <div class="err"><b>Ошибка 5. «Больше модуль Юнга — значит, прочнее»</b>$E$ — про жёсткость, прочность — про предел прочности. Стекло и алюминий одинаково жёсткие, но стекло хрупкое. Резина в десятки тысяч раз мягче стали, а растянуть её вдвое можно без разрыва.</div>
+  <div class="err"><b>Ошибка 6. «Трос тянут с двух концов силами по 100 Н — натяжение 200 Н»</b>Натяжение 100 Н: так же натянут трос, привязанный к стене и растягиваемый одной силой 100 Н, — стена тоже тянет с силой 100 Н. Динамометр в такой ситуации показывает 100 Н.</div>
+  <div class="err"><b>Ошибка 7. «Нить нерастяжима, значит, по закону Гука T = 0»</b>У нерастяжимой нити $k \to \infty$, $\Delta l \to 0$, а $T$ конечно и находится из уравнений движения и условия связи.</div>
+  <div class="err"><b>Ошибка 8. «Напряжение — это сила»</b>Напряжение — сила на единицу площади, $\sigma = F/S$, измеряется в паскалях. Одна и та же сила в тонкой проволоке создаёт большое напряжение, в толстом стержне — малое.</div>
+</section>
+
+<!-- 13 -->
+<section class="txt" id="zadachi">
+  <h2 class="sec"><span class="step s5">▷</span>13. Задачи с решениями</h2>
+  <p>Задачи сгруппированы по методам. Сначала решите сами, потом откройте ответ, решение — если не сошлось. Проверка в решениях — размерностью и правдоподобием числа. Ответы проверены вторым независимым решением.</p>
+
+  <p class="zgr">А. Закон Гука и жёсткость</p>
+  <div class="zd" id="z1"><p><span class="n">1.</span>Под грузом 200 г пружина удлинилась на 4 см. Найдите её жёсткость. На сколько она удлинится под грузом 500 г? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>$k = 50$ Н/м; удлинение 10 см.</p></div></details>
+    <details><summary>Решение</summary><div><p>Груз в равновесии: сила упругости уравновешивает силу тяжести.</p>
+      $$\begin{aligned} kx_1 &= m_1g,\\ k &= \dfrac{m_1g}{x_1} = \dfrac{0{,}2\cdot10}{0{,}04} = 50~\text{Н/м},\\ x_2 &= \dfrac{m_2g}{k} = \dfrac{0{,}5\cdot10}{50} = 0{,}1~\text{м}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\dfrac{mg}{x}\right] = \dfrac{\text{кг}\cdot\text{м/с}^2}{\text{м}} = \text{Н/м}$. Правдоподобие: груз в 2,5 раза тяжелее — удлинение в 2,5 раза больше.</p></div></details></div>
+
+  <div class="zd" id="z2"><p><span class="n">2.</span>Пружину жёсткостью 40 Н/м разрезали на две части, длины которых относятся как 1 : 3. Найдите жёсткости частей. <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>160 Н/м (короткая часть) и ≈ 53 Н/м (длинная, точно $160/3$).</p></div></details>
+    <details><summary>Решение</summary><div><p>Жёсткость обратно пропорциональна длине: $k = ES/l$. Части имеют длины $\tfrac14 l$ и $\tfrac34 l$:</p>
+      $$\begin{aligned} k_1 &= 4k = 160~\text{Н/м},\\ k_2 &= \dfrac43 k = \dfrac{160}{3} \approx 53~\text{Н/м}. \end{aligned}$$
+      <p class="chk">Проверка: соединим части обратно последовательно: $\dfrac{1}{160} + \dfrac{3}{160} = \dfrac{1}{40}$ — получилась исходная пружина. Размерность: $[k] = \text{Н/м}$.</p></div></details></div>
+
+  <div class="zd" id="z3"><p><span class="n">3.</span>Груз массой 1 кг висит на пружине жёсткостью 200 Н/м в лифте, который разгоняется вверх с ускорением 2 м/с². Найдите удлинение пружины. Каким оно станет, если лифт будет свободно падать? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>6 см; при свободном падении — 0.</p></div></details>
+    <details><summary>Решение</summary><div><p>Ось — вверх. На груз действуют $kx$ (вверх) и $mg$ (вниз):</p>
+      $$\begin{aligned} kx - mg &= ma,\\ x &= \dfrac{m(g + a)}{k} = \dfrac{1\cdot12}{200} = 0{,}06~\text{м}. \end{aligned}$$
+      <p>При свободном падении $a = -g$: $x = 0$ — невесомость, пружина не растянута.</p>
+      <p class="chk">Проверка: $\left[\dfrac{m(g + a)}{k}\right] = \dfrac{\text{Н}}{\text{Н/м}} = \text{м}$. В покое было бы 5 см; при ускорении вверх больше — правдоподобно.</p></div></details></div>
+
+  <div class="zd" id="z4"><p><span class="n">4.</span>Брусок на гладком столе прикреплён к двум горизонтальным пружинам жёсткостью 100 Н/м и 300 Н/м; другие концы пружин закреплены на стенах по разные стороны от бруска. В положении равновесия пружины не деформированы. Брусок сдвинули вдоль пружин на 2 см. С какой суммарной силой пружины действуют на брусок? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>8 Н, к положению равновесия.</p></div></details>
+    <details><summary>Решение</summary><div><p>Одна пружина растянулась на 2 см и тянет брусок назад, другая сжалась на 2 см и тоже толкает его назад. Силы направлены одинаково — складываются (параллельное соединение):</p>
+      $$\begin{aligned} F &= k_1x + k_2x = (k_1 + k_2)x\\ &= 400\cdot0{,}02 = 8~\text{Н}. \end{aligned}$$
+      <p class="chk">Проверка: $[kx] = \text{Н/м}\cdot\text{м} = \text{Н}$. Если бы пружины считали последовательными, получили бы 1,5 Н — меньше, чем даёт одна пружина 300 Н/м (6 Н), чего быть не может: вторая пружина только помогает.</p></div></details></div>
+
+  <p class="zgr">Б. Напряжение и модуль Юнга</p>
+  <div class="zd" id="z5"><p><span class="n">5.</span>К стальной проволоке длиной 2 м и площадью сечения 0,5 мм² подвесили груз массой 10 кг. Модуль Юнга стали 200 ГПа. Найдите механическое напряжение в проволоке и её удлинение. <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>$\sigma = 200$ МПа; $\Delta l = 2$ мм.</p></div></details>
+    <details><summary>Решение</summary><div>
+      $$\begin{aligned} \sigma &= \dfrac{mg}{S} = \dfrac{100}{0{,}5\cdot10^{-6}} = 2\cdot10^{8}~\text{Па} = 200~\text{МПа},\\ \varepsilon &= \dfrac{\sigma}{E} = \dfrac{2\cdot10^{8}}{2\cdot10^{11}} = 10^{-3},\\ \Delta l &= \varepsilon l = 10^{-3}\cdot2 = 2\cdot10^{-3}~\text{м}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\dfrac{\sigma}{E}\,l\right] = \dfrac{\text{Па}}{\text{Па}}\cdot\text{м} = \text{м}$. Правдоподобие: удлинение 0,1 % — типично для стали; 200 МПа — уже близко к пределу текучести строительной стали, проволока работает на пределе.</p></div></details></div>
+
+  <div class="zd" id="z6"><p><span class="n">6.</span>В лабораторной работе медную проволоку длиной 1,5 м и диаметром 0,5 мм растянули грузом массой 2 кг; удлинение составило 1,27 мм. Найдите модуль Юнга меди. <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>$E \approx 1{,}2\cdot10^{11}$ Па = 120 ГПа.</p></div></details>
+    <details><summary>Решение</summary><div>
+      $$\begin{aligned} S &= \dfrac{\pi d^2}{4} = \dfrac{3{,}14\cdot(0{,}5\cdot10^{-3})^2}{4} \approx 1{,}96\cdot10^{-7}~\text{м}^2,\\ E &= \dfrac{\sigma}{\varepsilon} = \dfrac{Fl}{S\,\Delta l}\\ &= \dfrac{20\cdot1{,}5}{1{,}96\cdot10^{-7}\cdot1{,}27\cdot10^{-3}} \approx 1{,}2\cdot10^{11}~\text{Па}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\dfrac{Fl}{S\Delta l}\right] = \dfrac{\text{Н}\cdot\text{м}}{\text{м}^2\cdot\text{м}} = \text{Па}$. Совпадает с табличным значением для меди (110–130 ГПа).</p></div></details></div>
+
+  <div class="zd" id="z7"><p><span class="n">7.</span>Стальной и алюминиевый стержни одинаковой длины и сечения растягивают одинаковыми силами. Модули Юнга: сталь 210 ГПа, алюминий 70 ГПа. Удлинение какого стержня больше и во сколько раз? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>Алюминиевого, в 3 раза.</p></div></details>
+    <details><summary>Решение</summary><div>
+      $$\begin{aligned} \Delta l &= \dfrac{Fl}{ES},\\ \dfrac{\Delta l_{\text{ал}}}{\Delta l_{\text{ст}}} &= \dfrac{E_{\text{ст}}}{E_{\text{ал}}} = \dfrac{210}{70} = 3. \end{aligned}$$
+      <p class="chk">Проверка: отношение безразмерно. Правдоподобие: алюминий мягче — тянется больше.</p></div></details></div>
+
+  <div class="zd" id="z8"><p><span class="n">8.</span>Трос из стальной проволоки поднимает груз массой 1 т с ускорением 2 м/с². Предел прочности стали 1000 МПа, требуемый запас прочности 5 (рабочее напряжение в 5 раз меньше предела прочности). Найдите наименьшую площадь сечения и диаметр троса. Массой троса пренебречь. <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>$S = 60~\text{мм}^2$, $d \approx 8{,}7$ мм.</p></div></details>
+    <details><summary>Решение</summary><div><p>Натяжение — из второго закона Ньютона (ось вверх):</p>
+      $$\begin{aligned} T - mg &= ma,\\ T &= m(g + a) = 1000\cdot12 = 1{,}2\cdot10^{4}~\text{Н},\\ \sigma_{\text{доп}} &= \dfrac{\sigma_{\text{в}}}{5} = 200~\text{МПа},\\ S &= \dfrac{T}{\sigma_{\text{доп}}} = \dfrac{1{,}2\cdot10^{4}}{2\cdot10^{8}} = 6\cdot10^{-5}~\text{м}^2 = 60~\text{мм}^2,\\ d &= \sqrt{\dfrac{4S}{\pi}} \approx 8{,}7~\text{мм}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\dfrac{T}{\sigma}\right] = \dfrac{\text{Н}}{\text{Н/м}^2} = \text{м}^2$. Правдоподобие: тонна на тросе толщиной в палец — так и есть у строительных кранов.</p></div></details></div>
+
+  <div class="zd" id="z9"><p><span class="n">9.</span>Стальная проволока висит вертикально, закреплённая за верхний конец. При какой длине она оборвётся под собственным весом? Предел прочности 500 МПа, плотность стали 7800 кг/м³. Зависит ли ответ от толщины проволоки? <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>Около 6,4 км; от толщины не зависит.</p></div></details>
+    <details><summary>Решение</summary><div><p>Сильнее всего нагружено верхнее сечение: оно держит всю проволоку массой $\rho SL$.</p>
+      $$\begin{aligned} \sigma_{\max} &= \dfrac{\rho SLg}{S} = \rho gL,\\ \rho gL &= \sigma_{\text{в}},\\ L &= \dfrac{\sigma_{\text{в}}}{\rho g} = \dfrac{5\cdot10^{8}}{7800\cdot10} \approx 6{,}4\cdot10^{3}~\text{м}. \end{aligned}$$
+      <p>Площадь сократилась: толстая проволока и держит больше, и весит больше — ровно во столько же раз.</p>
+      <p class="chk">Проверка: $\left[\dfrac{\sigma}{\rho g}\right] = \dfrac{\text{Н/м}^2}{\text{кг/м}^3\cdot\text{м/с}^2} = \dfrac{\text{кг}\cdot\text{м/с}^2\cdot\text{м}^3}{\text{м}^2\cdot\text{кг}\cdot\text{м/с}^2} = \text{м}$.</p></div></details></div>
+
+  <p class="zgr">В. Коэффициент Пуассона</p>
+  <div class="zd" id="z10"><p><span class="n">10.</span>Стальную проволоку диаметром 1 мм растянули так, что напряжение в ней 200 МПа. Модуль Юнга 200 ГПа, коэффициент Пуассона 0,3. Найдите относительное удлинение, изменение диаметра и относительное изменение объёма проволоки. <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>$\varepsilon = 0{,}1~\%$; диаметр уменьшился на 0,3 мкм; объём увеличился на 0,04 %.</p></div></details>
+    <details><summary>Решение</summary><div>
+      $$\begin{aligned} \varepsilon &= \dfrac{\sigma}{E} = \dfrac{2\cdot10^{8}}{2\cdot10^{11}} = 10^{-3},\\ \varepsilon_\perp &= -\nu\varepsilon = -3\cdot10^{-4},\\ \Delta d &= \varepsilon_\perp d = -3\cdot10^{-4}\cdot1~\text{мм} = -0{,}3~\text{мкм},\\ \dfrac{\Delta V}{V} &\approx \varepsilon(1 - 2\nu) = 10^{-3}\cdot0{,}4 = 4\cdot10^{-4}. \end{aligned}$$
+      <p class="chk">Проверка: $[\varepsilon_\perp d] = \text{мм}$; относительные величины безразмерны. Правдоподобие: при $\nu &lt; 0{,}5$ растянутая проволока чуть увеличивает объём.</p></div></details></div>
+
+  <div class="zd" id="z11"><p><span class="n">11.</span>Резиновый жгут (коэффициент Пуассона 0,5) растянули на 10 %. Как примерно изменились его диаметр и объём? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>Диаметр уменьшился примерно на 5 %; объём почти не изменился.</p></div></details>
+    <details><summary>Решение</summary><div>
+      $$\begin{aligned} \varepsilon_\perp &= -\nu\varepsilon = -0{,}5\cdot0{,}1 = -0{,}05,\\ \dfrac{\Delta V}{V} &\approx \varepsilon(1 - 2\nu) = 0. \end{aligned}$$
+      <p>Формулы линейные, для 10 % — приближённые: если считать объём точно постоянным, $d'/d = 1/\sqrt{1{,}1}$, диаметр уменьшится на 4,7 %.</p>
+      <p class="chk">Проверка: величины безразмерны. Правдоподобие: резина почти несжимаема — что ушло в длину, пришло из толщины.</p></div></details></div>
+
+  <p class="zgr">Г. Соединения пружин</p>
+  <div class="zd" id="z12"><p><span class="n">12.</span>Пружины жёсткостью 100 Н/м и 300 Н/м соединили сначала последовательно, затем параллельно, и в каждом случае подвесили груз массой 3 кг. Найдите жёсткость соединения и удлинение в обоих случаях. <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>Последовательно: 75 Н/м, 40 см. Параллельно: 400 Н/м, 7,5 см.</p></div></details>
+    <details><summary>Решение</summary><div>
+      $$\begin{aligned} k_{\text{посл}} &= \dfrac{k_1k_2}{k_1 + k_2} = \dfrac{100\cdot300}{400} = 75~\text{Н/м},\\ x_{\text{посл}} &= \dfrac{mg}{k_{\text{посл}}} = \dfrac{30}{75} = 0{,}4~\text{м},\\ k_{\text{пар}} &= k_1 + k_2 = 400~\text{Н/м},\\ x_{\text{пар}} &= \dfrac{30}{400} = 0{,}075~\text{м}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\dfrac{k_1k_2}{k_1 + k_2}\right] = \dfrac{(\text{Н/м})^2}{\text{Н/м}} = \text{Н/м}$. Правдоподобие: $75 &lt; 100$ (мягче мягкой) и $400 &gt; 300$ (жёстче жёсткой).</p></div></details></div>
+
+  <div class="zd" id="z13"><p><span class="n">13.</span>Пружина жёсткостью 200 Н/м соединена последовательно с парой параллельных пружин жёсткостью 100 Н/м и 300 Н/м (нижние концы пары скреплены планкой, которая не перекашивается). К системе подвесили груз 4 кг. Найдите общую жёсткость, общее удлинение, удлинение пружины 200 Н/м и силы в пружинах 100 Н/м и 300 Н/м. <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>$k \approx 133$ Н/м; удлинение 30 см; пружина 200 Н/м — 20 см; силы 10 Н и 30 Н.</p></div></details>
+    <details><summary>Решение</summary><div><p>Сначала заменим пару одной пружиной, потом сложим последовательно:</p>
+      $$\begin{aligned} k_{23} &= k_2 + k_3 = 400~\text{Н/м},\\ \dfrac1k &= \dfrac{1}{200} + \dfrac{1}{400} = \dfrac{3}{400},\quad k = \dfrac{400}{3} \approx 133~\text{Н/м},\\ x &= \dfrac{mg}{k} = \dfrac{40\cdot3}{400} = 0{,}3~\text{м},\\ x_1 &= \dfrac{mg}{k_1} = \dfrac{40}{200} = 0{,}2~\text{м},\\ x_{23} &= \dfrac{mg}{k_{23}} = 0{,}1~\text{м},\\ F_2 &= k_2x_{23} = 10~\text{Н},\qquad F_3 = k_3x_{23} = 30~\text{Н}. \end{aligned}$$
+      <p class="chk">Проверка: $x_1 + x_{23} = 0{,}3$ м — сходится с общим удлинением; $F_2 + F_3 = 40~\text{Н} = mg$. Размерность: $[F/k] = \text{м}$.</p></div></details></div>
+
+  <div class="zd" id="z14"><p><span class="n">14.</span>Есть сколько угодно одинаковых пружин жёсткостью $k$. Какое наименьшее число пружин нужно, чтобы собрать систему жёсткостью $1{,}5k$, и как их соединить? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>Три: цепочка из двух последовательных пружин и параллельно к ней третья.</p></div></details>
+    <details><summary>Решение</summary><div><p>Одна пружина даёт $k$, две — $2k$ (параллельно) или $\tfrac{k}{2}$ (последовательно): $1{,}5k$ не получается. Из трёх:</p>
+      $$\begin{aligned} k_{\text{цепочки}} &= \dfrac{k}{2},\\ k_{\text{сист}} &= k + \dfrac{k}{2} = 1{,}5k. \end{aligned}$$
+      <p>Другие схемы из трёх дают $3k$, $\tfrac{k}{3}$ и $\tfrac{2k}{3}$.</p>
+      <p class="chk">Проверка: размерность — Н/м; $1{,}5k$ лежит между $k$ и $2k$ — значит, нужна «добавка» мягче одной пружины к одной пружине.</p></div></details></div>
+
+  <p class="zgr">Д. Вязкоупругость</p>
+  <div class="zd" id="z15"><p><span class="n">15.</span>Модель Максвелла: пружина жёсткостью 200 Н/м последовательно соединена с демпфером ($F = bv$, $b = 400$ Н·с/м). Систему мгновенно растянули на 5 см, и её концы удерживают неподвижно. Найдите силу сразу после растяжения, время релаксации и силу через 2 с и через 4 с. <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>10 Н; $\tau = 2$ с; ≈ 3,7 Н; ≈ 1,35 Н.</p></div></details>
+    <details><summary>Решение</summary><div><p>В первый миг демпфер не успевает сдвинуться — растягивается только пружина:</p>
+      $$\begin{aligned} F_0 &= kx_0 = 200\cdot0{,}05 = 10~\text{Н},\\ \tau &= \dfrac{b}{k} = \dfrac{400}{200} = 2~\text{с},\\ F(t) &= F_0e^{-t/\tau},\\ F(2~\text{с}) &= \dfrac{10}{e} \approx 3{,}7~\text{Н},\qquad F(4~\text{с}) = \dfrac{10}{e^2} \approx 1{,}35~\text{Н}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\dfrac{b}{k}\right] = \dfrac{\text{Н}\cdot\text{с/м}}{\text{Н/м}} = \text{с}$. Правдоподобие: за каждые 2 с сила уменьшается в одно и то же число раз.</p></div></details></div>
+
+  <div class="zd" id="z16"><p><span class="n">16.</span>Модель Кельвина–Фойгта: пружина жёсткостью 1000 Н/м и параллельный ей демпфер ($b = 500$ Н·с/м). В момент $t = 0$ к системе прикладывают постоянную силу 50 Н. Найдите конечное смещение, начальную скорость смещения и смещение через 0,5 с. <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>5 см; 0,1 м/с; ≈ 3,2 см.</p></div></details>
+    <details><summary>Решение</summary><div><p>В конце движение прекращается, демпфер не работает, всю силу держит пружина. В начале пружина не растянута, всю силу держит демпфер:</p>
+      $$\begin{aligned} x_\infty &= \dfrac{F}{k} = \dfrac{50}{1000} = 0{,}05~\text{м},\\ v_0 &= \dfrac{F}{b} = \dfrac{50}{500} = 0{,}1~\text{м/с},\\ \tau &= \dfrac{b}{k} = 0{,}5~\text{с},\\ x(\tau) &= x_\infty\left(1 - \dfrac1e\right) \approx 0{,}05\cdot0{,}63 \approx 0{,}032~\text{м}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\dfrac{F}{b}\right] = \dfrac{\text{Н}}{\text{Н}\cdot\text{с/м}} = \text{м/с}$. Правдоподобие: если бы скорость оставалась 0,1 м/с, за 0,5 с набежало бы 5 см; реально меньше — демпфер постепенно разгружается.</p></div></details></div>
+
+  <p class="zgr">Е. Нити и связи</p>
+  <div class="zd" id="z17"><p><span class="n">17.</span>Два бруска массами 2 кг и 3 кг лежат на гладком столе и связаны нитью, которая выдерживает натяжение 12 Н. Какую наибольшую горизонтальную силу можно приложить к бруску 3 кг (тянуть от второго бруска), чтобы нить не порвалась? А к бруску 2 кг? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>К бруску 3 кг — 30 Н; к бруску 2 кг — 20 Н.</p></div></details>
+    <details><summary>Решение</summary><div><p>Нить нерастяжима — общее ускорение $a = \dfrac{F}{m_1 + m_2}$; нить разгоняет только задний брусок:</p>
+      $$\begin{aligned} T &= m_{\text{задн}}a = \dfrac{m_{\text{задн}}}{m_1 + m_2}F \le T_{\max},\\ F_{\max} &= \dfrac{m_1 + m_2}{m_{\text{задн}}}\,T_{\max}. \end{aligned}$$
+      <p>Тянем за 3 кг — сзади 2 кг: $F_{\max} = \dfrac52\cdot12 = 30$ Н. Тянем за 2 кг — сзади 3 кг: $F_{\max} = \dfrac53\cdot12 = 20$ Н.</p>
+      <p class="chk">Проверка: $\left[\dfrac{m}{m}T\right] = \text{Н}$. Правдоподобие: выгоднее тянуть за тяжёлый брусок — нити тогда нужно разгонять лёгкий.</p></div></details></div>
+
+  <div class="zd" id="z18"><p><span class="n">18.</span>В машине Атвуда с грузами 3 кг и 2 кг нить заменили лёгкой пружиной жёсткостью 800 Н/м. Найдите удлинение пружины, когда грузы движутся с постоянным ускорением (колебания затухли). Отличается ли это ускорение от ускорения с нерастяжимой нитью? <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>3 см; ускорение то же — 2 м/с².</p></div></details>
+    <details><summary>Решение</summary><div><p>Когда колебания затухли, длина пружины постоянна — грузы движутся с равными ускорениями, как на нерастяжимой нити. Значит, и уравнения те же:</p>
+      $$\begin{aligned} m_1a &= m_1g - T,\qquad m_2a = T - m_2g,\\ a &= g\,\dfrac{m_1 - m_2}{m_1 + m_2} = 2~\text{м/с}^2,\\ T &= \dfrac{2m_1m_2g}{m_1 + m_2} = 24~\text{Н},\\ x &= \dfrac{T}{k} = \dfrac{24}{800} = 0{,}03~\text{м}. \end{aligned}$$
+      <p>Пружина ничего не меняет в установившемся движении — она лишь «показывает» натяжение. Так работает динамометр, включённый в нить.</p>
+      <p class="chk">Проверка: $\left[\dfrac{T}{k}\right] = \text{м}$. Правдоподобие: $20~\text{Н} &lt; T &lt; 30$ Н, как и положено в машине Атвуда.</p></div></details></div>
+
+  <div class="zd" id="z19"><p><span class="n">19.</span>Груз массой 30 кг подвешен к планке, которая висит на двух вертикальных проволоках одинаковой длины и сечения: стальной (модуль Юнга 200 ГПа) и медной (100 ГПа). Груз подвешен в такой точке, что планка опускается без перекоса. Найдите силы натяжения проволок. Массой планки пренебречь. <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>Стальная — 200 Н, медная — 100 Н.</p></div></details>
+    <details><summary>Решение</summary><div><p>Одно уравнение равновесия и одно условие совместности деформаций (удлинения равны, $k \propto E$ при одинаковых $l$ и $S$):</p>
+      $$\begin{aligned} T_1 + T_2 &= mg = 300~\text{Н},\\ \dfrac{T_1}{E_1} &= \dfrac{T_2}{E_2} \;\Rightarrow\; T_1 = 2T_2,\\ T_2 &= 100~\text{Н},\qquad T_1 = 200~\text{Н}. \end{aligned}$$
+      <p>Чтобы планка не перекосилась, груз висит на трети расстояния между проволоками, ближе к стальной (это уже условие равновесия моментов — раздел «Статика»).</p>
+      <p class="chk">Проверка: $T_1 + T_2 = 300$ Н; размерность — Н. Правдоподобие: жёсткая проволока берёт на себя больше.</p></div></details></div>
+</section>
+
+<!-- 14 -->
+<section class="txt">
+  <h2 class="sec" id="proverka"><span class="step s6">?</span>14. Проверь себя</h2>
+  <details class="qz"><summary>Толстый трос выдерживает больший груз, чем тонкий из той же стали. Почему у них одинаковая разрывная длина?</summary><p>Прочность определяется напряжением: допустимая сила $\propto S$, но и вес троса $\propto S$. Площадь сокращается, $L = \sigma_{\text{в}}/(\rho g)$ (раздел 6, задача 9).</p></details>
+  <details class="qz"><summary>Пружину сложили вдвое (две половинки работают рядом). Как изменилась жёсткость?</summary><p>Каждая половинка имеет жёсткость $2k$, вместе параллельно — $4k$ (раздел 8).</p></details>
+  <details class="qz"><summary>Динамометр тянут за два крючка в разные стороны силами по 10 Н. Что он покажет?</summary><p>10 Н. Так же он показывает 10 Н, если один крючок привязан к стене (раздел 12, ошибка 6).</p></details>
+  <details class="qz"><summary>Почему бутылку легко закрыть пробковой пробкой и труднее — резиновой?</summary><p>У пробки $\nu \approx 0$: сжимаясь в горлышке, она почти не раздаётся в стороны. Резина ($\nu \approx 0{,}5$) сохраняет объём и распирает горлышко (раздел 7).</p></details>
+  <details class="qz"><summary>Почему балки делают двутавровыми, а кости — трубчатыми?</summary><p>При изгибе нагрузку несут слои, далёкие от нейтрального; середина почти не напряжена, её можно убрать без потери прочности (раздел 4).</p></details>
+  <details class="qz"><summary>Почему законы Ньютона не позволяют найти, какую нагрузку несёт каждая ножка абсолютно твёрдого стола на четырёх ножках?</summary><p>Неизвестных сил четыре, а уравнений равновесия меньше: система статически неопределима. Распределение нагрузки определяют деформации ножек и пола (раздел 10).</p></details>
+  <details class="qz"><summary>«Умный пластилин» отскакивает от пола, как мяч, а за ночь растекается. Какая модель его описывает?</summary><p>Модель Максвелла: удар длится меньше времени релаксации — тело упругое; ночь гораздо дольше — тело течёт (раздел 9).</p></details>
+  <details class="qz"><summary>Стержень сечением 1 см² и длиной 1 м под силой 10 кН удлинился на 1 мм. Каков модуль Юнга материала? Что это может быть?</summary><p>$E = \dfrac{Fl}{S\Delta l} = \dfrac{10^4\cdot1}{10^{-4}\cdot10^{-3}} = 10^{11}$ Па = 100 ГПа — похоже на медь или титан (раздел 6).</p></details>
+</section>
+
+<!-- материалы -->
+<section class="txt" id="materialy">
+  <h2 class="sec">Тренажёры по теме</h2>
+  <div class="cards">
+    <a class="card" href="../trenazhery/pruzhiny.html"><b>Соединение пружин →</b><span>Последовательно, параллельно, смешанно; силы и удлинения каждой пружины; игра «Собери жёсткость».</span></a>
+    <a class="card" href="../trenazhery/provoloka.html"><b>Проволока: модуль Юнга и прочность →</b><span>Напряжение, удлинение, подбор сечения; игра «Выдержит или порвётся?».</span></a>
+    <a class="card" href="../trenazhery/nit.html" style="border-left-color:var(--res)"><b>От пружины к нити ★ →</b><span>Как жёсткая пружина превращается в нерастяжимую нить; игра «Порвётся ли нить?».</span></a>
+    <a class="card" href="zakony-nyutona.html"><b>Учебник: законы Ньютона →</b><span>Нити и блоки, наклонная плоскость, брусок на доске — задачи со связями.</span></a>
+  </div>
+</section>
+<p class="foot"><a href="index.html">← Оглавление Учебника</a> · <a href="../index.html">Тренажёры и тесты</a></p>
+</div>
+
+<script>
+/* рисунки: пружины (data-spring="x1,y1,x2,y2,витков,амплитуда"), демпферы (data-damper="x1,y1,x2,y2,ширина"), наконечники стрелок */
+document.querySelectorAll('svg [data-spring]').forEach(el => {
+  const [x1, y1, x2, y2, n = 8, w = 7] = el.dataset.spring.split(',').map(Number), L = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / L, uy = (y2 - y1) / L, px = -uy, py = ux, lead = Math.min(10, L * 0.15), body = L - 2 * lead;
+  const pts = [[x1, y1], [x1 + ux * lead, y1 + uy * lead]];
+  for (let i = 0; i < n; i++) { const t = lead + body * (i + 0.5) / n, s = i % 2 ? -w : w; pts.push([x1 + ux * t + px * s, y1 + uy * t + py * s]); }
+  pts.push([x2 - ux * lead, y2 - uy * lead], [x2, y2]); el.setAttribute('points', pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' '));
+});
+document.querySelectorAll('svg [data-damper]').forEach(g => {
+  const [x1, y1, x2, y2, w = 20] = g.dataset.damper.split(',').map(Number), L = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / L, uy = (y2 - y1) / L, px = -uy, py = ux, h = w / 2;
+  const P = t => [x1 + ux * t, y1 + uy * t], Q = (t, s) => [x1 + ux * t + px * s, y1 + uy * t + py * s], f = p => p.map(v => v.toFixed(1)).join(' ');
+  const c0 = 0.3 * L, c1 = 0.8 * L, pis = 0.55 * L;
+  const d = 'M' + f(P(0)) + 'L' + f(P(pis)) + 'M' + f(Q(pis, -h * 0.8)) + 'L' + f(Q(pis, h * 0.8)) + 'M' + f(Q(c0, -h)) + 'L' + f(Q(c1, -h)) + 'L' + f(Q(c1, h)) + 'L' + f(Q(c0, h)) + 'M' + f(P(c1)) + 'L' + f(P(L));
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); p.setAttribute('class', 'dmp'); g.appendChild(p);
+});
+document.querySelectorAll('svg line.ar').forEach(l => {
+  const x1 = +l.getAttribute('x1'), y1 = +l.getAttribute('y1'), x2 = +l.getAttribute('x2'), y2 = +l.getAttribute('y2');
+  const L = Math.hypot(x2 - x1, y2 - y1); if (L < 4) return; const ux = (x2 - x1) / L, uy = (y2 - y1) / L, h = 10, w = 4.5;
+  l.setAttribute('x2', x2 - ux * h * 0.8); l.setAttribute('y2', y2 - uy * h * 0.8);
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  p.setAttribute('points', [x2, y2, x2 - ux * h - uy * w, y2 - uy * h + ux * w, x2 - ux * h + uy * w, y2 - uy * h - ux * w].map(v => v.toFixed(1)).join(' '));
+  p.setAttribute('class', [...l.classList].filter(c => /^c/.test(c)).join(' ')); p.style.strokeWidth = 0; l.after(p);
+});
+</script>
+<script src="../assets/katex/katex.min.js"></script>
+<script src="../assets/katex/auto-render.min.js"></script>
+<script>renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false, ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'canvas', 'svg']});</script>
+<script src="../assets/sim-core.js"></script>
+<script src="../assets/uprugost-sims.js"></script>
+</body>
+</html>

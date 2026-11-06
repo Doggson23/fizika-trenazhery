@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>От пружины к нити: натяжение как реакция связи</title>
+<link rel="stylesheet" href="../assets/sim.css">
+<style>#cv{aspect-ratio:16/11}@media (max-width:600px){#cv{aspect-ratio:4/4.4}}
+.choices{display:flex;gap:8px;flex-wrap:wrap}.choices button.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}.choices button.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">физика · сила упругости · связи · ★</div>
+    <h1>От пружины к нити</h1>
+    <p class="sub">Два бруска на гладком столе связаны пружиной, правый тянут силой F. Делайте пружину всё жёстче — и она превратится в нерастяжимую нить: колебания станут быстрыми и мелкими, а среднее натяжение — ровно таким, какое даёт расчёт с нитью. g = 10 м/с².</p>
+  </header>
+  <div class="tabs" role="tablist"><button class="tab" id="t-ex" data-tab="explore">Исследовать</button><button class="tab" id="t-task" data-tab="task">Задача</button><button class="tab" id="t-game" data-tab="game">Игра</button></div>
+
+  <section class="lab">
+    <div class="stage"><canvas id="cv" aria-label="Два бруска, связанные пружиной, и график натяжения"></canvas>
+      <div class="legend"><span><i style="background:var(--aa)"></i>натяжение T(t)</span><span><i style="background:var(--ink-2)"></i>натяжение нерастяжимой нити</span><span><i style="background:var(--res)"></i>сила F</span></div></div>
+
+    <div class="panel" data-pane="explore">
+      <div class="ctl"><label for="kk"><span>Жёсткость связи k</span><output id="kkO"></output></label><input id="kk" type="range" min="1" max="5" step="0.1" value="2"></div>
+      <div class="ctl"><label for="zz"><span>Вязкость связи (доля от критической) ζ</span><output id="zzO"></output></label><input id="zz" type="range" min="0" max="1.5" step="0.05" value="0.05"></div>
+      <div class="ctl"><label for="m1"><span>Масса левого (заднего) бруска</span><output id="m1O"></output></label><input id="m1" type="range" min="0.5" max="5" step="0.5" value="1"></div>
+      <div class="ctl"><label for="m2"><span>Масса правого бруска (за него тянут)</span><output id="m2O"></output></label><input id="m2" type="range" min="0.5" max="5" step="0.5" value="3"></div>
+      <div class="ctl"><label for="FF"><span>Сила F</span><output id="FFO"></output></label><input id="FF" type="range" min="1" max="20" step="0.5" value="8"></div>
+      <div class="checks"><label><input type="checkbox" id="soft"> прикладывать силу плавно (за 1 с), а не рывком</label></div>
+      <div class="btns"><button class="b" id="go">Пуск</button></div>
+      <dl class="read" id="rd"></dl>
+      <div class="rule"><b>Нить как связь.</b> Нерастяжимая нить: a₁ = a₂ = F/(m₁ + m₂), натяжение T = m₁a = m₁F/(m₁ + m₂) — нить разгоняет только задний брусок. Пружина колеблется вокруг этого значения с периодом 2π√(μ/k), где μ = m₁m₂/(m₁ + m₂).</div>
+      <p class="note">Исследуйте: что происходит с колебаниями и средним натяжением при k = 10², 10³, 10⁵ Н/м? Почему при рывке без вязкости натяжение на миг почти вдвое больше среднего? Что делает вязкость?</p>
+    </div>
+
+    <div class="panel" data-pane="task" hidden>
+      <h2>Задача</h2>
+      <p id="tq"></p>
+      <div class="field"><span>Ответ</span><input id="tin" inputmode="decimal" aria-label="Ответ"><span class="num" id="tunit"></span></div>
+      <div class="btns"><button class="b" id="tchk">Проверить</button><button class="b ghost" id="thint">Подсказка</button><button class="b ghost" id="tnew">Новая задача</button></div>
+      <div class="msg" id="tmsg"></div>
+      <div class="hint" id="thintBox" hidden></div>
+      <div class="svo" id="tprop" hidden></div>
+      <div class="score"><span>верно <b id="sOk">0</b></span><span>попыток <b id="sAll">0</b></span><span>серия <b id="sSer">0</b></span></div>
+      <p class="note">Стол гладкий. Ответ числом, допуск 1 %.</p>
+    </div>
+
+    <div class="panel" data-pane="game" hidden>
+      <h2>Порвётся ли нить?</h2>
+      <p id="gq"></p>
+      <div class="choices"><button class="b ghost" data-gc="ok">Нить выдержит</button><button class="b ghost" data-gc="br">Нить порвётся</button></div>
+      <div class="msg" id="gmsg"></div>
+      <div class="btns"><button class="b" id="gnext">Новое задание</button></div>
+      <div class="score"><span>верно <b id="gOk">0</b></span><span>попыток <b id="gAll">0</b></span><span>серия <b id="gSer">0</b></span></div>
+      <p class="note">Силу прикладывают плавно. Если дёрнуть резко, натяжение на мгновение может почти удвоиться — так рвут нитку рывком.</p>
+    </div>
+  </section>
+  <p class="foot">Тренажёр к главе «Сила упругости» · <a href="../uchebnik/sila-uprugosti.html#svyazi">теория в Учебнике</a> · <a href="../index.html">все тренажёры</a></p>
+</div>
+<script src="../assets/sim-core.js"></script>
+<script src="../assets/dinamika-tren.js"></script>
+<script>
+(function(){
+'use strict';
+const {fmt, prep, arrow, text} = SC; const {G, nf, num, close, pick, rows} = TR; const $ = id => document.getElementById(id);
+const L0 = 0.5, T_END = 6;
+let P = {k: 100, z: 0.05, m1: 1, m2: 3, F: 8, soft: false, Tmax: Infinity}, st = null, hist = [], run = false, mode = 'explore', hide = false;
+const Tstar = p => p.m1 * p.F / (p.m1 + p.m2), mu = p => p.m1 * p.m2 / (p.m1 + p.m2);
+function reset(){ st = {x1: 0, x2: L0, v1: 0, v2: 0, t: 0, broken: false}; hist = []; }
+function step(dt){
+  const p = P, w = Math.sqrt(p.k / mu(p)), b = 2 * p.z * Math.sqrt(p.k * mu(p)), h = Math.min(1e-3, 0.05 / w), n = Math.ceil(dt / h), hh = dt / n;
+  for (let i = 0; i < n && st.t < T_END; i++) {
+    const F = p.soft ? p.F * Math.min(1, st.t / 1) : p.F, s = st.x2 - st.x1 - L0;
+    let T = st.broken ? 0 : p.k * s + b * (st.v2 - st.v1);
+    if (!st.broken && T > p.Tmax) { st.broken = true; st.tb = st.t; T = 0; }
+    const a1 = T / p.m1, a2 = (F - T) / p.m2; st.v1 += a1 * hh; st.v2 += a2 * hh; st.x1 += st.v1 * hh; st.x2 += st.v2 * hh; st.t += hh;
+    if (i % Math.max(1, Math.floor(n / 6)) === 0) hist.push([st.t, T]);
+  }
+  if (st.t >= T_END) { run = false; $('go').textContent = 'Пуск'; }
+}
+// ---------- исследование
+const readP = () => ({k: Math.pow(10, +$('kk').value), z: +$('zz').value, m1: +$('m1').value, m2: +$('m2').value, F: +$('FF').value, soft: $('soft').checked, Tmax: Infinity});
+const upd = () => { if (mode === 'explore') { P = readP(); reset(); run = true; } };
+SC.slider(document, 'kk', v => fmt(Math.pow(10, v), Math.pow(10, v) < 100 ? 1 : 0) + ' Н/м', upd); SC.slider(document, 'zz', v => fmt(v, 2), upd);
+SC.slider(document, 'm1', v => fmt(v, 1) + ' кг', upd); SC.slider(document, 'm2', v => fmt(v, 1) + ' кг', upd); SC.slider(document, 'FF', v => fmt(v, 1) + ' Н', upd);
+$('soft').addEventListener('change', upd);
+$('go').addEventListener('click', () => { reset(); run = true; });
+// ---------- задачи
+let Q = null; const SCORE = TR.score('s');
+function newTask(){
+  const m1 = pick([1, 2, 3, 4, 5]), m2 = pick([1, 2, 3, 4, 5]), F = pick([4, 6, 8, 10, 12, 15, 20]), kind = pick(['T', 'x', 'per', 'Fmax']), p = {k: 1e3, z: 0.6, m1, m2, F, soft: true, Tmax: Infinity}, q = {P: p}, Ts = Tstar(p);
+  const base = 'Два бруска на гладком столе: левый ' + m1 + ' кг, правый ' + m2 + ' кг. ';
+  if (kind === 'T') { q.ans = Ts; q.unit = 'Н'; q.text = base + 'Они связаны нерастяжимой нитью; правый тянут горизонтальной силой ' + F + ' Н. Найдите натяжение нити.';
+    q.wrong = [[F, 'Нить не передаёт всю силу: она разгоняет только левый брусок.'], [m2 * F / (m1 + m2), 'Нить тянет тот брусок, к которому сила не приложена, — левый.'], [F / 2, 'Сила делится не поровну, а пропорционально массам.']];
+    q.hints = ['Нить нерастяжима — ускорения брусков равны: a = F/(m₁ + m₂).', 'Нить — единственная горизонтальная сила на левом бруске.', 'T = m₁a = m₁F/(m₁ + m₂).']; }
+  if (kind === 'x') { const k = pick([200, 400, 500, 800, 1000]); p.k = k; p.z = 1; q.ans = Ts / k * 100; q.unit = 'см';
+    q.text = base + 'Они связаны лёгкой пружиной жёсткостью ' + k + ' Н/м; правый тянут силой ' + F + ' Н. Колебания затухли, бруски движутся с одинаковым ускорением. Найдите удлинение пружины.';
+    q.wrong = [[F / k * 100, 'Пружина растянута не всей силой F, а натяжением, которое разгоняет левый брусок.'], [Ts / k, 'Ответ нужен в сантиметрах.']];
+    q.hints = ['Когда колебания затухли, пружина ведёт себя как нерастяжимая нить.', 'Натяжение T = m₁F/(m₁ + m₂) = ' + nf(Ts) + ' Н.', 'x = T/k.']; }
+  if (kind === 'per') { const k = pick([100, 200, 400, 1000]); p.k = k; p.z = 0; p.soft = false; q.ans = 2 * Math.PI * Math.sqrt(mu(p) / k); q.unit = 'с';
+    q.text = base + 'Они связаны лёгкой пружиной жёсткостью ' + k + ' Н/м, правый резко начали тянуть постоянной силой. С каким периодом бруски колеблются друг относительно друга?';
+    q.wrong = [[2 * Math.PI * Math.sqrt((m1 + m2) / k), 'Колеблются оба бруска навстречу друг другу: масса в формуле — приведённая, μ = m₁m₂/(m₁ + m₂).'], [2 * Math.PI * Math.sqrt(m1 / k), 'Правый брусок тоже колеблется: масса — приведённая, μ = m₁m₂/(m₁ + m₂).']];
+    q.hints = ['В системе центра масс постоянная сила не важна: остаются два груза на пружине.', 'Это как один груз массой μ = m₁m₂/(m₁ + m₂) = ' + nf(mu(p)) + ' кг на пружине k.', 'T = 2π√(μ/k).']; }
+  if (kind === 'Fmax') { const Tm = pick([5, 6, 8, 10, 12]); q.ans = Tm * (m1 + m2) / m1; q.unit = 'Н'; p.F = q.ans * 0.95;
+    q.text = base + 'Они связаны нитью, которая выдерживает ' + Tm + ' Н. Какую наибольшую горизонтальную силу можно приложить к правому бруску, чтобы нить не порвалась?';
+    q.wrong = [[Tm, 'Нить разгоняет только левый брусок, а сила F — оба: F больше натяжения.'], [Tm * (m1 + m2) / m2, 'Натяжение разгоняет левый брусок: T = m₁F/(m₁ + m₂).']];
+    q.hints = ['T = m₁F/(m₁ + m₂) ≤ T_max.', 'F ≤ T_max·(m₁ + m₂)/m₁.', 'Подставьте числа.']; }
+  q.prop = 'Натяжение нерастяжимой нити закон Гука не определяет: его дают уравнения движения и условие связи. Пружина конечной жёсткости колеблется вокруг этого значения; вязкость гасит колебания.';
+  Q = q; Q.h = 0; P = Object.assign({}, p); reset(); run = false; hide = true; $('tq').textContent = q.text; $('tunit').textContent = q.unit; $('tin').value = ''; TR.clear($('tmsg')); $('thintBox').hidden = true; $('tprop').hidden = true;
+}
+$('tnew').addEventListener('click', newTask);
+$('thint').addEventListener('click', () => { if (!Q) return; Q.h = Math.min(3, Q.h + 1); const b = $('thintBox'); b.hidden = false; b.innerHTML = Q.hints.slice(0, Q.h).map((x, i) => (i + 1) + '. ' + x).join('<br>'); });
+$('tchk').addEventListener('click', () => { if (!Q) return; const x = num($('tin').value), m = $('tmsg'); if (!isFinite(x)) { TR.msg(m, 'bad', 'Введите число.'); return; }
+  const ok = close(x, Q.ans); SCORE.add(ok);
+  if (ok) { Q.solved = true; hide = false; TR.msg(m, 'ok', 'Верно: ' + nf(Q.ans) + ' ' + Q.unit + '.'); $('tprop').hidden = false; $('tprop').innerHTML = '<b>Свойство.</b> ' + Q.prop; P = Object.assign({}, Q.P); reset(); run = true; }
+  else { const w = Q.wrong.find(p => close(x, p[0], 0.015)); TR.msg(m, 'bad', w ? w[1] : 'Пока нет. Запишите второй закон для каждого бруска — или возьмите подсказку.'); } });
+// ---------- игра
+const GS = TR.score('g'); let GQ = null;
+function newRound(){ let m1, m2, Tm, F, Ts, i = 0;
+  do { m1 = pick([1, 2, 3, 4, 5]); m2 = pick([1, 2, 3, 4, 5]); Tm = pick([4, 5, 6, 8, 10]); F = pick([6, 8, 10, 12, 15, 18, 20, 25]); Ts = m1 * F / (m1 + m2); i++; } while (Math.abs(Ts / Tm - 1) < 0.12 && i < 500);
+  GQ = {p: {k: 1e4, z: 1, m1, m2, F, soft: true, Tmax: Tm}, ans: Ts > Tm ? 'br' : 'ok', Ts, Tm, done: false}; P = Object.assign({}, GQ.p); reset(); run = false; hide = true;
+  $('gq').innerHTML = 'Левый брусок <b>' + m1 + ' кг</b>, правый <b>' + m2 + ' кг</b>, нить выдерживает <b>' + Tm + ' Н</b>. Правый плавно тянут силой <b>' + F + ' Н</b>. Что будет?'; TR.clear($('gmsg'));
+  document.querySelectorAll('[data-gc]').forEach(b => { b.className = 'b ghost'; b.disabled = false; }); }
+document.querySelectorAll('[data-gc]').forEach(b => b.addEventListener('click', () => { if (!GQ || GQ.done) return; GQ.done = true; const ok = b.dataset.gc === GQ.ans; GS.add(ok); hide = false;
+  document.querySelectorAll('[data-gc]').forEach(x => { x.disabled = true; if (x.dataset.gc === GQ.ans) x.className = 'b ghost right'; else if (x === b) x.className = 'b ghost wrong'; });
+  TR.msg($('gmsg'), ok ? 'ok' : 'bad', (ok ? 'Верно! ' : 'Нет. ') + 'T = m₁F/(m₁ + m₂) = ' + nf(GQ.Ts) + ' Н ' + (GQ.Ts > GQ.Tm ? '>' : '<') + ' ' + GQ.Tm + ' Н.'); P = Object.assign({}, GQ.p); reset(); run = true; }));
+$('gnext').addEventListener('click', newRound);
+if (/[?&]test/.test(location.search)) { window.__ans = () => Q && Q.ans; window.__gans = () => GQ && {choose: '[data-gc="' + GQ.ans + '"]'}; window.__st = () => ({t: st.t, broken: st.broken, ans: GQ && GQ.ans}); }
+// ---------- вкладки
+SC.tabs(document, k => { mode = k; if (k === 'task') { if (!Q) newTask(); else { P = Object.assign({}, Q.P); reset(); run = !!Q.solved; hide = !Q.solved; } }
+  if (k === 'game') { if (!GQ) newRound(); else { P = Object.assign({}, GQ.p); reset(); run = GQ.done; hide = !GQ.done; } }
+  if (k === 'explore') { P = readP(); reset(); run = true; hide = false; } });
+reset(); run = true;
+// ---------- рисование
+const cv = $('cv');
+SC.loop(cv, dt => {
+  if (run) step(SC.reduce ? T_END : Math.min(dt, 0.05) * 0.5);
+  const {ctx, W, H} = prep(cv), C = SC.col(); ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, W, H);
+  const hTop = H * 0.36, gy = hTop - 12, s = W / 6, cm = (P.m1 * st.x1 + P.m2 * st.x2) / (P.m1 + P.m2), X = u => W / 2 + (u - cm) * s;
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+  ctx.strokeStyle = C.rule; ctx.lineWidth = 1; for (let u = Math.floor(cm - 4); u < cm + 4; u += 0.25) { const x = X(u); ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x - 7, gy + 7); ctx.stroke(); }
+  const bw = m => Math.max(44, Math.min(90, 40 * Math.cbrt(m))), b1 = bw(P.m1), b2 = bw(P.m2), x1 = X(st.x1), x2 = X(st.x2), sStr = st.x2 - st.x1 - L0;
+  const gap = L0 * s, visGap = st.broken ? Math.max(gap, x2 - x1) : gap * (1 + 0.6 * Math.tanh(sStr / 0.15));
+  const cx = (x1 + x2) / 2, xa = cx - visGap / 2, xb = cx + visGap / 2;
+  ctx.fillStyle = C.grid; ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.fillRect(xa - b1, gy - b1 * 0.7, b1, b1 * 0.7); ctx.strokeRect(xa - b1, gy - b1 * 0.7, b1, b1 * 0.7); ctx.fillRect(xb, gy - b2 * 0.7, b2, b2 * 0.7); ctx.strokeRect(xb, gy - b2 * 0.7, b2, b2 * 0.7);
+  text(ctx, fmt(P.m1, 1) + ' кг', xa - b1 / 2, gy - b1 * 0.35, {align: 'center', size: 11, weight: 700}); text(ctx, fmt(P.m2, 1) + ' кг', xb + b2 / 2, gy - b2 * 0.35, {align: 'center', size: 11, weight: 700});
+  const yy = gy - Math.min(b1, b2) * 0.35;
+  if (!st.broken) { const n = P.k >= 3000 ? 0 : 10, L = xb - xa; ctx.strokeStyle = C.ink; ctx.lineWidth = P.k >= 3000 ? 2.2 : 1.8; ctx.beginPath(); ctx.moveTo(xa, yy);
+    if (n) { for (let i = 0; i < n; i++) ctx.lineTo(xa + 6 + (L - 12) * (i + 0.5) / n, yy + (i % 2 ? -7 : 7)); } ctx.lineTo(xb, yy); ctx.stroke(); }
+  else { ctx.strokeStyle = C.bad; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(xa, yy); ctx.lineTo(xa + 16, yy + 6); ctx.moveTo(xb, yy); ctx.lineTo(xb - 16, yy + 6); ctx.stroke(); text(ctx, 'нить порвалась', cx, yy - 18, {align: 'center', color: C.bad, weight: 700, size: 13}); }
+  const Fn = P.soft ? P.F * Math.min(1, st.t) : P.F; arrow(ctx, xb + b2, yy, xb + b2 + Math.min(80, 10 + Fn * 4), yy, C.res, 4, 'F', [0, -13]);
+  text(ctx, 't = ' + fmt(st.t, 2) + ' с', 10, 14, {color: C.ink2, size: 12}); text(ctx, P.k >= 3000 ? 'связь почти нерастяжима (k = ' + fmt(P.k, 0) + ' Н/м)' : 'пружина k = ' + fmt(P.k, P.k < 100 ? 1 : 0) + ' Н/м', W - 10, 14, {align: 'right', color: C.ink2, size: 12});
+  // график натяжения
+  const gx = 46, gw = W - gx - 14, g0 = hTop + 16, gh = H - g0 - 30, Ts = Tstar(P), Tmax = Math.max(2.2 * Ts, isFinite(P.Tmax) ? P.Tmax * 1.2 : 0, 1), Y = T => g0 + gh - Math.max(-0.2 * Tmax, Math.min(T, Tmax)) / Tmax * gh * 0.85 - gh * 0.1, Xt = t => gx + t / T_END * gw;
+  ctx.strokeStyle = C.rule; ctx.lineWidth = 1; ctx.strokeRect(gx, g0, gw, gh); ctx.beginPath(); ctx.moveTo(gx, Y(0)); ctx.lineTo(gx + gw, Y(0)); ctx.stroke();
+  text(ctx, 'T, Н', gx + 6, g0 + 10, {color: C.ink2, size: 11}); text(ctx, 't, с → ' + T_END, gx + gw, H - 8, {align: 'right', color: C.ink2, size: 11}); text(ctx, '0', gx - 6, Y(0), {align: 'right', color: C.ink2, size: 11});
+  if (!hide) { ctx.setLineDash([6, 4]); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(gx, Y(Ts)); ctx.lineTo(gx + gw, Y(Ts)); ctx.stroke(); ctx.setLineDash([]); text(ctx, 'нить: ' + nf(Ts) + ' Н', gx + gw - 4, Y(Ts) - 9, {align: 'right', color: C.ink2, size: 12, weight: 600}); }
+  if (isFinite(P.Tmax)) { ctx.strokeStyle = C.bad; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(gx, Y(P.Tmax)); ctx.lineTo(gx + gw, Y(P.Tmax)); ctx.stroke(); ctx.setLineDash([]); text(ctx, 'предел нити ' + P.Tmax + ' Н', gx + 6, Y(P.Tmax) - 9, {color: C.bad, size: 12}); }
+  ctx.strokeStyle = C.a; ctx.lineWidth = 1.6; ctx.beginPath(); hist.forEach((h, i) => i ? ctx.lineTo(Xt(h[0]), Y(h[1])) : ctx.moveTo(Xt(h[0]), Y(h[1]))); ctx.stroke();
+  if (mode === 'explore') { const recent = hist.filter(h => h[0] > st.t - 0.6), avg = recent.length ? recent.reduce((a, h) => a + h[1], 0) / recent.length : 0, Tnow = hist.length ? hist[hist.length - 1][1] : 0;
+    $('rd').innerHTML = rows([['натяжение нити (расчёт со связью)', nf(Ts) + ' Н'], ['натяжение сейчас', nf(Tnow) + ' Н'], ['среднее за 0,6 с', nf(avg) + ' Н'], ['растяжение связи', nf(sStr * 1000) + ' мм'],
+      ['период колебаний 2π√(μ/k)', nf(2 * Math.PI * Math.sqrt(mu(P) / P.k) * 1000) + ' мс'], ['ускорение центра масс F/(m₁ + m₂)', nf(P.F / (P.m1 + P.m2)) + ' м/с²']]); }
+});
+})();
+</script>
+</body>
+</html>
