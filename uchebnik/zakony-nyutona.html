@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Законы Ньютона — Учебник</title>
+<link rel="stylesheet" href="../assets/sim.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<style>
+/* Учебник: одна колонка ~76ch, тренажёры и таблицы — на всю ширину 1180px. Шаги мышления — цветные метки (как в «Движении по окружности»). */
+.book{max-width:1180px;margin:0 auto;display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+.book > *{min-width:0}
+.txt{max-width:76ch;display:grid;gap:12px;font-size:16.5px;line-height:1.6}
+.txt p{margin:0} .txt ul,.txt ol{margin:0;padding-left:22px;display:grid;gap:4px}
+h2.sec{font:700 clamp(21px,3vw,27px)/1.2 var(--body);margin:26px 0 0;scroll-margin-top:12px}
+h3.sub3{font:700 17px var(--body);margin:8px 0 0;scroll-margin-top:12px}
+.step{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:999px;border:1px solid currentColor;margin-right:6px;vertical-align:middle}
+.s1{color:#1D4ED8}.s2{color:#B91C1C}.s3{color:#6D28D9}.s4{color:#047857}.s5{color:#B45309}.s6{color:#475569}
+@media (prefers-color-scheme:dark){.s1{color:#8AB4F8}.s2{color:#F7A3A3}.s3{color:#C4B5FD}.s4{color:#6EE7B7}.s5{color:#FCD34D}.s6{color:#CBD5E1}}
+.def{border-left:4px solid #1D4ED8;background:var(--sheet);border-radius:0 8px 8px 0;padding:10px 14px}
+.law{border-left:4px solid #B91C1C;background:var(--sheet);border-radius:0 8px 8px 0;padding:10px 14px}
+.law b:first-child,.def b:first-child{display:block;margin-bottom:2px}
+.prop{border:1px solid var(--res);background:var(--res-soft);border-radius:8px;padding:10px 14px}
+.prop b:first-child{display:block;font:600 11.5px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--res);margin-bottom:4px}
+.err{border:1px solid var(--bad);background:var(--bad-soft);border-radius:8px;padding:10px 14px}
+.err b:first-child{display:block;font:600 11.5px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--bad);margin-bottom:4px}
+.der{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:12px 16px;display:grid;gap:8px}
+.der ol{padding-left:22px}
+.toc{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:14px 18px;columns:2 260px;column-gap:28px;font-size:15px}
+.toc a{display:block;padding:3px 0;color:var(--ink);text-decoration:none;break-inside:avoid} .toc a:hover{color:var(--f1)}
+.frame{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.frame iframe{display:block;width:100%;height:min(1020px,94vh);border:0}
+.frame .cap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;border-top:1px solid var(--rule);font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.card{display:grid;gap:6px;text-decoration:none;color:inherit;background:var(--sheet);border:1px solid var(--rule);border-left:5px solid var(--f1);border-radius:10px;padding:14px}
+.card:hover{border-color:var(--f1)} .card b{font-size:16px} .card span{font-size:14px;color:var(--ink-2)}
+details.qz{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px 14px}
+details.qz summary{cursor:pointer;font-weight:600}
+details.qz p{margin:8px 0 0}
+figure.fg{margin:0;background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:10px;max-width:520px}
+figure.fg svg{display:block;width:100%;height:auto}
+figure.fg figcaption{font-size:13.5px;color:var(--ink-2);padding-top:6px}
+figure.ph{margin:0;max-width:420px} figure.ph img{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--rule);background:#fff}
+figure.ph figcaption{font-size:13px;color:var(--ink-2);padding-top:6px}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;align-items:start;max-width:1060px}
+.txt > *,.zd > *,.zd details > div > *,.der > *,.der li{min-width:0}
+.katex{font-size:1.06em} .katex-display{margin:.4em 0;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+@media (max-width:600px){[data-sim=lift] canvas{aspect-ratio:4/3.6}}
+.crumbs{font-size:14px;color:var(--ink-2)} .crumbs a{color:var(--f1);text-decoration:none}
+/* задачи */
+.zgr{font:700 15px var(--body);margin:14px 0 0;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em}
+.zd{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:12px 16px;display:grid;gap:8px;scroll-margin-top:12px}
+.zd > p{margin:0}
+.zd .n{font:700 15px var(--mono);margin-right:6px}
+.lv{font:600 11px/1 var(--mono);padding:3px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--ink-2);vertical-align:middle;margin-left:4px;white-space:nowrap}
+.lv.st{border-color:var(--res);color:var(--res)}
+.zd details{border-top:1px dashed var(--rule);padding-top:6px}
+.zd details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--f1)}
+.zd details > div{display:grid;gap:8px;padding-top:6px}
+.zd details p{margin:0}
+.chk{font-size:14.5px;color:var(--ink-2)}
+/* рисунки: цвета сил */
+svg .ln{stroke:currentColor;fill:none;stroke-width:1.6}
+svg .sh{fill:var(--grid);stroke:currentColor;stroke-width:1.6}
+svg .ar{stroke-width:2.6;stroke-linecap:round}
+svg .dsh{stroke-dasharray:5 4;stroke-width:1.8}
+svg .cg{stroke:var(--f1);fill:var(--f1)} svg .cn{stroke:var(--f2);fill:var(--f2)} svg .ct{stroke:var(--aa);fill:var(--aa)}
+svg .cf{stroke:var(--an);fill:var(--an)} svg .cF{stroke:var(--res);fill:var(--res)} svg .ca{stroke:var(--ink-2);fill:var(--ink-2)}
+svg text{font:italic 600 14px var(--body);fill:currentColor;stroke:none} svg text.u{font-style:normal;font-weight:500;font-size:12.5px}
+svg text.cg{fill:var(--f1)} svg text.cn{fill:var(--f2)} svg text.ct{fill:var(--aa)} svg text.cf{fill:var(--an)} svg text.cF{fill:var(--res)}
+</style>
+</head>
+<body>
+<div class="book">
+<header class="txt">
+  <div class="crumbs"><a href="index.html">Учебник</a> · Механика · Динамика</div>
+  <h1>Законы Ньютона</h1>
+  <p class="sub">Почему тела движутся именно так: сила, масса, инерциальные системы отсчёта, три закона Ньютона, силы в механике, вес и невесомость, классические задачи с разборами. Для 9–10 класса, углублённый уровень. Каждый закон — с опытом или выводом; рядом — тренажёры, в которых всё можно покрутить.</p>
+  <p class="note">Метки шагов мышления: <span class="step s1">≡ понятие</span><span class="step s2">! закон</span><span class="step s3">↓ вывод · опыт</span><span class="step s4">□ устройство мира</span><span class="step s5">▷ как решать</span><span class="step s6">? проверка</span> · ★ — для 10 класса и тех, кому мало.</p>
+  <p class="note">Во всех числовых примерах $g = 10~\text{м/с}^2$; нити невесомые и нерастяжимые, блоки невесомые, трения в осях блоков нет — если не сказано иначе.</p>
+</header>
+
+<nav class="toc" aria-label="Содержание">
+  <a href="#dinamika">1. Сила и масса</a><a href="#pervyi">2. Первый закон: инерциальные системы отсчёта</a><a href="#vtoroi">3. Второй закон: сила задаёт ускорение</a>
+  <a href="#tretii">4. Третий закон: действие и противодействие</a><a href="#sily">5. Силы в механике</a><a href="#ves">6. Вес, перегрузка, невесомость</a>
+  <a href="#metod">7. Как решать задачи динамики</a><a href="#klassika">8. Классические ситуации</a><a href="#vokrug">9. Законы Ньютона вокруг нас</a>
+  <a href="#oshibki">10. Типичные ошибки</a><a href="#zadachi">11. Классические задачи с решениями</a><a href="#proverka">12. Проверь себя</a><a href="#materialy">Тренажёры по теме</a>
+</nav>
+
+<!-- 1 -->
+<section class="txt">
+  <h2 class="sec" id="dinamika"><span class="step s1">≡</span>1. Сила и масса</h2>
+  <p>Кинематика отвечала на вопрос «как движется тело»: задавала координату, скорость и ускорение. <b>Динамика</b> отвечает на вопрос «почему оно движется так»: какое ускорение получит тело, если на него действуют другие тела. Для этого нужны две новые величины — сила и масса.</p>
+  <div class="def"><b>Сила</b> $\vec F$ — мера действия одного тела на другое, в результате которого тело получает ускорение или деформируется. Сила — вектор: у неё есть модуль, направление и точка приложения. Единица — ньютон (Н). Силу измеряют динамометром: по растяжению пружины.</div>
+  <div class="def"><b>Масса</b> $m$ — мера инертности тела: чем больше масса, тем меньшее ускорение тело получает при том же действии и тем труднее изменить его скорость. Единица — килограмм (кг). Масса — скаляр, у системы тел она складывается: $m = m_1 + m_2 + \ldots$</div>
+  <p><b>Инертность</b> — свойство тела «сопротивляться» изменению скорости. Пустую тележку в супермаркете легко разогнать и легко остановить, гружёную — трудно и то и другое. Это и есть разница масс. Заметьте: речь не о весе — в невесомости на МКС тяжёлый контейнер так же трудно разогнать, как на Земле, хотя он «ничего не весит».</p>
+  <div class="law"><b>☆ Принцип суперпозиции сил.</b> Если на тело действуют несколько сил, их действие такое же, как у одной силы — <b>равнодействующей</b>, равной их векторной сумме: $\vec F = \vec F_1 + \vec F_2 + \ldots$ Силы складывают по правилу параллелограмма или треугольника; на практике — через проекции на оси.</div>
+  <p>Сложение сил через проекции отрабатывается в тренажёре <a href="../slozhenie-sil.html">«Сложение сил»</a> — если проекции пока даются с трудом, начните с него.</p>
+  <div class="prop"><b>Свойство</b>Сила — характеристика <i>взаимодействия двух тел</i>. У каждой силы в задаче должен быть «автор»: Земля (сила тяжести), опора (реакция), нить (натяжение), поверхность (трение), воздух (сопротивление). Если автора назвать нельзя — такой силы нет. «Сила инерции», «сила движения», «центробежная сила» в инерциальной системе отсчёта авторов не имеют.</div>
+</section>
+
+<!-- 2 -->
+<section class="txt">
+  <h2 class="sec" id="pervyi"><span class="step s4">⧖</span><span class="step s2">!</span>2. Первый закон: инерциальные системы отсчёта</h2>
+  <p><b>Из истории.</b> Аристотель (IV век до н. э.) учил: чтобы тело двигалось, его надо всё время толкать; перестанешь — оно остановится. Бытовой опыт с ним согласен: телега без лошади встаёт. Галилей (опыты с наклонными плоскостями, «Беседы», 1638) рассуждал иначе. Шар, скатившись по одной наклонной плоскости, поднимается по другой почти на ту же высоту. Чем положе вторая плоскость, тем дальше он катится, чтобы набрать эту высоту. Если вторую плоскость сделать горизонтальной, шар должен катиться бесконечно. Значит, останавливает тело не «отсутствие толчка», а трение и сопротивление воздуха. Ньютон сделал из этого первый закон своей механики в книге «Математические начала натуральной философии» (1687).</p>
+  <div class="law"><b>! Первый закон Ньютона (закон инерции).</b> Существуют такие системы отсчёта, относительно которых тело сохраняет скорость постоянной (покоится или движется равномерно и прямолинейно), если на него не действуют другие тела или их действия скомпенсированы. Такие системы отсчёта называют <b>инерциальными</b> (ИСО).</div>
+  <p>Первый закон — не частный случай второго. Он <i>утверждает существование</i> ИСО и тем самым говорит, в каких системах отсчёта работают второй и третий законы. Проверьте сами: автобус резко тормозит, мяч на полу катится вперёд. На мяч в горизонтальном направлении никто не подействовал, а относительно автобуса он разогнался. Автобус, тормозящий относительно Земли, — <b>неинерциальная</b> система отсчёта. Относительно Земли мяч просто продолжает ехать с прежней скоростью, а пол из-под него уходит.</p>
+  <div class="prop"><b>Свойство</b>Любая система отсчёта, движущаяся относительно ИСО равномерно и прямолинейно, тоже инерциальная. Система, движущаяся с ускорением (разгоняется, тормозит, поворачивает, вращается), — неинерциальная.</div>
+  <div class="der"><b>≈ Оценка: насколько Земля инерциальна?</b>
+    <ol><li>Вращение вокруг оси: точка экватора имеет центростремительное ускорение $a = \omega^2R \approx 0{,}034~\text{м/с}^2$ — в 300 раз меньше $g$ (глава <a href="dvizhenie-po-okruzhnosti.html#prashcha">«Движение по окружности»</a>).</li>
+    <li>Обращение вокруг Солнца: $a = \dfrac{v^2}{R} = \dfrac{(3\cdot10^4)^2}{1{,}5\cdot10^{11}} \approx 0{,}006~\text{м/с}^2$.</li>
+    <li>Для движения машин, мячей и лифтов этими ускорениями можно пренебречь: систему отсчёта «Земля» считаем инерциальной. Для полёта баллистической ракеты, маятника Фуко или циклонов — уже нельзя.</li></ol></div>
+  <div class="law"><b>☆ Принцип относительности Галилея.</b> Во всех инерциальных системах отсчёта механические явления протекают одинаково: никаким механическим опытом внутри закрытой каюты нельзя узнать, стоит корабль или плывёт равномерно и прямолинейно. Галилей описал этот опыт с бабочками, рыбами в аквариуме и каплями из кувшина («Диалог», 1632).</div>
+</section>
+
+<!-- 3 -->
+<section class="txt">
+  <h2 class="sec" id="vtoroi"><span class="step s2">!</span><span class="step s3">✱</span><span class="step s3">↓</span>3. Второй закон: сила задаёт ускорение</h2>
+  <p><b>Опыт.</b> Тележку на гладких рельсах тянут динамометром, который держат на одном показании, и измеряют ускорение (датчиком или по меткам через равные промежутки времени). Результаты: при вдвое большей силе ускорение вдвое больше; если положить на тележку второй такой же груз (вдвое большая масса), ускорение при той же силе вдвое меньше; ускорение всегда направлено вдоль равнодействующей силы. Отсюда $a \propto \dfrac{F}{m}$, а единицу силы выбирают так, чтобы коэффициент был равен единице.</p>
+  <div class="law"><b>! Второй закон Ньютона.</b> В инерциальной системе отсчёта ускорение тела прямо пропорционально равнодействующей всех приложенных к нему сил и обратно пропорционально его массе:
+    $$m\vec a = \vec F_1 + \vec F_2 + \ldots + \vec F_n.$$
+    Ускорение направлено так же, как равнодействующая. <b>1 Н</b> — сила, сообщающая телу массой 1 кг ускорение 1 м/с²: $1~\text{Н} = 1~\text{кг}\cdot\text{м/с}^2$. Яблоко массой 100 г Земля притягивает с силой около 1 Н.</div>
+  <div class="prop"><b>Свойство</b>Сила задаёт <b>ускорение</b>, а не скорость. Направление скорости и направление силы могут быть любыми: у брошенного камня скорость направлена вверх-вперёд, а сила и ускорение — вниз. Сила исчезла — ускорение мгновенно стало нулевым, а скорость осталась прежней (первый закон). Покрутите в тренажёре ниже.</div>
+  <div class="der"><b>★ Второй закон через импульс (так его записал сам Ньютон).</b>
+    <ol><li><b>Импульс</b> тела $\vec p = m\vec v$ («количество движения» у Ньютона), кг·м/с.</li>
+    <li>Если масса постоянна, $\dfrac{d\vec p}{dt} = m\dfrac{d\vec v}{dt} = m\vec a$. Значит, второй закон можно записать как $$\vec F = \dfrac{d\vec p}{dt}.$$ Скорость изменения импульса равна равнодействующей силе.</li>
+    <li>При постоянной силе за время $\Delta t$: $\Delta\vec p = \vec F\,\Delta t$. Величину $\vec F\Delta t$ называют <b>импульсом силы</b>. Одно и то же изменение импульса можно получить большой силой за короткое время или малой за долгое — на этом держатся ремни безопасности и подушки (раздел 9).</li>
+    <li>Запись через импульс шире: она годится и для тел переменной массы — ракеты, которая выбрасывает газы, транспортёра, на который сыплется песок.</li></ol></div>
+  <div class="def"><b>Как измерить массу, не взвешивая.</b> Пусть два тела взаимодействуют только друг с другом (тележки отталкиваются пружиной). По третьему закону (раздел 4) силы равны по модулю, значит, $m_1a_1 = m_2a_2$, то есть $\dfrac{m_1}{m_2} = \dfrac{a_2}{a_1}$. Сравнивая ускорения с эталоном (килограмм), находим инертную массу любого тела — в космосе, где весы бесполезны, так и делают: на МКС космонавтов «взвешивают» на пружинном кресле по периоду колебаний.</div>
+  <p><b>Границы применимости.</b> Законы Ньютона верны в инерциальных системах отсчёта, для скоростей много меньше скорости света (иначе — теория относительности) и для тел много больше атомов (иначе — квантовая механика). Внутри этих границ — от песчинки до планет — они не нарушались ни в одном опыте.</p>
+</section>
+<section class="lab" data-sim="puck">
+  <div class="stage"><canvas class="wide" aria-label="Шайба на льду: вектор скорости, сила и ускорение, траектория"></canvas>
+    <div class="legend"><span><i style="background:var(--vv)"></i>скорость v</span><span><i style="background:var(--res)"></i>сила F</span><span><i style="background:var(--aa)"></i>ускорение a = F/m</span><span><i style="background:var(--ink-2)"></i>след (метки через 0,5 с)</span></div></div>
+  <div class="panel"><h2>Шайба на гладком льду (вид сверху)</h2>
+    <div class="ctl"><label for="pkV"><span>Начальная скорость v₀ (вправо)</span><output id="pkVO"></output></label><input id="pkV" type="range" min="0" max="4" step="0.1" value="2"></div>
+    <div class="ctl"><label for="pkF"><span>Сила F</span><output id="pkFO"></output></label><input id="pkF" type="range" min="0" max="3" step="0.1" value="1"></div>
+    <div class="ctl"><label for="pkA"><span>Направление силы (от оси x, против часовой)</span><output id="pkAO"></output></label><input id="pkA" type="range" min="0" max="360" step="5" value="90"></div>
+    <div class="ctl"><label for="pkM"><span>Масса шайбы m</span><output id="pkMO"></output></label><input id="pkM" type="range" min="0.5" max="4" step="0.1" value="1"></div>
+    <div class="checks"><label><input type="checkbox" id="pkOn" checked> сила действует (снимите на ходу — что станет с движением?)</label></div>
+    <div class="btns"><button class="b" id="pkPlay">Пауза</button><button class="b ghost" id="pkReset">Сначала</button></div>
+    <dl class="read" id="pkRead"></dl>
+    <p class="note">Исследуйте: при каком направлении силы шайба движется по прямой с разгоном? С торможением? Когда траектория — парабола? Почему ускорение никогда не «смотрит» вдоль скорости, если сила к ней под углом?</p></div>
+</section>
+
+<!-- 4 -->
+<section class="txt">
+  <h2 class="sec" id="tretii"><span class="step s2">!</span><span class="step s3">↓</span>4. Третий закон: действие и противодействие</h2>
+  <div class="law"><b>! Третий закон Ньютона.</b> Тела действуют друг на друга с силами, равными по модулю, противоположными по направлению и направленными вдоль одной прямой: $$\vec F_{12} = -\vec F_{21}.$$ Эти силы одной природы (обе — тяготения, обе — упругости, обе — трения) и приложены к <b>разным</b> телам.</div>
+  <p>Земля притягивает яблоко с силой 1 Н — и яблоко притягивает Землю с силой 1 Н. Ускорение Земли при этом в $\dfrac{6\cdot10^{24}}{0{,}1} = 6\cdot10^{25}$ раз меньше, поэтому его никто не замечает. Вы давите на пол — пол давит на вас; вы отталкиваетесь ногой от земли назад — земля толкает вас вперёд. Без этой силы (на идеально гладком льду) не пойдёшь.</p>
+  <div class="prop"><b>Свойство</b>Силы из третьего закона <b>никогда не уравновешивают друг друга</b>: они приложены к разным телам. Уравновешиваться (складываться в ноль) могут только силы, приложенные к одному телу. Книга на столе: сила тяжести книги и сила реакции стола равны, но это <i>не</i> пара из третьего закона — обе приложены к книге и имеют разную природу. Пара к силе тяжести — притяжение Земли книгой; пара к реакции стола — сила давления книги на стол.</div>
+  <div class="der"><b>∴ Следствие: импульс замкнутой системы сохраняется.</b>
+    <ol><li>Два тела взаимодействуют только друг с другом. По второму закону $\dfrac{\Delta\vec p_1}{\Delta t} = \vec F_{21}$ и $\dfrac{\Delta\vec p_2}{\Delta t} = \vec F_{12}$.</li>
+    <li>Сложим и используем третий закон: $\dfrac{\Delta(\vec p_1 + \vec p_2)}{\Delta t} = \vec F_{21} + \vec F_{12} = 0$.</li>
+    <li>Значит, $\vec p_1 + \vec p_2 = \text{const}$: внутренние силы перекачивают импульс от одного тела к другому, но не меняют суммы. Это закон сохранения импульса — ему посвящена отдельная глава.</li></ol></div>
+  <p><b>Парадокс лошади и телеги.</b> «Если телега тянет лошадь назад с той же силой, с какой лошадь тянет телегу вперёд, как они вообще сдвинутся?» Ответ: силы натяжения оглобель приложены к разным телам и на движение системы «лошадь + телега» не влияют — это внутренние силы. Систему разгоняют внешние силы: земля толкает копыта лошади вперёд (сила трения покоя), а дорога тормозит колёса телеги назад. Пока первая больше — система разгоняется.</p>
+</section>
+<section class="lab" data-sim="carts">
+  <div class="stage"><canvas class="wide" aria-label="Две тележки отталкиваются: равные силы, разные ускорения"></canvas>
+    <div class="legend"><span><i style="background:var(--res)"></i>силы взаимодействия F₁₂ и F₂₁</span><span><i style="background:var(--vv)"></i>скорости</span><span><i style="background:var(--ink-2)"></i>метки через 0,25 с</span></div></div>
+  <div class="panel"><h2>Тележки и сжатая пружина</h2>
+    <div class="ctl"><label for="ctM1"><span>Масса левой тележки m₁</span><output id="ctM1O"></output></label><input id="ctM1" type="range" min="0.5" max="4" step="0.5" value="1"></div>
+    <div class="ctl"><label for="ctM2"><span>Масса правой тележки m₂</span><output id="ctM2O"></output></label><input id="ctM2" type="range" min="0.5" max="4" step="0.5" value="2"></div>
+    <div class="ctl"><label for="ctF"><span>Сила пружины во время толчка</span><output id="ctFO"></output></label><input id="ctF" type="range" min="1" max="6" step="0.5" value="4"></div>
+    <div class="btns"><button class="b" id="ctGo">Отпустить пружину</button><button class="b ghost" id="ctReset">Сначала</button></div>
+    <dl class="read" id="ctRead"></dl>
+    <p class="note">Толчок длится 0,4 с. Сравните расстояния между метками: отношение скоростей тележек — обратное отношению масс. Так массы сравнивают без весов.</p></div>
+</section>
+
+<!-- 5 -->
+<section class="txt">
+  <h2 class="sec" id="sily"><span class="step s1">≡</span><span class="step s1">◇</span>5. Силы в механике</h2>
+  <p>В механике встречаются силы всего трёх природ: тяготения, упругости и трения (две последние — проявления электромагнитного взаимодействия молекул). Всё многообразие «сил» в задачах — это их частные случаи.</p>
+</section>
+<div class="tblwrap"><table class="cmp">
+  <thead><tr><th>Сила</th><th>Автор (со стороны чего)</th><th>Формула</th><th>Направление</th><th>Важно помнить</th></tr></thead>
+  <tbody>
+  <tr><td><b>Тяжести</b> $m\vec g$</td><td>Земля</td><td>$F = mg$, $g \approx 9{,}8~\text{м/с}^2$</td><td>вертикально вниз</td><td>действует всегда, даже в невесомости; приложена к центру тяжести тела</td></tr>
+  <tr><td><b>Упругости</b> (пружина)</td><td>деформированная пружина, резинка</td><td>$F = k\lvert\Delta l\rvert$ (закон Гука)</td><td>против деформации</td><td>$\Delta l$ — удлинение, а не длина; верна при малых деформациях</td></tr>
+  <tr><td><b>Реакции опоры</b> $\vec N$</td><td>поверхность, на которой лежит тело</td><td>из уравнений движения</td><td>перпендикулярно поверхности</td><td>это тоже сила упругости; $N = mg$ — только на горизонтали и без ускорения по вертикали</td></tr>
+  <tr><td><b>Натяжения</b> $\vec T$</td><td>нить, трос, верёвка</td><td>из уравнений движения</td><td>вдоль нити от тела</td><td>нить только тянет; у невесомой нити натяжение одинаково по всей длине</td></tr>
+  <tr><td><b>Трения скольжения</b></td><td>поверхность, по которой скользит тело</td><td>$F_{\text{тр}} = \mu N$</td><td>против скорости относительно поверхности</td><td>$\mu$ зависит от пары материалов; почти не зависит от площади и скорости</td></tr>
+  <tr><td><b>Трения покоя</b></td><td>поверхность, относительно которой тело покоится</td><td>$F_{\text{тр}} \le \mu N$</td><td>против того, куда тело «хочет» сдвинуться</td><td>равна ровно той силе, которая нужна для покоя; $\mu N$ — только её предел</td></tr>
+  <tr><td><b>Сопротивления среды</b></td><td>воздух, вода</td><td>медленно $\propto v$; быстро $\approx \tfrac12 C\rho Sv^2$</td><td>против скорости относительно среды</td><td>растёт со скоростью, поэтому падение заканчивается равномерным</td></tr>
+  </tbody></table></div>
+<section class="txt">
+  <h3 class="sub3">Трение покоя и скольжения</h3>
+  <p>Толкайте шкаф всё сильнее. Сначала он стоит: сила трения покоя растёт вместе с вашей силой и в точности её уравновешивает. При некоторой силе шкаф трогается — трение покоя достигло предела $\mu_{\text{п}}N$. Дальше действует трение скольжения $\mu N$; обычно оно чуть меньше предельного трения покоя (стронуть шкаф труднее, чем потом тянуть), но в задачах их считают равными, если не сказано иначе.</p>
+</section>
+<div class="pair">
+  <figure class="fg"><svg viewBox="0 0 440 230" role="img" aria-label="График силы трения от приложенной силы">
+    <line class="ln" x1="50" y1="200" x2="420" y2="200"/><line class="ln" x1="50" y1="200" x2="50" y2="20"/>
+    <polygon points="420,200 410,195 410,205" fill="currentColor"/><polygon points="50,20 45,30 55,30" fill="currentColor"/>
+    <polyline points="50,200 210,60" class="cf" style="fill:none" stroke-width="3"/><polyline points="210,60 210,78 410,78" class="cf" style="fill:none" stroke-width="3"/>
+    <line class="ln dsh" x1="50" y1="60" x2="210" y2="60" opacity=".6"/><line class="ln dsh" x1="210" y1="200" x2="210" y2="60" opacity=".6"/>
+    <text x="14" y="64" class="u">μ<tspan dy="4" font-size="10">п</tspan><tspan dy="-4">N</tspan></text><text x="14" y="86" class="u">μN</text>
+    <text x="60" y="30">F<tspan dy="4" font-size="10" font-style="normal">тр</tspan></text><text x="400" y="222">F</text>
+    <text x="90" y="150" class="u" transform="rotate(-41 90 150)">покой: F<tspan dy="3" font-size="9">тр</tspan><tspan dy="-3"> = F</tspan></text><text x="270" y="70" class="u">скольжение</text>
+    <text x="190" y="218" class="u">трогается</text></svg>
+    <figcaption>Сила трения при растущей внешней силе $F$: пока тело покоится, $F_{\text{тр}} = F$; после срыва — постоянная $\mu N$.</figcaption></figure>
+  <div class="txt" style="font-size:15px">
+    <p><b>Типичные коэффициенты трения</b> (сильно зависят от состояния поверхностей):</p>
+    <ul><li>шина по сухому асфальту — 0,7–0,8; по мокрому — около 0,4–0,5; по льду — около 0,1;</li>
+      <li>дерево по дереву — 0,3–0,5; сталь по стали без смазки — около 0,15;</li>
+      <li>тефлон по тефлону — около 0,04; коньки по льду — около 0,01–0,02.</li></ul>
+    <p>Трение — не только враг. Без него не завязать шнурки, не удержать ручку, не тронуться с места на машине: колёса толкает вперёд именно сила трения покоя со стороны дороги.</p></div>
+</div>
+<section class="txt">
+  <h3 class="sub3">◇ Модели (идеализации) в задачах</h3>
+  <ul>
+    <li><b>Материальная точка</b> — размерами тела пренебрегаем, все силы приложены в одной точке. Нельзя, если тело опрокидывается или вращается.</li>
+    <li><b>Невесомая нерастяжимая нить</b>: невесомая — натяжение одинаково по всей длине (на кусок нити без массы равнодействующая обязана быть нулём); нерастяжимая — тела на концах нити имеют ускорения, равные по модулю.</li>
+    <li><b>Идеальный блок</b> (невесомый, без трения в оси) только поворачивает нить и не меняет её натяжения.</li>
+    <li><b>Гладкая поверхность</b> — трения нет, реакция опоры перпендикулярна поверхности.</li>
+  </ul>
+  <div class="der"><b>≈ Оценка: предельная скорость парашютиста.</b> Падение становится равномерным, когда сопротивление воздуха сравняется с силой тяжести: $mg = \tfrac12C\rho Sv^2$, $v = \sqrt{\dfrac{2mg}{C\rho S}}$. Для $m = 80$ кг, площади $S \approx 0{,}7~\text{м}^2$ (плашмя), $C \approx 1$, $\rho = 1{,}2~\text{кг/м}^3$ получаем $v \approx 44$ м/с, около 160 км/ч; реальные значения — 50–55 м/с. С раскрытым куполом площадью в десятки квадратных метров — около 5 м/с: как прыжок с высоты чуть больше метра.</div>
+</section>
+
+<!-- 6 -->
+<section class="txt">
+  <h2 class="sec" id="ves"><span class="step s1">≡</span><span class="step s3">↓</span><span class="step s4">□</span>6. Вес, перегрузка, невесомость</h2>
+  <div class="def"><b>Вес</b> $\vec P$ — сила, с которой тело вследствие притяжения к Земле давит на опору или растягивает подвес. Вес приложен <b>к опоре или подвесу</b>, а не к телу. По третьему закону он равен по модулю силе реакции опоры (натяжению подвеса): $P = N$.</div>
+  <div class="der"><b>Вывод: вес в лифте.</b>
+    <ol><li>Человек массой $m$ стоит на весах в лифте, ускорение лифта $\vec a$ направлено вверх. На человека действуют $m\vec g$ (вниз) и $\vec N$ (вверх).</li>
+    <li>Второй закон в проекции на ось, направленную вверх: $N - mg = ma$.</li>
+    <li>Отсюда $N = m(g + a)$, и по третьему закону вес $P = m(g + a)$. Если ускорение направлено вниз: $P = m(g - a)$.</li>
+    <li>Важно только <b>направление ускорения</b>, а не скорости. Лифт, тормозящий при подъёме, и лифт, разгоняющийся вниз, дают одинаковое уменьшение веса.</li></ol></div>
+  <div class="def"><b>Перегрузка</b> $n = \dfrac{P}{mg}$ — во сколько раз вес больше, чем у покоящегося тела. <b>Невесомость</b> — состояние, при котором вес равен нулю: тело и опора движутся с ускорением $\vec g$ (свободно падают). Сила тяжести при этом никуда не девается.</div>
+  <ul>
+    <li><b>МКС.</b> На высоте около 400 км $g \approx 8{,}7~\text{м/с}^2$ — почти как на Земле. Невесомость на станции оттого, что станция со всем содержимым непрерывно «падает» на Землю, двигаясь по орбите: опоры не давят, потому что падают вместе с космонавтами.</li>
+    <li><b>Параболический полёт.</b> Самолёт-лаборатория (в Звёздном городке — Ил-76МДК) летит по параболе с выключенной «лишней» тягой: двигатели лишь компенсируют сопротивление воздуха, и самолёт движется с ускорением $g$. Внутри — около 25 секунд невесомости, на которых тренируют космонавтов и снимают кино.</li>
+    <li><b>Перегрузки.</b> При спуске корабля «Союз» по штатной траектории — около 4$g$, при баллистическом спуске — до 8–9$g$. Пилоты истребителей в противоперегрузочных костюмах выдерживают на вираже до 9$g$. На американских горках — 3–5$g$ на коротких участках.</li>
+  </ul>
+</section>
+<section class="lab" data-sim="lift">
+  <div class="stage"><canvas class="wide" aria-label="Лифт с весами: ускорение и показания весов"></canvas>
+    <div class="legend"><span><i style="background:var(--aa)"></i>ускорение a(t)</span><span><i style="background:var(--res)"></i>показания весов P(t)</span><span><i style="background:var(--ink-2)"></i>mg</span></div></div>
+  <div class="panel"><h2>Весы в лифте</h2>
+    <div class="ctl"><label for="lfM"><span>Масса пассажира m</span><output id="lfMO"></output></label><input id="lfM" type="range" min="30" max="100" step="5" value="60"></div>
+    <div class="ctl"><label for="lfA"><span>Ускорение при разгоне и торможении</span><output id="lfAO"></output></label><input id="lfA" type="range" min="0.5" max="4" step="0.5" value="2"></div>
+    <div class="seg" role="group" aria-label="Поездка"><button data-lf="up" aria-pressed="false">Вверх на 3 этажа</button><button data-lf="down" aria-pressed="false">Вниз на 3 этажа</button><button data-lf="cut" aria-pressed="false">Обрыв троса</button></div>
+    <dl class="read" id="lfRead"></dl>
+    <p class="note">Весы проградуированы в килограммах: показывают $P/g$. «Обрыв троса»: 0,8 с свободного падения, затем аварийные тормоза-ловители останавливают кабину с ускорением $2g$. Что покажут весы в каждой фазе?</p></div>
+</section>
+
+<!-- 7 -->
+<section class="txt">
+  <h2 class="sec" id="metod"><span class="step s5">#</span>7. Как решать задачи динамики</h2>
+  <ol>
+    <li><b>Выберите тело</b> (или каждое из связанных тел по отдельности) и <b>инерциальную систему отсчёта</b> — обычно Землю.</li>
+    <li><b>Нарисуйте все силы</b>, приложенные к телу. Для каждой назовите автора: Земля, опора, нить, поверхность. Сила «ma» на рисунок не ставится — это не сила, а результат.</li>
+    <li><b>Выберите оси.</b> Одну — вдоль ускорения (если известно, куда оно направлено), другую — перпендикулярно. На наклонной — вдоль и поперёк плоскости.</li>
+    <li><b>Запишите второй закон в проекциях</b>: вдоль ускорения $\sum F_x = ma$, поперёк $\sum F_y = 0$.</li>
+    <li><b>Добавьте связи</b>: $F_{\text{тр}} = \mu N$ при скольжении (при покое — неравенство); у тел на одной нерастяжимой нити ускорения равны по модулю; натяжение невесомой нити одинаково по всей длине.</li>
+    <li><b>Решите систему</b> в общем виде, потом подставьте числа.</li>
+    <li><b>Проверьте</b>: размерность (подставьте единицы в формулу), предельные случаи ($\mu = 0$, $\alpha = 0$, равные массы), правдоподобие числа (ускорение тела на нити через блок не может превышать $g$).</li>
+  </ol>
+  <div class="prop"><b>Свойство</b>Если неизвестно, покоится ли тело или скользит, сначала <b>предположите покой</b> и найдите нужную для него силу трения покоя. Если она не больше $\mu N$ — тело покоится, и это ответ. Если больше — тело скользит, трение равно $\mu N$, пересчитайте.</div>
+  <h3 class="sub3">Кинематические связи</h3>
+  <ul>
+    <li><b>Нить через неподвижный блок</b>: насколько опустился один конец, настолько поднялся другой — $a_1 = a_2$.</li>
+    <li><b>★ Подвижный блок</b>: если груз на подвижном блоке опустился на $y$, оба куска нити, на которых он висит, удлинились на $y$ — свободный конец нити сместился на $2y$. Значит, $a_{\text{конца}} = 2a_{\text{груза}}$, а сила, держащая груз, — $2T$.</li>
+    <li><b>Тела движутся вместе</b> (брусок не скользит по доске): ускорения равны, а сила трения между ними — трения покоя, её находят из уравнений, а не из $\mu N$.</li>
+  </ul>
+</section>
+
+<!-- 8 -->
+<section class="txt">
+  <h2 class="sec" id="klassika"><span class="step s5">▷</span><span class="step s3">↓</span>8. Классические ситуации</h2>
+  <p>Почти любая задача динамики собирается из нескольких «кирпичей». Разберём их в общем виде: буквы, а не числа, — тогда видно, от чего зависит ответ.</p>
+  <h3 class="sub3" id="naklon">8.1. Тело на наклонной плоскости</h3>
+</section>
+<div class="pair">
+  <figure class="fg"><svg viewBox="0 0 420 240" role="img" aria-label="Силы, действующие на брусок на наклонной плоскости">
+    <polygon class="sh" points="30,220 370,220 370,24" style="fill:var(--grid)"/>
+    <path class="ln" d="M 80 220 A 50 50 0 0 0 73.3 195"/><text x="88" y="212">α</text>
+    <g transform="translate(195 106) rotate(-30)"><rect x="-26" y="-16" width="52" height="32" rx="3" style="fill:var(--sheet);stroke:currentColor;stroke-width:1.6"/></g>
+    <line class="ar cg" x1="195" y1="106" x2="195" y2="178"/><text x="200" y="190" class="cg">mg</text>
+    <line class="ar cn" x1="195" y1="106" x2="165" y2="54"/><text x="146" y="50" class="cn">N</text>
+    <line class="ar cf" x1="195" y1="106" x2="228" y2="87"/><text x="232" y="82" class="cf">F<tspan dy="4" font-size="10" font-style="normal">тр</tspan></text>
+    <line class="ar ca dsh" x1="195" y1="106" x2="164" y2="124"/><text x="104" y="140" class="u">mg sin α</text>
+    <line class="ar ca dsh" x1="195" y1="106" x2="226" y2="160"/><text x="232" y="166" class="u">mg cos α</text></svg>
+    <figcaption>Брусок скользит вниз: трение направлено вверх вдоль плоскости. Пунктир — проекции силы тяжести на оси вдоль и поперёк плоскости.</figcaption></figure>
+  <div class="der"><b>Вывод.</b> Ось $x$ — вниз вдоль плоскости, ось $y$ — перпендикулярно ей.
+    <ol><li>Поперёк: $N - mg\cos\alpha = 0$, значит, $N = mg\cos\alpha$ (а не $mg$!).</li>
+    <li>Скольжение вниз: $ma = mg\sin\alpha - \mu mg\cos\alpha$, $$a_{\downarrow} = g(\sin\alpha - \mu\cos\alpha).$$</li>
+    <li>Движение вверх по инерции (толкнули): трение тоже вниз, $$a_{\uparrow} = g(\sin\alpha + \mu\cos\alpha)$$ — это модуль замедления.</li>
+    <li>Покой: нужна сила трения покоя $mg\sin\alpha \le \mu mg\cos\alpha$, то есть $\operatorname{tg}\alpha \le \mu$.</li></ol></div>
+</div>
+<section class="txt">
+  <div class="prop"><b>Свойство</b>Брусок, лежащий на наклонной плоскости, начинает соскальзывать при $\operatorname{tg}\alpha = \mu$ — независимо от массы. Так коэффициент трения и измеряют: наклоняют доску, пока брусок не тронется. Если $\operatorname{tg}\alpha = \mu$, брусок, толкнутый вниз, едет <b>равномерно</b>. Брусок, толкнутый вверх, поднимается быстрее, чем потом спускается: на подъёме трение и скатывающая сила работают вместе, на спуске — против друг друга.</div>
+</section>
+<div class="frame"><iframe src="../trenazhery/naklonnaya.html" title="Тренажёр «Наклонная плоскость»" loading="lazy"></iframe>
+  <div class="cap"><span>Тренажёр «Наклонная плоскость»: силы и их проекции, граница tg α = μ, задачи со случайными числами, игра «Что будет с бруском?».</span><a href="../trenazhery/naklonnaya.html">Открыть отдельно →</a></div></div>
+
+<section class="txt">
+  <h3 class="sub3" id="bloki">8.2. Связанные тела: нити и блоки</h3>
+</section>
+<div class="pair">
+  <figure class="fg"><svg viewBox="0 0 440 230" role="img" aria-label="Машина Атвуда и брусок на столе с грузом через блок">
+    <line class="ln" x1="40" y1="14" x2="180" y2="14"/><line class="ln" x1="110" y1="14" x2="110" y2="40"/>
+    <circle cx="110" cy="40" r="24" style="fill:var(--sheet);stroke:currentColor;stroke-width:1.6"/><circle cx="110" cy="40" r="3" fill="currentColor"/>
+    <line class="ln" x1="86" y1="40" x2="86" y2="150"/><line class="ln" x1="134" y1="40" x2="134" y2="112"/>
+    <rect x="70" y="150" width="32" height="40" rx="3" class="sh"/><rect x="120" y="112" width="28" height="26" rx="3" class="sh"/>
+    <text x="78" y="176" class="u">m₁</text><text x="125" y="130" class="u">m₂</text>
+    <line class="ar ct" x1="62" y1="168" x2="62" y2="128"/><text x="44" y="126" class="ct">T</text>
+    <line class="ar cg" x1="86" y1="190" x2="86" y2="222"/><text x="92" y="222" class="cg">m₁g</text>
+    <line class="ar ct" x1="160" y1="125" x2="160" y2="88"/><text x="164" y="92" class="ct">T</text>
+    <line class="ar cg" x1="134" y1="138" x2="134" y2="160"/><text x="140" y="164" class="cg">m₂g</text>
+    <!-- стол и груз -->
+    <rect x="210" y="110" width="170" height="8" class="sh"/><line class="ln" x1="220" y1="118" x2="220" y2="225"/><line class="ln" x1="370" y1="118" x2="370" y2="225"/>
+    <circle cx="392" cy="112" r="12" style="fill:var(--sheet);stroke:currentColor;stroke-width:1.6"/><circle cx="392" cy="112" r="2.5" fill="currentColor"/><line class="ln" x1="380" y1="118" x2="392" y2="112"/>
+    <rect x="245" y="80" width="50" height="30" rx="3" class="sh"/><text x="262" y="100" class="u">m₁</text>
+    <line class="ln" x1="295" y1="100" x2="392" y2="100"/><line class="ln" x1="404" y1="112" x2="404" y2="170"/>
+    <rect x="391" y="170" width="26" height="28" rx="3" class="sh"/><text x="395" y="189" class="u">m₂</text>
+    <line class="ar ct" x1="300" y1="80" x2="340" y2="80"/><text x="334" y="72" class="ct">T</text>
+    <line class="ar cf" x1="245" y1="104" x2="215" y2="104"/><text x="204" y="96" class="cf">F<tspan dy="4" font-size="10" font-style="normal">тр</tspan></text>
+    <line class="ar cg" x1="270" y1="95" x2="270" y2="135"/><text x="276" y="140" class="cg">m₁g</text>
+    <line class="ar cn" x1="258" y1="95" x2="258" y2="55"/><text x="238" y="54" class="cn">N</text>
+    <line class="ar cg" x1="404" y1="198" x2="404" y2="224"/><text x="372" y="222" class="cg">m₂g</text></svg>
+    <figcaption>Слева — машина Атвуда ($m_1 &gt; m_2$), справа — брусок на столе и висящий груз. Натяжение невесомой нити по обе стороны блока одинаково.</figcaption></figure>
+  <div class="der"><b>Вывод для машины Атвуда.</b> Каждому грузу — своя ось вдоль его ускорения ($m_1$ вниз, $m_2$ вверх):
+    $$\begin{aligned} m_1a &= m_1g - T,\\ m_2a &= T - m_2g. \end{aligned}$$
+    Сложим уравнения — натяжение сократится:
+    $$\begin{aligned} a &= g\,\dfrac{m_1 - m_2}{m_1 + m_2},\\ T &= \dfrac{2m_1m_2}{m_1 + m_2}\,g. \end{aligned}$$
+    <b>Брусок на столе и груз:</b> $m_1a = T - \mu m_1g$, $m_2a = m_2g - T$, отсюда $$a = g\,\dfrac{m_2 - \mu m_1}{m_1 + m_2}.$$ Если $m_2 \le \mu m_1$, система стоит.</div>
+</div>
+<section class="txt">
+  <div class="prop"><b>Свойство</b>В машине Атвуда $a &lt; g$ всегда, а натяжение лежит между весами грузов: $m_2g &lt; T &lt; m_1g$. Блок давит на ось с силой $2T$, и это <b>меньше</b> полного веса грузов $(m_1 + m_2)g$: пока грузы движутся с ускорением, система «легче». Атвуд придумал свою машину в 1784 году именно для проверки законов Ньютона: подбирая почти равные грузы, он делал ускорение в десятки раз меньше $g$, и его можно было измерить с часами того времени.</div>
+</section>
+<div class="frame"><iframe src="../trenazhery/bloki.html" title="Тренажёр «Нити и блоки»" loading="lazy"></iframe>
+  <div class="cap"><span>Тренажёр «Нити и блоки»: машина Атвуда и брусок с грузом, силы на каждом теле, задачи, игра «Подбери груз» (иногда правильный ответ — «невозможно»).</span><a href="../trenazhery/bloki.html">Открыть отдельно →</a></div></div>
+
+<section class="txt">
+  <h3 class="sub3" id="doska">8.3. ★ Брусок на доске: вместе или с проскальзыванием</h3>
+</section>
+<div class="pair">
+  <figure class="fg"><svg viewBox="0 0 440 200" role="img" aria-label="Брусок на доске, к доске приложена сила F">
+    <line class="ln" x1="20" y1="170" x2="420" y2="170"/>
+    <rect x="50" y="148" width="270" height="22" rx="3" class="sh"/><text x="60" y="164" class="u">доска M</text>
+    <rect x="140" y="112" width="70" height="36" rx="3" style="fill:var(--sheet);stroke:currentColor;stroke-width:1.6"/><text x="150" y="134" class="u">брусок m</text>
+    <line class="ar cF" x1="320" y1="159" x2="390" y2="159"/><text x="380" y="150" class="cF">F</text>
+    <line class="ar cf" x1="175" y1="146" x2="232" y2="146"/><text x="228" y="138" class="cf">F<tspan dy="4" font-size="10" font-style="normal">тр</tspan></text>
+    <line class="ar cf" x1="175" y1="152" x2="118" y2="152"/><text x="96" y="146" class="cf">F<tspan dy="4" font-size="10" font-style="normal">тр</tspan></text></svg>
+    <figcaption>Сила трения между бруском и доской — пара из третьего закона: на брусок вперёд, на доску назад. Только она разгоняет брусок.</figcaption></figure>
+  <div class="der"><b>Вывод.</b> Стол гладкий, коэффициент трения между бруском и доской $\mu$.
+    <ol><li>Пусть тела едут вместе: $a = \dfrac{F}{M + m}$. Брусок разгоняет только трение покоя: $F_{\text{тр}} = ma$.</li>
+    <li>Трение покоя не больше $\mu mg$, значит, вместе тела едут, пока $a \le \mu g$, то есть $$F \le \mu g\,(M + m).$$</li>
+    <li>При большей силе брусок проскальзывает: $a_{\text{б}} = \mu g$ (больше трение дать не может), а доска — $a_{\text{д}} = \dfrac{F - \mu mg}{M}$, и $a_{\text{д}} &gt; a_{\text{б}}$.</li></ol></div>
+</div>
+<section class="txt">
+  <div class="prop"><b>Свойство</b>Ускорение бруска не может превысить $\mu g$, как сильно ни тяни доску. Поэтому скатерть можно выдернуть из-под посуды: если дёрнуть резко, тарелки успевают сдвинуться лишь чуть-чуть. Груз в кузове грузовика ведёт себя как брусок на доске: при резком разгоне больше $\mu g$ незакреплённый ящик поедет назад относительно кузова.</div>
+</section>
+<div class="frame"><iframe src="../trenazhery/doska.html" title="Тренажёр «Брусок на доске»" loading="lazy"></iframe>
+  <div class="cap"><span>Тренажёр «Брусок на доске» (★): график ускорений от силы, сила на доску или на брусок, задачи, игра «Вместе или проскользнёт?».</span><a href="../trenazhery/doska.html">Открыть отдельно →</a></div></div>
+
+<section class="txt">
+  <h3 class="sub3" id="okruzhnost">8.4. Движение по окружности: сила, которая поворачивает скорость</h3>
+  <p>В главе <a href="dvizhenie-po-okruzhnosti.html#an">«Движение по окружности»</a> мы вывели: при равномерном движении по окружности ускорение направлено к центру, $a_n = \dfrac{v^2}{R}$. По второму закону это ускорение обязана создавать равнодействующая, тоже направленная к центру: $$\dfrac{mv^2}{R} = F_{\text{к центру}}.$$ Это не новая сила, а сумма уже знакомых: трения, натяжения, реакции опоры, тяжести.</p>
+  <ul>
+    <li><b>Поворот на горизонтальной дороге.</b> К центру поворота машину толкает трение покоя шин: $\dfrac{mv^2}{R} \le \mu mg$, $v_{\max} = \sqrt{\mu gR}$ — от массы не зависит. Поэтому на мокрой и тем более обледенелой дороге повороты проходят медленнее.</li>
+    <li><b>Выпуклый мост.</b> В верхней точке ускорение направлено вниз, к центру: $mg - N = \dfrac{mv^2}{R}$, $N = m\!\left(g - \dfrac{v^2}{R}\right)$. Вес машины меньше $mg$; при $v = \sqrt{gR}$ он обращается в ноль. На вогнутом участке — наоборот, $N = m\!\left(g + \dfrac{v^2}{R}\right)$: подвеска и пассажиры «приседают».</li>
+    <li><b>★ Конический маятник.</b> Шарик на нити длиной $L$ описывает горизонтальную окружность, нить образует угол $\alpha$ с вертикалью. По вертикали: $T\cos\alpha = mg$; по горизонтали: $T\sin\alpha = m\omega^2L\sin\alpha$. Отсюда $T = m\omega^2L$ и период $$T_{\text{об}} = 2\pi\sqrt{\dfrac{L\cos\alpha}{g}}.$$ На этом принципе работал центробежный регулятор Уатта паровой машины: чем быстрее вращение, тем выше поднимаются шары и тем сильнее прикрывается заслонка пара.</li>
+  </ul>
+  <div class="err"><b>Ошибка</b>«На тело на повороте действует центробежная сила наружу». В инерциальной системе отсчёта такой силы нет: у неё нет автора. Пассажира прижимает к двери не сила наружу — это дверь давит на пассажира внутрь, поворачивая его скорость. Без двери пассажир продолжил бы двигаться прямо (по касательной), как камень из пращи.</div>
+
+  <h3 class="sub3" id="vagon">8.5. Отвес в разгоняющемся вагоне — акселерометр</h3>
+  <p>Груз на нити висит в вагоне, который разгоняется с ускорением $a$. Относительно Земли груз движется вместе с вагоном с тем же ускорением, а сообщить его может только горизонтальная составляющая натяжения: нить отклонится назад на угол $\alpha$. По вертикали $T\cos\alpha = mg$, по горизонтали $T\sin\alpha = ma$, отсюда $$\operatorname{tg}\alpha = \dfrac{a}{g}.$$ Измерив угол, находим ускорение — это простейший <b>акселерометр</b>. Акселерометр в смартфоне устроен по тому же закону: крошечный кремниевый грузик на упругих перемычках смещается при ускорении, смещение меряют по изменению электрической ёмкости. По нему телефон поворачивает экран, считает шаги и управляет машиной в гоночной игре.</p>
+</section>
+
+<!-- 9 -->
+<section class="txt">
+  <h2 class="sec" id="vokrug"><span class="step s4">□</span><span class="step s4">↗</span>9. Законы Ньютона вокруг нас</h2>
+  <div class="der"><b>≈ Оценка: зачем ремень безопасности.</b> Автомобиль врезается в препятствие на скорости 50 км/ч ≈ 14 м/с. Пристёгнутый пассажир останавливается вместе с сминающимся кузовом и растягивающимся ремнём на пути около 0,5 м: $a = \dfrac{v^2}{2s} \approx \dfrac{196}{1} \approx 200~\text{м/с}^2 \approx 20g$. Непристёгнутый продолжает лететь по инерции (первый закон!) и останавливается о панель или стекло на нескольких сантиметрах: при $s = 5$ см ускорение около $2000~\text{м/с}^2 = 200g$. Импульс у пассажира отнимают в обоих случаях один и тот же, но ремень и подушка растягивают время торможения в десятки раз — и во столько же раз уменьшают силу ($F = \Delta p/\Delta t$).</div>
+</section>
+<div class="tblwrap"><table class="cmp">
+  <thead><tr><th>Где</th><th>Какой закон или сила</th><th>Как это работает</th></tr></thead>
+  <tbody>
+  <tr><td><b>Ракета, кальмар, медуза</b></td><td>третий закон, импульс</td><td>выбрасывают массу назад — она толкает их вперёд; опора не нужна, поэтому реактивный двигатель работает в вакууме. Теорию полёта ракет построил К. Э. Циолковский (1903)</td></tr>
+  <tr><td><b>Формула-1: антикрылья</b></td><td>трение покоя, $F_{\text{тр}} \le \mu N$</td><td>антикрылья прижимают машину к дороге: растёт $N$, а с ней предельная сила трения — поворот можно пройти быстрее. На большой скорости прижимная сила сравнима с весом болида</td></tr>
+  <tr><td><b>Керлинг</b></td><td>трение скольжения</td><td>спортсмены натирают лёд щётками перед камнем: лёд подтаивает тонким слоем, трение уменьшается, и камень проходит дальше и ровнее</td></tr>
+  <tr><td><b>Скалолазание</b></td><td>трение покоя</td><td>скальные туфли с мягкой липкой резиной дают большой коэффициент трения: лазать можно, опираясь на почти гладкую плиту, пока нога давит на неё достаточно сильно</td></tr>
+  <tr><td><b>Батут и прыжки в воду</b></td><td>второй закон, $F\Delta t = \Delta p$</td><td>мягкая сетка или вода растягивают время остановки — сила, действующая на спортсмена, становится безопасной</td></tr>
+  <tr><td><b>Смартфон, квадрокоптер, VR-шлем</b></td><td>второй закон, $\operatorname{tg}\alpha = a/g$</td><td>МЭМС-акселерометр меряет ускорение по силе упругости, действующей на грузик; квадрокоптер по нему держит горизонт, шлем — понимает, куда вы наклонили голову</td></tr>
+  <tr><td><b>Космическая станция</b></td><td>невесомость, второй закон</td><td>станция свободно падает вокруг Земли; массу космонавтов меряют не весами, а по периоду колебаний на пружинном кресле — через инертность</td></tr>
+  </tbody></table></div>
+<div class="pair">
+  <figure class="ph"><img src="https://iiif.wellcomecollection.org/image/V0024421/full/800%2C/0/default.jpg" alt="Гравюра: машина Атвуда — высокая стойка с блоком наверху, шкалой и часами" loading="lazy" onerror="this.closest('figure').hidden=true">
+    <figcaption>Машина Атвуда на гравюре конца XVIII века: «прибор Атвуда для опытов с ускоренным движением». Источник: Wellcome Collection, общественное достояние.</figcaption></figure>
+  <div class="txt" style="font-size:15.5px">
+    <p><b>Из истории.</b> Исаак Ньютон опубликовал три закона в 1687 году в книге «Математические начала натуральной философии» (Principia). Книгу издал на свои деньги его друг, астроном Эдмунд Галлей. Ньютон назвал эти положения «аксиомами, или законами движения» и вывел из них движение планет, приливы, форму Земли и движение комет.</p>
+    <p>Сам Ньютон писал второй закон через «количество движения» (импульс), а привычная формула $F = ma$ появилась позже, в XVIII веке, у Эйлера. Единицу силы назвали ньютоном в честь учёного.</p></div>
+</div>
+
+<!-- 10 -->
+<section class="txt">
+  <h2 class="sec" id="oshibki"><span class="step s5">✗</span>10. Типичные ошибки</h2>
+  <div class="err"><b>Ошибка 1. «Тело движется — значит, на него действует сила в сторону движения»</b>Подброшенный мяч летит вверх, а единственная сила, тяжести, направлена вниз. Сила задаёт ускорение, а не скорость. Проверка: назовите автора силы. «Сила броска» после того, как мяч покинул руку, автора не имеет.</div>
+  <div class="err"><b>Ошибка 2. «N = mg всегда»</b>На наклонной $N = mg\cos\alpha$, в лифте с ускорением $N = m(g \pm a)$, при тяге за верёвку под углом $N = mg - F\sin\alpha$. Реакцию опоры всегда находят из второго закона в проекции на ось, перпендикулярную опоре.</div>
+  <div class="err"><b>Ошибка 3. «Сила трения равна μN»</b>Только при скольжении. Если тело покоится, трение покоя равно ровно той силе, которая нужна для покоя, и может быть гораздо меньше $\mu N$. Брусок 2 кг на столе с $\mu = 0{,}3$ толкают силой 5 Н — трение равно 5 Н, а не 6 Н (задача 2).</div>
+  <div class="err"><b>Ошибка 4. «Силы действия и противодействия уравновешивают друг друга»</b>Они приложены к разным телам. Складывать можно только силы, действующие на одно тело.</div>
+  <div class="err"><b>Ошибка 5. «Вес — это сила тяжести»</b>Сила тяжести приложена к телу и равна $mg$ всегда; вес приложен к опоре и зависит от ускорения: в невесомости вес ноль, а сила тяжести — нет.</div>
+  <div class="err"><b>Ошибка 6. «ma — это ещё одна сила»</b>В уравнении $m\vec a = \sum\vec F$ слева стоит не сила, а «отклик» тела. Нарисовать $m\vec a$ на рисунке сил и потом ещё раз сложить его с силами — значит учесть одно и то же дважды.</div>
+  <div class="err"><b>Ошибка 7. «Натяжение нити в машине Атвуда равно весу груза»</b>Только если грузы покоятся или движутся равномерно. При ускорении $m_2g &lt; T &lt; m_1g$.</div>
+</section>
+
+<!-- 11 -->
+<section class="txt" id="zadachi">
+  <h2 class="sec"><span class="step s5">▷</span>11. Классические задачи с решениями</h2>
+  <p>Задачи сгруппированы по методам решения. Сначала решите сами, потом откройте ответ; решение — если не сошлось. В решениях проверка — <b>размерностью</b> (подставляем единицы в итоговую формулу) и <b>правдоподобием</b> числа. Ответы проверены вторым независимым решением.</p>
+
+  <p class="zgr">А. Одно тело, силы вдоль одной прямой</p>
+  <div class="zd" id="z1"><p><span class="n">1.</span>Человек массой 60 кг стоит на напольных весах в лифте. Что показывают весы (в ньютонах и в «килограммах» шкалы), когда лифт (а) разгоняется вверх с ускорением 2 м/с²; (б) тормозит, двигаясь вверх, с ускорением того же модуля? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>(а) 720 Н, весы показывают 72 кг; (б) 480 Н, 48 кг.</p></div></details>
+    <details><summary>Решение</summary><div><p>На человека действуют $m\vec g$ и $\vec N$. Ось — вверх. (а) Ускорение вверх, (б) ускорение вниз (тормозит при подъёме):</p>
+      $$\begin{aligned} N_a - mg &= ma,\\ N_a &= m(g + a) = 60\cdot12 = 720~\text{Н};\\ N_b - mg &= -ma,\\ N_b &= m(g - a) = 60\cdot8 = 480~\text{Н}. \end{aligned}$$
+      <p>По третьему закону вес $P = N$; шкала в килограммах показывает $P/g$: 72 кг и 48 кг.</p>
+      <p class="chk">Проверка: $[m(g + a)] = \text{кг}\cdot\text{м/с}^2 = \text{Н}$. Правдоподобие: при ускорении вверх вес больше 600 Н, при ускорении вниз — меньше.</p></div></details></div>
+
+  <div class="zd" id="z2"><p><span class="n">2.</span>Брусок массой 2 кг лежит на горизонтальном столе, коэффициент трения 0,3. Брусок тянут горизонтальной силой (а) 10 Н; (б) 5 Н. Найдите ускорение бруска и силу трения в каждом случае. <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>(а) $a = 2~\text{м/с}^2$, $F_{\text{тр}} = 6$ Н; (б) брусок покоится, $F_{\text{тр}} = 5$ Н (трение покоя).</p></div></details>
+    <details><summary>Решение</summary><div><p>Вертикально: $N = mg = 20$ Н. Предельная сила трения покоя:</p>
+      $$\mu N = 0{,}3\cdot20 = 6~\text{Н}.$$
+      <p>(а) $F = 10~\text{Н} &gt; 6$ Н — брусок скользит, трение $\mu N = 6$ Н:</p>
+      $$\begin{aligned} ma &= F - \mu mg,\\ a &= \dfrac{F - \mu mg}{m} = \dfrac{10 - 6}{2} = 2~\text{м/с}^2. \end{aligned}$$
+      <p>(б) $F = 5~\text{Н} &lt; 6$ Н — сдвинуть брусок не удаётся. Он покоится, $a = 0$, и трение покоя уравновешивает внешнюю силу: $F_{\text{тр}} = F = 5$ Н.</p>
+      <p class="chk">Проверка: $\left[\dfrac{F}{m}\right] = \dfrac{\text{Н}}{\text{кг}} = \dfrac{\text{кг}\cdot\text{м/с}^2}{\text{кг}} = \text{м/с}^2$. Ответ «6 Н» в пункте (б) означал бы, что трение сильнее тяги и разгоняет брусок назад, — так не бывает.</p></div></details></div>
+
+  <div class="zd" id="z3"><p><span class="n">3.</span>Автомобиль ехал по горизонтальной дороге со скоростью 72 км/ч и резко затормозил: колёса заблокированы, коэффициент трения шин о дорогу 0,5. Найдите тормозной путь. Зависит ли он от массы автомобиля? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>40 м; от массы не зависит.</p></div></details>
+    <details><summary>Решение</summary><div><p>Тормозит только сила трения скольжения $\mu mg$; $v_0 = 72~\text{км/ч} = 20$ м/с.</p>
+      $$\begin{aligned} ma &= \mu mg,\\ a &= \mu g = 5~\text{м/с}^2,\\ s &= \dfrac{v_0^2}{2a} = \dfrac{v_0^2}{2\mu g}\\ &= \dfrac{400}{10} = 40~\text{м}. \end{aligned}$$
+      <p>Масса сократилась: у тяжёлой машины больше и сила трения, и инертность — ровно в одно и то же число раз.</p>
+      <p class="chk">Проверка: $\left[\dfrac{v^2}{\mu g}\right] = \dfrac{\text{м}^2/\text{с}^2}{\text{м/с}^2} = \text{м}$. Правдоподобие: 40 м при 72 км/ч — реальный порядок тормозного пути на сухом асфальте.</p></div></details></div>
+
+  <div class="zd" id="z4"><p><span class="n">4.</span>Два конькобежца массами 40 кг и 60 кг стоят на льду и отталкиваются друг от друга. Во время толчка первый движется с ускорением 3 м/с². С каким ускорением движется второй? С какой силой они действуют друг на друга? Трением о лёд пренебречь. <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>$a_2 = 2~\text{м/с}^2$; сила взаимодействия 120 Н.</p></div></details>
+    <details><summary>Решение</summary><div><p>Горизонтально на каждого действует только сила со стороны другого; по третьему закону они равны по модулю:</p>
+      $$\begin{aligned} F &= m_1a_1 = 40\cdot3 = 120~\text{Н},\\ a_2 &= \dfrac{F}{m_2} = \dfrac{m_1}{m_2}\,a_1 = \dfrac{40}{60}\cdot3 = 2~\text{м/с}^2. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\dfrac{m_1}{m_2}a_1\right] = \dfrac{\text{кг}}{\text{кг}}\cdot\text{м/с}^2 = \text{м/с}^2$. Правдоподобие: более массивный получает меньшее ускорение.</p></div></details></div>
+
+  <p class="zgr">Б. Сила под углом и наклонная плоскость</p>
+  <div class="zd" id="z5"><p><span class="n">5.</span>Ящик массой 4 кг тянут по полу за верёвку силой 20 Н, верёвка направлена вверх под углом $\alpha$ к горизонту ($\cos\alpha = 0{,}8$, $\sin\alpha = 0{,}6$). Коэффициент трения 0,25. Найдите ускорение ящика. <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>$a = 2{,}25~\text{м/с}^2$.</p></div></details>
+    <details><summary>Решение</summary><div><p>Силы: $m\vec g$, $\vec N$, натяжение $\vec F$, трение $\vec F_{\text{тр}}$. Ось $x$ — вдоль пола по движению, $y$ — вверх.</p>
+      $$\begin{aligned} y:\;\; N + F\sin\alpha - mg &= 0,\\ N &= mg - F\sin\alpha = 40 - 12 = 28~\text{Н},\\ x:\;\; ma &= F\cos\alpha - \mu N,\\ a &= \dfrac{F\cos\alpha - \mu(mg - F\sin\alpha)}{m}\\ &= \dfrac{16 - 7}{4} = 2{,}25~\text{м/с}^2. \end{aligned}$$
+      <p>Верёвка под углом немного «приподнимает» ящик: реакция опоры и трение меньше, чем при горизонтальной тяге.</p>
+      <p class="chk">Проверка: $\left[\dfrac{F - \mu mg}{m}\right] = \dfrac{\text{Н}}{\text{кг}} = \text{м/с}^2$. Предельный случай $\alpha = 0$: $a = (F - \mu mg)/m$ — обычная формула.</p></div></details></div>
+
+  <div class="zd" id="z6"><p><span class="n">6.</span>Ящик массой 10 кг равномерно тянут по полу за верёвку, коэффициент трения 0,75. Под каким углом к горизонту надо тянуть, чтобы сила натяжения верёвки была наименьшей? Найдите эту силу и сравните с силой при горизонтальной верёвке. <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>$\operatorname{tg}\alpha = \mu = 0{,}75$ ($\alpha \approx 37^\circ$); $F_{\min} = 60$ Н — на 15 Н (в 1,25 раза) меньше, чем 75 Н при горизонтальной верёвке.</p></div></details>
+    <details><summary>Решение</summary><div><p>Равномерное движение — равнодействующая ноль. Как в задаче 5:</p>
+      $$\begin{aligned} N &= mg - F\sin\alpha,\\ F\cos\alpha &= \mu(mg - F\sin\alpha),\\ F(\alpha) &= \dfrac{\mu mg}{\cos\alpha + \mu\sin\alpha}. \end{aligned}$$
+      <p>$F$ наименьшая, когда знаменатель $f(\alpha) = \cos\alpha + \mu\sin\alpha$ наибольший. Ищем максимум с помощью производной:</p>
+      $$\begin{aligned} f'(\alpha) &= -\sin\alpha + \mu\cos\alpha = 0,\\ \operatorname{tg}\alpha &= \mu = 0{,}75;\\ f''(\alpha) &= -\cos\alpha - \mu\sin\alpha &lt; 0. \end{aligned}$$
+      <p>Вторая производная отрицательна — это максимум знаменателя, то есть минимум силы.</p>
+      <p>При $\operatorname{tg}\alpha = 0{,}75$: $\sin\alpha = 0{,}6$, $\cos\alpha = 0{,}8$, $f = 0{,}8 + 0{,}75\cdot0{,}6 = 1{,}25$:</p>
+      $$\begin{aligned} F_{\min} &= \dfrac{\mu mg}{1{,}25} = \dfrac{75}{1{,}25} = 60~\text{Н},\\ F(0) &= \mu mg = 75~\text{Н}. \end{aligned}$$
+      <p>В общем виде $F_{\min} = \dfrac{\mu mg}{\sqrt{1 + \mu^2}}$.</p>
+      <p class="chk">Проверка: $\left[\dfrac{\mu mg}{\cos\alpha + \mu\sin\alpha}\right] = \text{кг}\cdot\text{м/с}^2 = \text{Н}$ ($\mu$ и тригонометрия безразмерны). При $\mu \to 0$ выгодный угол $\to 0$ — тянуть горизонтально, как и подсказывает здравый смысл.</p></div></details></div>
+
+  <div class="zd" id="z7"><p><span class="n">7.</span>Брусок соскальзывает с наклонной плоскости с углом $\alpha$ ($\sin\alpha = 0{,}6$, $\cos\alpha = 0{,}8$), коэффициент трения 0,5. Найдите ускорение бруска. <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>$a = 2~\text{м/с}^2$.</p></div></details>
+    <details><summary>Решение</summary><div><p>Ось $x$ — вниз вдоль плоскости, $y$ — перпендикулярно ей (раздел 8.1):</p>
+      $$\begin{aligned} N &= mg\cos\alpha,\\ ma &= mg\sin\alpha - \mu mg\cos\alpha,\\ a &= g(\sin\alpha - \mu\cos\alpha) = 10\,(0{,}6 - 0{,}4) = 2~\text{м/с}^2. \end{aligned}$$
+      <p class="chk">Проверка: $[g(\sin\alpha - \mu\cos\alpha)] = \text{м/с}^2$. Без трения было бы $g\sin\alpha = 6~\text{м/с}^2$; с трением меньше — правдоподобно.</p></div></details></div>
+
+  <div class="zd" id="z8"><p><span class="n">8.</span>Брусок толкнули вверх вдоль той же наклонной плоскости ($\sin\alpha = 0{,}6$, $\cos\alpha = 0{,}8$, $\mu = 0{,}5$) со скоростью 10 м/с. Через какое время он остановится и какой путь пройдёт? Соскользнёт ли он обратно? Если да — за какое время спустится в начальную точку и с какой скоростью? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>Остановится через 1 с, пройдя 5 м; соскользнёт ($\operatorname{tg}\alpha = 0{,}75 &gt; \mu$); спуск займёт $\sqrt5 \approx 2{,}2$ с (всего от толчка ≈ 3,2 с), скорость внизу $2\sqrt5 \approx 4{,}5$ м/с.</p></div></details>
+    <details><summary>Решение</summary><div><p><b>Подъём.</b> Брусок едет вверх — трение направлено вниз, вместе со скатывающей силой. Модуль замедления:</p>
+      $$\begin{aligned} a_1 &= g(\sin\alpha + \mu\cos\alpha) = 10\,(0{,}6 + 0{,}4) = 10~\text{м/с}^2,\\ t_1 &= \dfrac{v_0}{a_1} = 1~\text{с},\\ s &= \dfrac{v_0^2}{2a_1} = \dfrac{100}{20} = 5~\text{м}. \end{aligned}$$
+      <p><b>Остановка.</b> Удержать брусок может трение покоя не больше $\mu mg\cos\alpha = 0{,}4\,mg$, а скатывающая сила $mg\sin\alpha = 0{,}6\,mg$ больше. Брусок поедет вниз.</p>
+      <p><b>Спуск.</b> Трение теперь направлено вверх:</p>
+      $$\begin{aligned} a_2 &= g(\sin\alpha - \mu\cos\alpha) = 2~\text{м/с}^2,\\ t_2 &= \sqrt{\dfrac{2s}{a_2}} = \sqrt5 \approx 2{,}2~\text{с},\\ v &= \sqrt{2a_2s} = \sqrt{20} \approx 4{,}5~\text{м/с}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\sqrt{\dfrac{s}{a}}\right] = \sqrt{\dfrac{\text{м}}{\text{м/с}^2}} = \text{с}$; $[\sqrt{as}] = \sqrt{\text{м/с}^2\cdot\text{м}} = \text{м/с}$. Правдоподобие: вернулся медленнее, чем уехал (4,5 &lt; 10 м/с), и спускался дольше, чем поднимался, — трение всё время отнимало скорость.</p></div></details></div>
+
+  <div class="zd" id="z9"><p><span class="n">9.</span>Брусок массой 2 кг лежит на наклонной плоскости ($\sin\alpha = 0{,}6$, $\cos\alpha = 0{,}8$), коэффициент трения 0,25. Какую наименьшую силу, направленную вдоль плоскости, надо приложить, чтобы брусок не соскальзывал? Какую — чтобы равномерно втаскивать его вверх? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>Удержать — 8 Н; втаскивать равномерно — 16 Н. При любой силе от 8 до 16 Н брусок покоится.</p></div></details>
+    <details><summary>Решение</summary><div><p>Скатывающая сила $mg\sin\alpha = 12$ Н, предельное трение $\mu mg\cos\alpha = 0{,}25\cdot16 = 4$ Н.</p>
+      <p><b>Удержать.</b> Брусок «хочет» вниз — трение покоя помогает, направлено вверх (наибольшее — 4 Н):</p>
+      $$\begin{aligned} F_1 + \mu mg\cos\alpha - mg\sin\alpha &= 0,\\ F_1 &= mg(\sin\alpha - \mu\cos\alpha) = 12 - 4 = 8~\text{Н}. \end{aligned}$$
+      <p><b>Втаскивать.</b> Брусок едет вверх — трение направлено вниз и мешает:</p>
+      $$\begin{aligned} F_2 - \mu mg\cos\alpha - mg\sin\alpha &= 0,\\ F_2 &= mg(\sin\alpha + \mu\cos\alpha) = 12 + 4 = 16~\text{Н}. \end{aligned}$$
+      <p class="chk">Проверка: $[mg(\sin\alpha \pm \mu\cos\alpha)] = \text{кг}\cdot\text{м/с}^2 = \text{Н}$. При $\mu = 0$ обе силы равны $mg\sin\alpha$ — без трения «окна покоя» нет.</p></div></details></div>
+
+  <p class="zgr">В. Связанные тела</p>
+  <div class="zd" id="z10"><p><span class="n">10.</span>Два бруска массами 1 кг и 3 кг связаны нитью и лежат на гладком горизонтальном столе. К бруску 3 кг приложили горизонтальную силу 12 Н, направленную от второго бруска. Найдите ускорение брусков и силу натяжения нити. Как изменится натяжение, если ту же силу приложить к бруску 1 кг? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>$a = 3~\text{м/с}^2$, $T = 3$ Н; если тянуть за лёгкий брусок, $T = 9$ Н — в 3 раза больше.</p></div></details>
+    <details><summary>Решение</summary><div><p>Нить нерастяжима — ускорения равны. Для каждого бруска — свой второй закон (тянут за брусок 3 кг, брусок 1 кг едет сзади):</p>
+      $$\begin{aligned} 3a &= F - T,\\ 1\cdot a &= T. \end{aligned}$$
+      <p>Сложим: $(m_1 + m_2)a = F$, $a = \dfrac{12}{4} = 3~\text{м/с}^2$, $T = m_1a = 3$ Н.</p>
+      <p>В общем виде нить разгоняет только задний брусок: $T = \dfrac{m_{\text{задн}}}{m_1 + m_2}F$. Если тянуть за лёгкий, сзади едет тяжёлый: $T = \dfrac{3}{4}\cdot12 = 9$ Н.</p>
+      <p class="chk">Проверка: $\left[\dfrac{m}{m_1 + m_2}F\right] = \text{Н}$. Правдоподобие: $T &lt; F$ всегда — нить передаёт лишь долю силы.</p></div></details></div>
+
+  <div class="zd" id="z11"><p><span class="n">11.</span>Машина Атвуда: через неподвижный блок перекинута нить с грузами 3 кг и 2 кг. Найдите ускорение грузов, силу натяжения нити и силу, с которой блок давит на ось. <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>$a = 2~\text{м/с}^2$, $T = 24$ Н, на ось — 48 Н.</p></div></details>
+    <details><summary>Решение</summary><div><p>Тяжёлый груз едет вниз, лёгкий вверх; каждому — ось вдоль его ускорения:</p>
+      $$\begin{aligned} m_1a &= m_1g - T,\\ m_2a &= T - m_2g. \end{aligned}$$
+      <p>Сложим и выразим:</p>
+      $$\begin{aligned} a &= g\,\dfrac{m_1 - m_2}{m_1 + m_2} = 10\cdot\dfrac{1}{5} = 2~\text{м/с}^2,\\ T &= m_2(g + a) = 2\cdot12 = 24~\text{Н},\\ F_{\text{ось}} &= 2T = 48~\text{Н}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[g\,\dfrac{m_1 - m_2}{m_1 + m_2}\right] = \text{м/с}^2$. Правдоподобие: $20~\text{Н} &lt; T &lt; 30$ Н; на ось меньше полного веса 50 Н. Предельный случай $m_1 = m_2$: $a = 0$, $T = mg$.</p></div></details></div>
+
+  <div class="zd" id="z12"><p><span class="n">12.</span>Брусок массой 2 кг лежит на горизонтальном столе (коэффициент трения 0,25) и связан нитью, перекинутой через блок на краю стола, с висящим грузом массой 3 кг. Найдите ускорение системы и натяжение нити. <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>$a = 5~\text{м/с}^2$, $T = 15$ Н.</p></div></details>
+    <details><summary>Решение</summary><div><p>Сдвинется ли? Груз тянет с силой $m_2g = 30$ Н, трение не больше $\mu m_1g = 5$ Н — сдвинется. Уравнения для бруска (вдоль стола) и груза (вниз):</p>
+      $$\begin{aligned} m_1a &= T - \mu m_1g,\\ m_2a &= m_2g - T. \end{aligned}$$
+      $$\begin{aligned} a &= g\,\dfrac{m_2 - \mu m_1}{m_1 + m_2} = \dfrac{30 - 5}{5} = 5~\text{м/с}^2,\\ T &= m_2(g - a) = 3\cdot5 = 15~\text{Н}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[g\,\dfrac{m_2 - \mu m_1}{m_1 + m_2}\right] = \text{м/с}^2$. Правдоподобие: $a &lt; g$ и $T &lt; m_2g = 30$ Н — груз падает не свободно.</p></div></details></div>
+
+  <div class="zd" id="z13"><p><span class="n">13.</span>На гладкой наклонной плоскости с углом 30° лежит брусок массой 4 кг. Нить от бруска перекинута через блок на вершине плоскости, к её концу подвешен груз 1 кг. В какую сторону поедет брусок? Найдите ускорение и натяжение нити. <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>Брусок поедет вниз по плоскости (груз — вверх); $a = 2~\text{м/с}^2$, $T = 12$ Н.</p></div></details>
+    <details><summary>Решение</summary><div><p>Сравним силы, тянущие систему в разные стороны: скатывающая $m_1g\sin30^\circ = 20$ Н и сила тяжести груза $m_2g = 10$ Н. Перевешивает брусок — он едет вниз.</p>
+      $$\begin{aligned} m_1a &= m_1g\sin\alpha - T,\\ m_2a &= T - m_2g. \end{aligned}$$
+      $$\begin{aligned} a &= g\,\dfrac{m_1\sin\alpha - m_2}{m_1 + m_2} = \dfrac{20 - 10}{5} = 2~\text{м/с}^2,\\ T &= m_2(g + a) = 1\cdot12 = 12~\text{Н}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[g\,\dfrac{m_1\sin\alpha - m_2}{m_1 + m_2}\right] = \text{м/с}^2$. Предельный случай $\alpha = 90^\circ$ — машина Атвуда.</p></div></details></div>
+
+  <div class="zd" id="z14"><p><span class="n">14.</span>Брусок массой 1 кг лежит на гладком горизонтальном столе. К нему привязана нить; она идёт через неподвижный блок на краю стола вниз, огибает снизу подвижный блок и поднимается к крюку у края стола, где закреплён её конец (оба куска нити у подвижного блока вертикальны). К оси подвижного блока подвешен груз массой 4 кг. Найдите ускорения бруска и груза и силу натяжения нити. <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>Брусок — 10 м/с², груз — 5 м/с², $T = 10$ Н.</p></div></details>
+    <details><summary>Решение</summary><div><p><b>Связь.</b> Груз опустился на $y$ — оба вертикальных куска нити удлинились на $y$, со стола «ушло» $2y$ нити. Значит, $a_1 = 2a_2$.</p>
+      <p><b>Силы.</b> На брусок по горизонтали — только $T$; на груз с блоком — $m_2g$ вниз и два куска нити вверх, $2T$:</p>
+      $$\begin{aligned} m_1a_1 &= T,\\ m_2a_2 &= m_2g - 2T,\\ a_1 &= 2a_2. \end{aligned}$$
+      <p>Подставим $T = 2m_1a_2$ во второе уравнение:</p>
+      $$\begin{aligned} m_2a_2 &= m_2g - 4m_1a_2,\\ a_2 &= \dfrac{m_2g}{m_2 + 4m_1} = \dfrac{40}{8} = 5~\text{м/с}^2,\\ a_1 &= 2a_2 = 10~\text{м/с}^2,\\ T &= m_1a_1 = 10~\text{Н}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\dfrac{m_2g}{m_2 + 4m_1}\right] = \text{м/с}^2$. Правдоподобие: $a_2 &lt; g$; при $m_1 \to 0$ груз падает свободно ($a_2 \to g$).</p></div></details></div>
+
+  <p class="zgr">Г. Два тела с трением между ними</p>
+  <div class="zd" id="z15"><p><span class="n">15.</span>На гладком столе лежит доска массой 2 кг, на ней — брусок массой 1 кг. Коэффициент трения между бруском и доской 0,4. К доске приложили горизонтальную силу $F$. При какой силе брусок начнёт скользить по доске? Найдите ускорения бруска и доски и силу трения между ними при $F = 9$ Н и при $F = 18$ Н. <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>Скольжение начинается при $F &gt; 12$ Н. При 9 Н: оба тела — 3 м/с², $F_{\text{тр}} = 3$ Н (покоя). При 18 Н: брусок — 4 м/с², доска — 7 м/с², $F_{\text{тр}} = 4$ Н.</p></div></details>
+    <details><summary>Решение</summary><div><p><b>Граница.</b> Пока тела едут вместе, брусок разгоняет трение покоя, и оно не больше $\mu mg = 4$ Н:</p>
+      $$\begin{aligned} a &= \dfrac{F}{M + m},\\ F_{\text{тр}} &= ma \le \mu mg,\\ a &\le \mu g = 4~\text{м/с}^2,\\ F &\le \mu g(M + m) = 12~\text{Н}. \end{aligned}$$
+      <p><b>$F = 9$ Н</b> — вместе: $a = \dfrac{9}{3} = 3~\text{м/с}^2$, $F_{\text{тр}} = ma = 3$ Н &lt; 4 Н.</p>
+      <p><b>$F = 18$ Н</b> — проскальзывание, трение скольжения $\mu mg = 4$ Н:</p>
+      $$\begin{aligned} a_{\text{б}} &= \dfrac{\mu mg}{m} = \mu g = 4~\text{м/с}^2,\\ a_{\text{д}} &= \dfrac{F - \mu mg}{M} = \dfrac{18 - 4}{2} = 7~\text{м/с}^2. \end{aligned}$$
+      <p class="chk">Проверка: $[\mu g(M + m)] = \text{м/с}^2\cdot\text{кг} = \text{Н}$. Правдоподобие: при скольжении доска обгоняет брусок ($7 &gt; 4$), иначе он не скользил бы назад относительно неё.</p></div></details></div>
+
+  <p class="zgr">Д. Движение по окружности</p>
+  <div class="zd" id="z16"><p><span class="n">16.</span>Автомобиль проходит горизонтальный поворот радиусом 50 м, коэффициент трения шин о дорогу 0,5. С какой наибольшей скоростью можно пройти поворот без заноса? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>$v = \sqrt{250} \approx 16$ м/с ≈ 57 км/ч.</p></div></details>
+    <details><summary>Решение</summary><div><p>К центру поворота машину толкает только трение покоя шин, оно не больше $\mu mg$:</p>
+      $$\begin{aligned} \dfrac{mv^2}{R} &\le \mu mg,\\ v_{\max} &= \sqrt{\mu gR} = \sqrt{0{,}5\cdot10\cdot50} = \sqrt{250} \approx 16~\text{м/с}. \end{aligned}$$
+      <p class="chk">Проверка: $[\sqrt{gR}] = \sqrt{\text{м/с}^2\cdot\text{м}} = \text{м/с}$. Правдоподобие: около 57 км/ч на крутом городском повороте — разумно; на льду ($\mu \approx 0{,}1$) — уже около 25 км/ч.</p></div></details></div>
+
+  <div class="zd" id="z17"><p><span class="n">17.</span>С какой скоростью автомобиль должен проходить верхнюю точку выпуклого моста радиусом 40 м, чтобы пассажиры оказались в невесомости? <span class="lv">база</span></p>
+    <details><summary>Ответ</summary><div><p>20 м/с = 72 км/ч.</p></div></details>
+    <details><summary>Решение</summary><div><p>Невесомость — вес ноль, $N = 0$. Тогда к центру (вниз) машину поворачивает одна сила тяжести:</p>
+      $$\begin{aligned} mg - N &= \dfrac{mv^2}{R},\\ N &= 0,\\ v &= \sqrt{gR} = \sqrt{10\cdot40} = 20~\text{м/с}. \end{aligned}$$
+      <p class="chk">Проверка: $[\sqrt{gR}] = \text{м/с}$. Правдоподобие: при большей скорости машина оторвалась бы от моста — так «прыгают» на горбатых мостах в кино.</p></div></details></div>
+
+  <div class="zd" id="z18"><p><span class="n">18.</span>Шарик массой $m$ на нити длиной 0,5 м вращается по горизонтальной окружности так, что нить образует с вертикалью угол 60° (конический маятник). Найдите период обращения и силу натяжения нити (через $mg$). <span class="lv st">★</span></p>
+    <details><summary>Ответ</summary><div><p>Период ≈ 1,0 с (0,99 с); натяжение $2mg$.</p></div></details>
+    <details><summary>Решение</summary><div><p>Радиус окружности $R = L\sin\alpha$. На шарик — $m\vec g$ и натяжение $\vec T$; ускорение $\omega^2R$ к центру:</p>
+      $$\begin{aligned} T\cos\alpha &= mg,\\ T\sin\alpha &= m\omega^2L\sin\alpha. \end{aligned}$$
+      <p>Из первого $T = \dfrac{mg}{\cos60^\circ} = 2mg$; из второго $T = m\omega^2L$, поэтому</p>
+      $$\begin{aligned} \omega^2 &= \dfrac{g}{L\cos\alpha},\\ T_{\text{об}} &= \dfrac{2\pi}{\omega} = 2\pi\sqrt{\dfrac{L\cos\alpha}{g}}\\ &= 2\pi\sqrt{\dfrac{0{,}25}{10}} \approx 0{,}99~\text{с}. \end{aligned}$$
+      <p class="chk">Проверка: $\left[\sqrt{\dfrac{L}{g}}\right] = \sqrt{\dfrac{\text{м}}{\text{м/с}^2}} = \text{с}$. Правдоподобие: период около секунды для полуметровой нити — как у обычного маятника такой длины; при $\alpha \to 90^\circ$ период стремится к нулю, а натяжение — к бесконечности: горизонтально нить не раскрутить.</p></div></details></div>
+</section>
+
+<!-- 12 -->
+<section class="txt">
+  <h2 class="sec" id="proverka"><span class="step s6">?</span>12. Проверь себя</h2>
+  <details class="qz"><summary>Автобус резко тормозит, пассажиров «бросает» вперёд. Какая сила их толкает?</summary><p>Никакая. Относительно Земли пассажиры продолжают двигаться с прежней скоростью по инерции, а автобус под ними замедляется. Автобус, тормозящий относительно Земли, — неинерциальная система отсчёта (раздел 2).</p></details>
+  <details class="qz"><summary>Мяч подбросили вертикально вверх. Какие силы действуют на него в верхней точке? Чему равно ускорение?</summary><p>Только сила тяжести (если пренебречь сопротивлением воздуха). Ускорение $g$, вниз, хотя скорость в этот момент нулевая (раздел 3).</p></details>
+  <details class="qz"><summary>Брусок лежит на наклонной плоскости и не скользит. Куда направлена сила трения и чему она равна?</summary><p>Вверх вдоль плоскости, $F_{\text{тр}} = mg\sin\alpha$ — ровно столько, сколько нужно для покоя. Не $\mu mg\cos\alpha$: это лишь её предел (раздел 8.1).</p></details>
+  <details class="qz"><summary>Весы в лифте показывают меньше, чем в покое. Куда движется лифт?</summary><p>Определить нельзя. Известно лишь, что ускорение направлено вниз: лифт либо разгоняется вниз, либо тормозит при подъёме (раздел 6).</p></details>
+  <details class="qz"><summary>На нити через блок висят два одинаковых груза. Один толкнули вниз. Как они будут двигаться?</summary><p>Равномерно: силы на каждом грузе скомпенсированы ($T = mg$), ускорение ноль — первый закон.</p></details>
+  <details class="qz"><summary>Почему на МКС невесомость, если сила тяжести на высоте 400 км всего на 10 % меньше, чем у Земли?</summary><p>Станция и всё внутри неё движутся с одним и тем же ускорением $g$ — свободно падают. Опоры не давят на космонавтов, вес равен нулю, а сила тяжести — нет (раздел 6).</p></details>
+  <details class="qz"><summary>Ящик в кузове грузовика не закреплён, коэффициент трения 0,4. С каким наибольшим ускорением может разгоняться грузовик, чтобы ящик не поехал?</summary><p>$\mu g = 4~\text{м/с}^2$: ящик разгоняет только трение покоя, и больше $\mu mg$ оно дать не может (раздел 8.3).</p></details>
+  <details class="qz"><summary>В разгоняющемся поезде отвес отклонился от вертикали на 6° назад. Каково ускорение поезда?</summary><p>$a = g\operatorname{tg}6^\circ \approx 10\cdot0{,}105 \approx 1{,}05~\text{м/с}^2$ (раздел 8.5).</p></details>
+</section>
+
+<!-- материалы -->
+<section class="txt" id="materialy">
+  <h2 class="sec">Тренажёры по теме</h2>
+  <div class="cards">
+    <a class="card" href="../trenazhery/naklonnaya.html"><b>Наклонная плоскость →</b><span>Силы и проекции, граница tg α = μ, задачи со случайными числами, игра «Что будет с бруском?».</span></a>
+    <a class="card" href="../trenazhery/bloki.html"><b>Нити и блоки →</b><span>Машина Атвуда и брусок с грузом через блок; игра «Подбери груз».</span></a>
+    <a class="card" href="../trenazhery/doska.html" style="border-left-color:var(--res)"><b>Брусок на доске ★ →</b><span>График ускорений от силы, граница совместного движения, игра «Вместе или проскользнёт?».</span></a>
+    <a class="card" href="../slozhenie-sil.html"><b>Сложение сил: проекции →</b><span>Равнодействующая на прямой и на плоскости — основа для всех задач главы.</span></a>
+  </div>
+</section>
+<p class="foot"><a href="index.html">← Оглавление Учебника</a> · <a href="../index.html">Тренажёры и тесты</a></p>
+</div>
+
+<script>
+/* наконечники стрелок у <line class="ar …"> в рисунках: треугольник того же цвета */
+document.querySelectorAll('svg line.ar').forEach(l => {
+  const x1 = +l.getAttribute('x1'), y1 = +l.getAttribute('y1'), x2 = +l.getAttribute('x2'), y2 = +l.getAttribute('y2');
+  const L = Math.hypot(x2 - x1, y2 - y1); if (L < 4) return; const ux = (x2 - x1) / L, uy = (y2 - y1) / L, h = 10, w = 4.5;
+  l.setAttribute('x2', x2 - ux * h * 0.8); l.setAttribute('y2', y2 - uy * h * 0.8);
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  p.setAttribute('points', [x2, y2, x2 - ux * h - uy * w, y2 - uy * h + ux * w, x2 - ux * h + uy * w, y2 - uy * h - ux * w].map(v => v.toFixed(1)).join(' '));
+  p.setAttribute('class', [...l.classList].filter(c => /^c/.test(c)).join(' ')); p.style.strokeWidth = 0; l.after(p);
+});
+</script>
+<script src="../assets/katex/katex.min.js"></script>
+<script src="../assets/katex/auto-render.min.js"></script>
+<script>renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false, ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'canvas', 'svg']});</script>
+<script src="../assets/sim-core.js"></script>
+<script src="../assets/nyuton-sims.js"></script>
+</body>
+</html>

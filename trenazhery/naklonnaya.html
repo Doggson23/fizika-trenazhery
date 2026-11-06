@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Наклонная плоскость: силы, трение, ускорение</title>
+<link rel="stylesheet" href="../assets/sim.css">
+<style>@media (max-width:600px){#cv{aspect-ratio:4/3}}
+.choices{display:grid;gap:6px}.choices button{text-align:left}.choices button.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}.choices button.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">физика · динамика · законы Ньютона</div>
+    <h1>Наклонная плоскость</h1>
+    <p class="sub">Брусок на наклонной плоскости с трением: силы и их проекции, когда брусок лежит, а когда скользит, почему вверх он едет иначе, чем вниз. g = 10 м/с².</p>
+  </header>
+  <div class="tabs" role="tablist"><button class="tab" id="t-ex" data-tab="explore">Исследовать</button><button class="tab" id="t-task" data-tab="task">Задача</button><button class="tab" id="t-game" data-tab="game">Игра</button></div>
+
+  <section class="lab">
+    <div class="stage"><canvas id="cv" class="wide" aria-label="Брусок на наклонной плоскости и силы, действующие на него"></canvas>
+      <div class="legend"><span><i style="background:var(--f1)"></i>mg</span><span><i style="background:var(--f2)"></i>N</span><span><i style="background:var(--an)"></i>F<sub>тр</sub></span><span><i style="background:var(--ink-2)"></i>проекции mg</span><span><i style="background:var(--res)"></i>скорость v</span></div></div>
+
+    <div class="panel" data-pane="explore">
+      <h2>Параметры</h2>
+      <div class="ctl"><label for="al"><span>Угол наклона α</span><output id="alO"></output></label><input id="al" type="range" min="0" max="60" step="1" value="30"></div>
+      <div class="ctl"><label for="mu"><span>Коэффициент трения μ</span><output id="muO"></output></label><input id="mu" type="range" min="0" max="1" step="0.05" value="0.4"></div>
+      <div class="ctl"><label for="ms"><span>Масса бруска m</span><output id="msO"></output></label><input id="ms" type="range" min="0.5" max="10" step="0.5" value="2"></div>
+      <div class="ctl"><label for="v0"><span>Начальная скорость (+ вверх, − вниз)</span><output id="v0O"></output></label><input id="v0" type="range" min="-8" max="10" step="0.5" value="0"></div>
+      <div class="checks"><label><input type="checkbox" id="chProj" checked> проекции силы тяжести</label></div>
+      <div class="btns"><button class="b" id="play">Пуск</button><button class="b ghost" id="reset">Сначала</button></div>
+      <dl class="read" id="rd"></dl>
+      <div class="rule"><b>Правило.</b> N = mg cos α. Брусок без толчка лежит, если tg α ≤ μ, иначе соскальзывает с ускорением g(sin α − μ cos α). Вверх по инерции он тормозит с ускорением g(sin α + μ cos α): трение и скатывающая сила направлены вниз вместе.</div>
+      <p class="note">Исследуйте: меняется ли движение, если увеличить массу? Найдите угол, при котором брусок, толкнутый вниз, едет равномерно.</p>
+    </div>
+
+    <div class="panel" data-pane="task" hidden>
+      <h2>Задача</h2>
+      <p id="tq"></p>
+      <div class="field"><span>Ответ</span><input id="tin" inputmode="decimal" aria-label="Ответ"><span class="num" id="tunit"></span></div>
+      <div class="btns"><button class="b" id="tchk">Проверить</button><button class="b ghost" id="thint">Подсказка</button><button class="b ghost" id="tnew">Новая задача</button></div>
+      <div class="msg" id="tmsg"></div>
+      <div class="hint" id="thintBox" hidden></div>
+      <div class="svo" id="tprop" hidden></div>
+      <div class="score"><span>верно <b id="sOk">0</b></span><span>попыток <b id="sAll">0</b></span><span>серия <b id="sSer">0</b></span></div>
+      <p class="note">Ответ — числом, можно с запятой или дробью (3/4). Допуск 1 %. После верного ответа брусок поедет.</p>
+    </div>
+
+    <div class="panel" data-pane="game" hidden>
+      <h2>Что будет с бруском?</h2>
+      <p id="gq"></p>
+      <div class="choices" id="gch">
+        <button class="b ghost" data-ch="stay">Останется лежать</button>
+        <button class="b ghost" data-ch="down">Сразу поедет вниз</button>
+        <button class="b ghost" data-ch="up_stay">Поднимется, остановится и останется лежать</button>
+        <button class="b ghost" data-ch="up_back">Поднимется, остановится и соскользнёт обратно</button>
+        <button class="b ghost" data-ch="top">Доедет до верха плоскости</button>
+      </div>
+      <div class="msg" id="gmsg"></div>
+      <div class="btns"><button class="b" id="gnext">Следующий брусок</button></div>
+      <div class="score"><span>верно <b id="gOk">0</b></span><span>попыток <b id="gAll">0</b></span><span>серия <b id="gSer">0</b></span></div>
+      <p class="note">Сначала решите в уме или на бумаге, потом нажимайте — брусок поедет и покажет, кто прав.</p>
+    </div>
+  </section>
+  <p class="foot">Тренажёр к главе «Законы Ньютона» · <a href="../uchebnik/zakony-nyutona.html#naklon">теория в Учебнике</a> · <a href="../index.html">все тренажёры</a></p>
+</div>
+<script src="../assets/sim-core.js"></script>
+<script src="../assets/dinamika-tren.js"></script>
+<script>
+(function(){
+'use strict';
+const {fmt, prep, arrow, text} = SC; const {G, nf, num, close, pick, rnd, rows} = TR; const $ = id => document.getElementById(id);
+const L = 8, BL = 1.2, BH = 0.7, S_UP = 0.8, TOP = L - BL / 2;     // длина плоскости, размеры бруска, старт и верх (центр бруска)
+let P = {al: 30, mu: 0.4, m: 2, v0: 0}, s, v, t, run = false, ended = '', mode = 'explore', s0 = 0;
+const rad = d => d * Math.PI / 180;
+function start(){ s0 = P.v0 > 0 ? S_UP : P.v0 < 0 ? TOP - 0.2 : L / 2; s = s0; v = P.v0; t = 0; ended = ''; }
+function force(vv){                      // проекции на ось вдоль плоскости вверх: a и сила трения
+  const a = rad(P.al), sa = Math.sin(a), ca = Math.cos(a);
+  if (vv > 1e-9) return {a: -G * (sa + P.mu * ca), fr: -P.mu * P.m * G * ca, kind: 'скольжения'};
+  if (vv < -1e-9) return {a: -G * (sa - P.mu * ca), fr: P.mu * P.m * G * ca, kind: 'скольжения'};
+  if (Math.tan(a) <= P.mu + 1e-12) return {a: 0, fr: P.m * G * sa, kind: 'покоя'};
+  return {a: -G * (sa - P.mu * ca), fr: P.mu * P.m * G * ca, kind: 'скольжения'};
+}
+function step(dt){
+  const n = 20, h = dt / n;
+  for (let i = 0; i < n; i++) {
+    const f = force(v); if (f.a === 0 && Math.abs(v) < 1e-9) { v = 0; if (t > 0.05) { run = false; ended = ended || 'stop'; } t += h; continue; }
+    const vn = v + f.a * h; if ((v > 0 && vn <= 0) || (v < 0 && vn >= 0)) v = 0; else v = vn;
+    s += v * h; t += h;
+    if (s <= BL / 2) { s = BL / 2; v = 0; run = false; ended = 'bottom'; break; }
+    if (s >= TOP) { s = TOP; v = 0; run = false; ended = 'top'; break; }
+  }
+}
+function setRun(on){ run = on; $('play').textContent = run ? 'Пауза' : 'Пуск'; }
+// ---------- исследование
+const slid = (id, f) => SC.slider(document, id, f, () => { if (mode === 'explore') { P = {al: +$('al').value, mu: +$('mu').value, m: +$('ms').value, v0: +$('v0').value}; start(); setRun(false); } });
+slid('al', v => v + '°'); slid('mu', v => fmt(v, 2)); slid('ms', v => fmt(v, 1) + ' кг'); slid('v0', v => fmt(v, 1) + ' м/с');
+$('play').addEventListener('click', () => { if (ended) start(); setRun(!run); });
+$('reset').addEventListener('click', () => { start(); setRun(false); });
+// ---------- задачи
+const TRIG = [{d: Math.atan2(3, 4) * 180 / Math.PI, s: 0.6, c: 0.8, txt: 'sin α = 0,6, cos α = 0,8'},
+  {d: 30, s: 0.5, c: Math.sqrt(3) / 2, txt: 'α = 30°'}, {d: Math.atan2(4, 3) * 180 / Math.PI, s: 0.8, c: 0.6, txt: 'sin α = 0,8, cos α = 0,6'}];
+const MUS = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5];
+let Q = null; const SCORE = TR.score('s');
+function newTask(){
+  const kind = pick(['a_down', 's_up', 't_up', 'alpha']), T = pick(TRIG), tg = T.s / T.c;
+  let mu = pick(MUS.filter(x => kind !== 'a_down' || x < tg - 0.05)), v0 = pick([4, 5, 6, 8, 10]), q = {kind};
+  if (kind === 'a_down') { q.ans = G * (T.s - mu * T.c); q.unit = 'м/с²';
+    q.text = 'Брусок соскальзывает с наклонной плоскости (' + T.txt + '), коэффициент трения ' + nf(mu) + '. Найдите ускорение бруска.';
+    q.wrong = [[G * (T.s + mu * T.c), 'Похоже, трение направлено не туда: брусок едет вниз, значит, трение действует вверх вдоль плоскости.'],
+      [G * T.s, 'Вы не учли трение.'], [G * (T.s - mu), 'Похоже, вы взяли N = mg. На наклонной плоскости N = mg cos α.']];
+    q.hints = ['Оси: x — вниз вдоль плоскости, y — перпендикулярно ей. Брусок едет вниз — трение направлено вверх.', 'По оси y: N = mg cos α. По оси x: ma = mg sin α − μN.', 'a = g(sin α − μ cos α).'];
+    q.P = {al: T.d, mu, m: 2, v0: 0}; q.prop = 'Масса сократилась: ускорение соскальзывания не зависит от массы бруска.'; }
+  if (kind === 's_up' || kind === 't_up') { const a1 = G * (T.s + mu * T.c);
+    q.text = 'Брусок толкнули вверх вдоль наклонной плоскости (' + T.txt + ', μ = ' + nf(mu) + ') со скоростью ' + v0 + ' м/с. ' + (kind === 's_up' ? 'Какой путь он пройдёт до остановки?' : 'Через какое время он остановится?');
+    q.ans = kind === 's_up' ? v0 * v0 / (2 * a1) : v0 / a1; q.unit = kind === 's_up' ? 'м' : 'с';
+    const a2 = G * (T.s - mu * T.c), a3 = G * T.s;
+    q.wrong = (kind === 's_up' ? [[v0 * v0 / (2 * a2), 'При движении вверх трение направлено вниз — вместе со скатывающей силой, а не против неё.'], [v0 * v0 / (2 * a3), 'Не учтено трение.'], [v0 * v0 / a1, 'Проверьте формулу пути до остановки: s = v₀²/(2a).']]
+      : [[v0 / a2, 'При движении вверх трение направлено вниз — вместе со скатывающей силой, а не против неё.'], [v0 / a3, 'Не учтено трение.']]);
+    q.hints = ['Брусок едет вверх, значит, трение направлено вниз вдоль плоскости — туда же, куда скатывающая сила.', 'Модуль замедления: a = g(sin α + μ cos α) = ' + nf(a1) + ' м/с².', kind === 's_up' ? 's = v₀²/(2a).' : 't = v₀/a.'];
+    q.P = {al: T.d, mu, m: 2, v0}; q.prop = 'Вверх брусок тормозит сильнее, чем потом разгоняется вниз: на подъёме трение и скатывающая сила складываются.'; }
+  if (kind === 'alpha') { mu = pick([0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1]); q.ans = Math.atan(mu) * 180 / Math.PI; q.unit = '°'; q.tolAbs = 0.3;
+    q.text = 'Брусок лежит на доске, коэффициент трения ' + nf(mu) + '. Доску медленно наклоняют. При каком угле наклона (в градусах) брусок начнёт соскальзывать?';
+    q.wrong = [[Math.atan(mu), 'Это значение в радианах — переведите в градусы.'], [Math.asin(Math.min(1, mu)) * 180 / Math.PI, 'Условие начала скольжения: mg sin α = μ mg cos α, то есть tg α = μ, а не sin α = μ.']];
+    q.hints = ['На грани скольжения трение покоя максимально: F_тр = μN.', 'mg sin α = μ mg cos α.', 'tg α = μ, α = arctg μ.'];
+    q.P = {al: Math.round(q.ans * 10) / 10 + 0.2, mu, m: 2, v0: 0}; q.prop = 'Так измеряют коэффициент трения: наклоняют плоскость до начала скольжения и берут tg α.'; }
+  Q = q; Q.h = 0; P = Object.assign({}, Q.kind === 'alpha' ? {al: 5, mu, m: 2, v0: 0} : Q.P); start(); setRun(false);
+  $('tq').textContent = q.text; $('tunit').textContent = q.unit; $('tin').value = ''; TR.clear($('tmsg')); $('thintBox').hidden = true; $('tprop').hidden = true;
+}
+$('tnew').addEventListener('click', newTask);
+$('thint').addEventListener('click', () => { if (!Q) return; Q.h = Math.min(3, Q.h + 1); const b = $('thintBox'); b.hidden = false; b.innerHTML = Q.hints.slice(0, Q.h).map((x, i) => (i + 1) + '. ' + x).join('<br>'); });
+$('tchk').addEventListener('click', () => { if (!Q) return; const x = num($('tin').value), m = $('tmsg');
+  if (!isFinite(x)) { TR.msg(m, 'bad', 'Введите число, например 2,5 или 3/4.'); return; }
+  const ok = Q.tolAbs ? Math.abs(x - Q.ans) <= Q.tolAbs : close(x, Q.ans); SCORE.add(ok);
+  if (ok) { TR.msg(m, 'ok', 'Верно: ' + nf(Q.ans) + ' ' + Q.unit + '. Смотрите, как поедет брусок.'); $('tprop').hidden = false; $('tprop').innerHTML = '<b>Свойство.</b> ' + Q.prop;
+    P = Object.assign({}, Q.P); start(); setRun(true); }
+  else { const w = Q.wrong.find(p => close(x, p[0], 0.015)); TR.msg(m, 'bad', w ? w[1] : 'Пока нет. Проверьте направление трения и выражение для N — или возьмите подсказку.'); } });
+// ---------- игра
+const GS = TR.score('g'); let GQ = null;
+function classify(p){ const a = rad(p.al), tg = Math.tan(a);
+  if (p.v0 === 0) return tg <= p.mu ? 'stay' : 'down';
+  const sStop = p.v0 * p.v0 / (2 * G * (Math.sin(a) + p.mu * Math.cos(a)));
+  if (sStop >= TOP - S_UP) return 'top'; return tg <= p.mu ? 'up_stay' : 'up_back'; }
+function margin(p){ const a = rad(p.al); let m = Math.abs(Math.tan(a) - p.mu);
+  if (p.v0 > 0) m = Math.min(m * 8, Math.abs(p.v0 * p.v0 / (2 * G * (Math.sin(a) + p.mu * Math.cos(a))) - (TOP - S_UP))); return m; }
+function newRound(){
+  const want = pick(['stay', 'down', 'up_stay', 'up_back', 'top']); let p;
+  for (let k = 0; k < 2000; k++) { p = {al: rnd(8, 50, 1), mu: rnd(0.1, 0.9, 0.05), m: 2, v0: want === 'stay' || want === 'down' ? 0 : rnd(2, 12, 1)};
+    p.mu = Math.round(p.mu * 100) / 100; if (classify(p) === want && margin(p) > (p.v0 ? 0.4 : 0.06)) break; }
+  GQ = {p, ans: classify(p), done: false}; P = Object.assign({}, p, {hide: true}); start(); setRun(false);
+  $('gq').innerHTML = 'Угол наклона <b>' + p.al + '°</b>, коэффициент трения <b>' + nf(p.mu) + '</b>. ' + (p.v0 ? 'Брусок толкнули вверх со скоростью <b>' + p.v0 + ' м/с</b>; до верха плоскости ' + fmt(TOP - S_UP, 1) + ' м.' : 'Брусок положили на плоскость без толчка.') + ' Что будет?';
+  document.querySelectorAll('[data-ch]').forEach(b => { b.className = 'b ghost'; b.disabled = false; b.hidden = p.v0 ? (b.dataset.ch === 'stay' || b.dataset.ch === 'down') : !(b.dataset.ch === 'stay' || b.dataset.ch === 'down'); });
+  TR.clear($('gmsg'));
+}
+document.querySelectorAll('[data-ch]').forEach(b => b.addEventListener('click', () => { if (!GQ || GQ.done) return; GQ.done = true;
+  const ok = b.dataset.ch === GQ.ans, p = GQ.p, a = rad(p.al), tg = Math.tan(a); GS.add(ok);
+  document.querySelectorAll('[data-ch]').forEach(x => { x.disabled = true; if (x.dataset.ch === GQ.ans) x.className = 'b ghost right'; else if (x === b) x.className = 'b ghost wrong'; });
+  let why = 'tg ' + p.al + '° = ' + fmt(tg, 2) + (tg <= p.mu ? ' ≤ ' : ' > ') + 'μ = ' + nf(p.mu) + (tg <= p.mu ? ' — трение покоя удержит брусок.' : ' — трение покоя брусок не удержит.');
+  if (p.v0) { const sS = p.v0 * p.v0 / (2 * G * (Math.sin(a) + p.mu * Math.cos(a))); why = 'Путь до остановки s = v₀²/(2g(sin α + μ cos α)) = ' + fmt(sS, 2) + ' м' + (sS >= TOP - S_UP ? ' ≥ ' + fmt(TOP - S_UP, 1) + ' м — доедет до верха.' : ' < ' + fmt(TOP - S_UP, 1) + ' м. ' + why); }
+  TR.msg($('gmsg'), ok ? 'ok' : 'bad', (ok ? 'Верно! ' : 'Нет. ') + why); P = Object.assign({}, GQ.p); start(); setRun(true); }));
+$('gnext').addEventListener('click', newRound);
+// ---------- крючки для автотеста (только с ?test в адресе)
+if (/[?&]test/.test(location.search)) { window.__ans = () => Q && Q.ans; window.__gans = () => GQ && {choose: '[data-ch="' + GQ.ans + '"]'}; }
+// ---------- вкладки
+SC.tabs(document, k => { mode = k; if (k === 'task') { if (!Q) newTask(); else { P = Object.assign({}, Q.kind === 'alpha' ? {al: 5, mu: Q.P.mu, m: 2, v0: 0} : Q.P); start(); setRun(false); } }
+  if (k === 'game') { if (!GQ) newRound(); else { P = Object.assign({}, GQ.p, {hide: !GQ.done}); start(); setRun(false); } }
+  if (k === 'explore') { P = {al: +$('al').value, mu: +$('mu').value, m: +$('ms').value, v0: +$('v0').value}; start(); setRun(false); } });
+// ---------- рисование
+const cv = $('cv');
+SC.loop(cv, dt => {
+  if (run && !SC.reduce) step(dt); else if (run && SC.reduce) { step(5); }
+  const {ctx, W, H} = prep(cv), C = SC.col(), a = rad(P.al), ca = Math.cos(a), sa = Math.sin(a); ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, W, H);
+  const pad = 26, sc = Math.min((W - 2 * pad) / (L * ca + 2.4), (H - 2 * pad) / (L * sa + 2.6)), ox = pad + 1.2 * sc, oy = H - pad - 0.4 * sc;
+  const ux = ca, uy = -sa, nx = -sa, ny = -ca;              // вдоль плоскости вверх и наружу (экран)
+  ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + L * ca * sc, oy); ctx.lineTo(ox + L * ca * sc, oy - L * sa * sc); ctx.closePath(); ctx.fillStyle = C.grid; ctx.fill(); ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(W, oy); ctx.stroke();
+  if (P.al > 0) { ctx.beginPath(); ctx.arc(ox, oy, 46, -a, 0); ctx.lineWidth = 1.2; ctx.stroke(); text(ctx, 'α = ' + P.al.toFixed(P.al % 1 ? 1 : 0) + '°', ox + 52, oy - 12, {size: 13, weight: 600}); }
+  // метки через метр
+  for (let k = 1; k < L; k++) { const x = ox + ux * k * sc, y = oy + uy * k * sc; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - nx * 6, y - ny * 6); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1; ctx.stroke(); }
+  const cx = ox + ux * s * sc + nx * BH / 2 * sc, cy = oy + uy * s * sc + ny * BH / 2 * sc;
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(-a); ctx.fillStyle = C.sheet; ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.fillRect(-BL / 2 * sc, -BH / 2 * sc, BL * sc, BH * sc); ctx.strokeRect(-BL / 2 * sc, -BH / 2 * sc, BL * sc, BH * sc);
+  text(ctx, fmt(P.m, 1) + ' кг', 0, 0, {align: 'center', size: Math.max(10, Math.min(13, BH * sc * 0.45)), weight: 600}); ctx.restore();
+  const f = force(v), mg = P.m * G, N = mg * ca, k = Math.min(sc * 1.6, H * 0.24) / mg;
+  arrow(ctx, cx, cy, cx, cy + mg * k, C.f1, 3, 'mg', [14, 4]);
+  if (N > 1e-6) arrow(ctx, cx, cy, cx + nx * N * k, cy + ny * N * k, C.f2, 3, 'N');
+  if (!P.hide && Math.abs(f.fr) > 1e-6) arrow(ctx, cx, cy, cx + ux * f.fr * k, cy + uy * f.fr * k, C.an, 3, 'Fтр');
+  if (!P.hide && $('chProj').checked) { ctx.setLineDash([5, 4]); arrow(ctx, cx, cy, cx - ux * mg * sa * k, cy - uy * mg * sa * k, C.ink2, 1.8); arrow(ctx, cx, cy, cx - nx * mg * ca * k, cy - ny * mg * ca * k, C.ink2, 1.8); ctx.setLineDash([]); }
+  if (Math.abs(v) > 1e-3) { const kv = sc * 0.25, bx = cx + nx * BH * sc * 1.3, by = cy + ny * BH * sc * 1.3; arrow(ctx, bx, by, bx + ux * v * kv, by + uy * v * kv, C.res, 3, 'v'); }
+  const ends = {top: 'брусок доехал до верха', bottom: 'брусок съехал к основанию плоскости', stop: 'брусок остановился и лежит'};
+  if (ended) text(ctx, ends[ended], W / 2, 18, {align: 'center', color: C.res, weight: 700, size: 15});
+  const state = Math.abs(v) < 1e-9 ? (f.a === 0 ? 'покоится' : 'трогается вниз') : v > 0 ? 'едет вверх, тормозит' : (f.a < -1e-9 ? 'едет вниз, разгоняется' : f.a > 1e-9 ? 'едет вниз, тормозит' : 'едет вниз равномерно');
+  if (mode === 'explore') $('rd').innerHTML = rows([['tg α и μ', fmt(Math.tan(a), 2) + (Math.tan(a) <= P.mu + 1e-12 ? ' ≤ ' : ' > ') + fmt(P.mu, 2)], ['состояние', state],
+    ['N = mg cos α', fmt(N, 1) + ' Н'], ['F_тр (' + f.kind + ')', fmt(Math.abs(f.fr), 1) + ' Н' + (f.kind === 'покоя' ? ' (предел ' + fmt(P.mu * N, 1) + ')' : '')],
+    ['ускорение', fmt(Math.abs(f.a), 2) + ' м/с²' + (Math.abs(f.a) < 1e-9 ? '' : f.a > 0 ? ' вверх' : ' вниз')], ['скорость', fmt(v, 2) + ' м/с'], ['t', fmt(t, 2) + ' с']]);
+});
+})();
+</script>
+</body>
+</html>

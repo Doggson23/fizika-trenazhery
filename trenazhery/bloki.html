@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Нити и блоки: машина Атвуда, брусок и груз</title>
+<link rel="stylesheet" href="../assets/sim.css">
+<style>@media (max-width:600px){#cv{aspect-ratio:4/3}}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">физика · динамика · связанные тела</div>
+    <h1>Нити и блоки</h1>
+    <p class="sub">Связанные тела: машина Атвуда и брусок на столе с грузом через блок. Каждому телу — свой второй закон, нить связывает ускорения и передаёт одно натяжение. g = 10 м/с², нить невесомая и нерастяжимая, блок идеальный.</p>
+  </header>
+  <div class="tabs" role="tablist"><button class="tab" id="t-ex" data-tab="explore">Исследовать</button><button class="tab" id="t-task" data-tab="task">Задача</button><button class="tab" id="t-game" data-tab="game">Игра</button></div>
+
+  <section class="lab">
+    <div class="stage"><canvas id="cv" class="wide" aria-label="Связанные тела на нити через блок и силы, действующие на них"></canvas>
+      <div class="legend"><span><i style="background:var(--f1)"></i>сила тяжести</span><span><i style="background:var(--aa)"></i>натяжение T</span><span><i style="background:var(--f2)"></i>реакция N</span><span><i style="background:var(--an)"></i>трение</span><span><i style="background:var(--res)"></i>ускорение</span></div></div>
+
+    <div class="panel" data-pane="explore">
+      <div class="seg" role="group" aria-label="Схема"><button data-md="atw" aria-pressed="true">Машина Атвуда</button><button data-md="tab" aria-pressed="false">Брусок и груз</button></div>
+      <div class="ctl"><label for="m1"><span id="m1L">Масса левого груза m₁</span><output id="m1O"></output></label><input id="m1" type="range" min="0.2" max="5" step="0.1" value="3"></div>
+      <div class="ctl"><label for="m2"><span id="m2L">Масса правого груза m₂</span><output id="m2O"></output></label><input id="m2" type="range" min="0.2" max="5" step="0.1" value="2"></div>
+      <div class="ctl" id="muBox" hidden><label for="mu"><span>Коэффициент трения бруска о стол μ</span><output id="muO"></output></label><input id="mu" type="range" min="0" max="1" step="0.05" value="0.25"></div>
+      <div class="btns"><button class="b" id="play">Пуск</button><button class="b ghost" id="reset">Сначала</button></div>
+      <dl class="read" id="rd"></dl>
+      <div class="rule" id="rule"></div>
+      <p class="note" id="ask"></p>
+    </div>
+
+    <div class="panel" data-pane="task" hidden>
+      <h2>Задача</h2>
+      <p id="tq"></p>
+      <div class="field"><span>Ответ</span><input id="tin" inputmode="decimal" aria-label="Ответ"><span class="num" id="tunit"></span></div>
+      <div class="btns"><button class="b" id="tchk">Проверить</button><button class="b ghost" id="thint">Подсказка</button><button class="b ghost" id="tnew">Новая задача</button></div>
+      <div class="msg" id="tmsg"></div>
+      <div class="hint" id="thintBox" hidden></div>
+      <div class="svo" id="tprop" hidden></div>
+      <div class="score"><span>верно <b id="sOk">0</b></span><span>попыток <b id="sAll">0</b></span><span>серия <b id="sSer">0</b></span></div>
+      <p class="note">Ответ — числом, можно с запятой или дробью. Допуск 1 %.</p>
+    </div>
+
+    <div class="panel" data-pane="game" hidden>
+      <h2>Подбери груз</h2>
+      <p id="gq"></p>
+      <div class="field"><span>m₂ =</span><input id="gin" inputmode="decimal" aria-label="Масса второго груза, кг"><span class="num">кг</span></div>
+      <div class="btns"><button class="b" id="gchk">Проверить</button><button class="b ghost" id="gimp">Невозможно</button><button class="b ghost" id="gnext">Новое задание</button></div>
+      <div class="msg" id="gmsg"></div>
+      <div class="score"><span>верно <b id="gOk">0</b></span><span>попыток <b id="gAll">0</b></span><span>серия <b id="gSer">0</b></span></div>
+      <p class="note">Иногда нужного груза не существует — тогда жмите «Невозможно». Допуск 1,5 %.</p>
+    </div>
+  </section>
+  <p class="foot">Тренажёр к главе «Законы Ньютона» · <a href="../uchebnik/zakony-nyutona.html#bloki">теория в Учебнике</a> · <a href="../index.html">все тренажёры</a></p>
+</div>
+<script src="../assets/sim-core.js"></script>
+<script src="../assets/dinamika-tren.js"></script>
+<script>
+(function(){
+'use strict';
+const {fmt, prep, arrow, text} = SC; const {G, nf, num, close, pick, rows} = TR; const $ = id => document.getElementById(id);
+const RANGE = 1.0;                                    // сколько метров проезжают тела в анимации
+let P = {md: 'atw', m1: 3, m2: 2, mu: 0.25}, d = 0, vv = 0, run = false, mode = 'explore', ended = false;
+function solve(p){                                    // a > 0 — в «естественную» сторону: m₁ вниз (Атвуд) / брусок к блоку (стол)
+  if (p.md === 'atw') { const a = G * (p.m1 - p.m2) / (p.m1 + p.m2), T = 2 * p.m1 * p.m2 * G / (p.m1 + p.m2); return {a, T, axis: 2 * T, fr: 0, frKind: ''}; }
+  const drive = p.m2 * G, frMax = p.mu * p.m1 * G;
+  if (drive <= frMax + 1e-12) return {a: 0, T: drive, axis: drive * Math.SQRT2, fr: drive, frKind: 'покоя'};
+  const a = (drive - frMax) / (p.m1 + p.m2), T = p.m2 * (G - a); return {a, T, axis: T * Math.SQRT2, fr: frMax, frKind: 'скольжения'};
+}
+function start(){ d = 0; vv = 0; ended = false; }
+function setRun(on){ run = on; $('play').textContent = run ? 'Пауза' : 'Пуск'; }
+function step(dt){ if (P.hide) { run = false; return; } const a = solve(P).a; vv += a * dt; d += vv * dt; if (Math.abs(d) >= RANGE) { d = Math.sign(d) * RANGE; run = false; ended = true; $('play').textContent = 'Пуск'; } }
+// ---------- исследование
+function syncLabels(){ const atw = P.md === 'atw';
+  $('m1L').textContent = atw ? 'Масса левого груза m₁' : 'Масса бруска на столе m₁'; $('m2L').textContent = atw ? 'Масса правого груза m₂' : 'Масса висящего груза m₂'; $('muBox').hidden = atw;
+  $('rule').innerHTML = atw ? '<b>Машина Атвуда.</b> m₁a = m₁g − T, m₂a = T − m₂g ⇒ a = g(m₁ − m₂)/(m₁ + m₂), T = 2m₁m₂g/(m₁ + m₂). На ось блока — 2T.'
+    : '<b>Брусок и груз.</b> m₁a = T − μm₁g, m₂a = m₂g − T ⇒ a = g(m₂ − μm₁)/(m₁ + m₂). Если m₂ ≤ μm₁ — система стоит, трение покоя равно m₂g. На ось блока — T√2 (два куска нити под прямым углом).';
+  $('ask').textContent = atw ? 'Исследуйте: можно ли подобрать грузы так, чтобы ускорение было больше g? Как сравнить T с весами грузов? Почему ось нагружена меньше, чем (m₁ + m₂)g?'
+    : 'Исследуйте: при какой массе груза брусок трогается? Почему натяжение нити меньше веса груза, пока груз падает?'; }
+const readP = () => ({md: P.md, m1: +$('m1').value, m2: +$('m2').value, mu: +$('mu').value});
+['m1', 'm2'].forEach(id => SC.slider(document, id, v => fmt(v, 1) + ' кг', () => { if (mode === 'explore') { P = readP(); start(); setRun(false); } }));
+SC.slider(document, 'mu', v => fmt(v, 2), () => { if (mode === 'explore') { P = readP(); start(); setRun(false); } });
+document.querySelectorAll('[data-md]').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('[data-md]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  P.md = b.dataset.md; P = readP(); syncLabels(); start(); setRun(false); }));
+$('play').addEventListener('click', () => { if (ended) start(); setRun(!run); });
+$('reset').addEventListener('click', () => { start(); setRun(false); });
+syncLabels();
+// ---------- задачи
+let Q = null; const SCORE = TR.score('s');
+function newTask(){
+  const md = pick(['atw', 'tab']), q = {};
+  if (md === 'atw') {
+    let m1, m2; do { m1 = pick([2, 3, 4, 5, 6]); m2 = pick([1, 2, 3, 4]); } while (m2 >= m1);
+    const s = solve({md, m1, m2}); q.kind = pick(['a', 'T', 'axis']); q.P = {md, m1, m2, mu: 0};
+    const base = 'Через неподвижный блок перекинута нить с грузами ' + m1 + ' кг и ' + m2 + ' кг. ';
+    if (q.kind === 'a') { q.ans = s.a; q.unit = 'м/с²'; q.text = base + 'Найдите ускорение грузов.';
+      q.wrong = [[G * (m1 - m2) / m1, 'Нить разгоняет оба груза: в знаменателе — масса всей системы m₁ + m₂.'], [G * (m1 - m2) / m2, 'Нить разгоняет оба груза: в знаменателе — масса всей системы m₁ + m₂.'], [G, 'Грузы не падают свободно: нить тормозит тяжёлый груз.']];
+      q.hints = ['Нарисуйте силы на каждом грузе отдельно: тяжести и натяжение T. Ускорения равны по модулю.', 'm₁a = m₁g − T; m₂a = T − m₂g. Сложите уравнения — T сократится.', 'a = g(m₁ − m₂)/(m₁ + m₂).']; }
+    if (q.kind === 'T') { q.ans = s.T; q.unit = 'Н'; q.text = base + 'Найдите силу натяжения нити.';
+      q.wrong = [[m1 * G, 'Натяжение равно весу груза, только если груз не ускоряется. Тяжёлый груз падает с ускорением — значит, T < m₁g.'], [m2 * G, 'Лёгкий груз поднимается с ускорением — значит, T > m₂g.'], [(m1 - m2) * G, 'Это разность сил тяжести, а не натяжение. Найдите сначала ускорение.']];
+      q.hints = ['Сначала найдите ускорение: a = g(m₁ − m₂)/(m₁ + m₂).', 'Для лёгкого груза: m₂a = T − m₂g.', 'T = m₂(g + a) = 2m₁m₂g/(m₁ + m₂).']; }
+    if (q.kind === 'axis') { q.ans = s.axis; q.unit = 'Н'; q.text = base + 'С какой силой блок давит на ось? Массой блока пренебречь.';
+      q.wrong = [[(m1 + m2) * G, 'Это полный вес грузов. Пока они движутся с ускорением, нить натянута слабее: на ось действует 2T.'], [s.T, 'Блок тянут вниз два куска нити — каждый с силой T.']];
+      q.hints = ['На невесомый блок действуют два куска нити вниз и ось вверх.', 'Найдите T = 2m₁m₂g/(m₁ + m₂).', 'Сила на ось 2T.']; }
+    q.prop = 'В машине Атвуда a < g, а m₂g < T < m₁g. Ось нагружена силой 2T — меньше полного веса грузов.';
+  } else {
+    let m1, m2, mu; do { m1 = pick([1, 2, 3, 4, 5]); m2 = pick([1, 2, 3, 4, 5]); mu = pick([0.1, 0.2, 0.25, 0.3, 0.4, 0.5]); } while (m2 <= mu * m1 + 0.3);
+    const s = solve({md, m1, m2, mu}); q.kind = pick(['a', 'T', 'min']); q.P = {md, m1, m2, mu};
+    const base = 'Брусок массой ' + m1 + ' кг лежит на столе (коэффициент трения ' + nf(mu) + ') и связан нитью через блок на краю стола с висящим грузом ';
+    if (q.kind === 'a') { q.ans = s.a; q.unit = 'м/с²'; q.text = base + m2 + ' кг. Найдите ускорение системы.';
+      q.wrong = [[G * m2 / (m1 + m2), 'Вы не учли трение бруска о стол.'], [G * (m2 - mu * m1) / m2, 'Груз разгоняет и себя, и брусок: в знаменателе m₁ + m₂.'], [G * (m2 - mu * m1) / m1, 'Груз разгоняет и себя, и брусок: в знаменателе m₁ + m₂.']];
+      q.hints = ['Брусок: вдоль стола T и трение μm₁g. Груз: m₂g вниз и T вверх. Ускорения равны.', 'm₁a = T − μm₁g; m₂a = m₂g − T.', 'a = g(m₂ − μm₁)/(m₁ + m₂).']; }
+    if (q.kind === 'T') { q.ans = s.T; q.unit = 'Н'; q.text = base + m2 + ' кг. Найдите силу натяжения нити.';
+      q.wrong = [[m2 * G, 'Груз падает с ускорением, значит, нить тянет его слабее, чем m₂g.'], [mu * m1 * G, 'Это сила трения. Натяжение больше: нить ещё и разгоняет брусок.']];
+      q.hints = ['Сначала найдите ускорение системы.', 'Для груза: m₂a = m₂g − T.', 'T = m₂(g − a).']; }
+    if (q.kind === 'min') { q.ans = mu * m1; q.unit = 'кг'; q.P = {md, m1, m2: Math.round((mu * m1 + 0.4) * 10) / 10, mu};
+      q.text = 'Брусок массой ' + m1 + ' кг лежит на столе (коэффициент трения ' + nf(mu) + ') и связан нитью через блок на краю стола с висящим грузом. Какой наименьшей массы груз сдвинет брусок?';
+      q.wrong = [[mu * m1 * G, 'Это сила (в ньютонах), а спрашивают массу груза в килограммах.'], [m1, 'Груз не обязан быть таким же тяжёлым, как брусок: ему достаточно перетянуть трение.']];
+      q.hints = ['На грани движения ускорение равно нулю, а трение покоя максимально.', 'm₂g = μm₁g.', 'm₂ = μm₁.']; }
+    q.prop = 'Пока система стоит, трение покоя равно m₂g, а не μm₁g. В движении натяжение меньше веса груза: T = m₂(g − a).';
+  }
+  Q = q; Q.h = 0; P = Object.assign({}, Q.P); start(); setRun(false);
+  $('tq').textContent = q.text; $('tunit').textContent = q.unit; $('tin').value = ''; TR.clear($('tmsg')); $('thintBox').hidden = true; $('tprop').hidden = true;
+}
+$('tnew').addEventListener('click', newTask);
+$('thint').addEventListener('click', () => { if (!Q) return; Q.h = Math.min(3, Q.h + 1); const b = $('thintBox'); b.hidden = false; b.innerHTML = Q.hints.slice(0, Q.h).map((x, i) => (i + 1) + '. ' + x).join('<br>'); });
+$('tchk').addEventListener('click', () => { if (!Q) return; const x = num($('tin').value), m = $('tmsg');
+  if (!isFinite(x)) { TR.msg(m, 'bad', 'Введите число.'); return; }
+  const ok = close(x, Q.ans); SCORE.add(ok);
+  if (ok) { TR.msg(m, 'ok', 'Верно: ' + nf(Q.ans) + ' ' + Q.unit + '.'); $('tprop').hidden = false; $('tprop').innerHTML = '<b>Свойство.</b> ' + Q.prop; start(); setRun(true); }
+  else { const w = Q.wrong.find(p => close(x, p[0], 0.015)); TR.msg(m, 'bad', w ? w[1] : 'Пока нет. Запишите второй закон для каждого тела отдельно — или возьмите подсказку.'); } });
+// ---------- игра
+const GS = TR.score('g'); let GQ = null;
+function newRound(){
+  const md = pick(['atw', 'tab']), imp = Math.random() < 0.25; let q = {md, done: false};
+  if (md === 'atw') { const m1 = pick([1, 2, 3, 4, 5]), X = imp ? pick([10, 12, 15, 20]) : pick([1, 2, 2.5, 4, 5, 6, 7.5]);
+    q.m1 = m1; q.X = X; q.imp = X >= G; q.ans = q.imp ? null : m1 * (G - X) / (G + X);
+    q.text = 'Машина Атвуда: левый груз <b>' + m1 + ' кг</b> должен опускаться с ускорением <b>' + nf(X) + ' м/с²</b>. Какой массы груз подвесить справа?';
+    q.why = q.imp ? 'Невозможно: левый груз тормозит нить, поэтому a = g(m₁ − m₂)/(m₁ + m₂) < g при любом m₂. Даже без второго груза ускорение было бы ровно g, а не больше.'
+      : 'm₁a = m₁g − T, m₂a = T − m₂g ⇒ m₂ = m₁(g − a)/(g + a) = ' + nf(q.ans) + ' кг.';
+    q.P = {md, m1, m2: q.imp ? 0.2 : q.ans, mu: 0}; }
+  else { const m1 = pick([1, 2, 3, 4]), mu = pick([0.1, 0.2, 0.25, 0.3, 0.5]), X = imp ? pick([10, 12, 15]) : pick([1, 2, 2.5, 4, 5, 6]);
+    q.m1 = m1; q.mu = mu; q.X = X; q.imp = X >= G; q.ans = q.imp ? null : m1 * (X + mu * G) / (G - X);
+    q.text = 'Брусок <b>' + m1 + ' кг</b> на столе (μ = ' + nf(mu) + ') должен разгоняться с ускорением <b>' + nf(X) + ' м/с²</b>. Груз какой массы подвесить на нить через блок?';
+    q.why = q.imp ? 'Невозможно: груз падает не свободно — нить его тормозит, поэтому ускорение системы всегда меньше g, как бы тяжёл ни был груз.'
+      : 'm₁a = T − μm₁g, m₂a = m₂g − T ⇒ m₂ = m₁(a + μg)/(g − a) = ' + nf(q.ans) + ' кг.';
+    q.P = {md, m1, m2: q.imp ? 5 : q.ans, mu}; }
+  GQ = q; P = Object.assign({}, q.P, {hide: true}); start(); setRun(false); $('gq').innerHTML = q.text; $('gin').value = ''; TR.clear($('gmsg'));
+}
+function judge(isImp){ if (!GQ || GQ.done) return; let ok;
+  if (isImp) ok = GQ.imp; else { const x = num($('gin').value); if (!isFinite(x)) { TR.msg($('gmsg'), 'bad', 'Введите массу числом или нажмите «Невозможно».'); return; } ok = !GQ.imp && close(x, GQ.ans, 0.015); }
+  GQ.done = true; GS.add(ok); TR.msg($('gmsg'), ok ? 'ok' : 'bad', (ok ? 'Верно! ' : 'Нет. ') + GQ.why); P = Object.assign({}, GQ.P); start(); setRun(true); }
+$('gchk').addEventListener('click', () => judge(false)); $('gimp').addEventListener('click', () => judge(true)); $('gnext').addEventListener('click', newRound);
+if (/[?&]test/.test(location.search)) { window.__ans = () => Q && Q.ans; window.__gans = () => GQ && (GQ.imp ? {imp: true} : {value: GQ.ans}); }
+// ---------- вкладки
+SC.tabs(document, k => { mode = k; if (k === 'task') { if (!Q) newTask(); else { P = Object.assign({}, Q.P); start(); setRun(false); } }
+  if (k === 'game') { if (!GQ) newRound(); else { P = Object.assign({}, GQ.P, {hide: !GQ.done}); start(); setRun(false); } }
+  if (k === 'explore') { const md = document.querySelector('[data-md][aria-pressed="true"]').dataset.md; P = readP(); P.md = md; syncLabels(); start(); setRun(false); } });
+// ---------- рисование
+const cv = $('cv');
+const box = (ctx, x, y, w, h, lab, C) => { ctx.fillStyle = C.sheet; ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.fillRect(x, y, w, h); ctx.strokeRect(x, y, w, h); text(ctx, lab, x + w / 2, y + h / 2, {align: 'center', size: 12, weight: 700}); };
+SC.loop(cv, dt => {
+  if (run) step(SC.reduce ? 1 : dt * 0.8);
+  const {ctx, W, H} = prep(cv), C = SC.col(), S = solve(P), HID = !!P.hide, side = m => Math.max(26, Math.min(64, 30 * Math.cbrt(HID && m === P.m2 ? 1.5 : m)));
+  const arrow = HID ? () => {} : SC.arrow, m2lab = HID ? '? кг' : fmt(P.m2, 1) + ' кг';
+  const k = H * 0.2 / Math.max(P.m1 * G, P.m2 * G, 1);       // масштаб сил
+  if (P.md === 'atw') {
+    const cx = W * 0.45, py = 46, r = Math.min(40, W * 0.05), s = (H - 150) / (2 * RANGE + 0.6), y0 = py + 70 + (RANGE + 0.1) * s;
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx - 90, 12); ctx.lineTo(cx + 90, 12); ctx.stroke(); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx, 12); ctx.lineTo(cx, py); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, py, r, 0, 2 * Math.PI); ctx.fillStyle = C.sheet; ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.arc(cx, py, 4, 0, 2 * Math.PI); ctx.fillStyle = C.ink; ctx.fill();
+    const y1 = y0 + d * s, y2 = y0 - d * s, b1 = side(P.m1), b2 = side(P.m2), xl = cx - r, xr = cx + r;
+    ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(xl, py); ctx.lineTo(xl, y1); ctx.moveTo(xr, py); ctx.lineTo(xr, y2); ctx.stroke();
+    box(ctx, xl - b1 / 2, y1, b1, b1, fmt(P.m1, 1) + ' кг', C); box(ctx, xr - b2 / 2, y2, b2, b2, m2lab, C);
+    arrow(ctx, xl - b1 / 2 - 12, y1 + b1 / 2, xl - b1 / 2 - 12, y1 + b1 / 2 - S.T * k, C.a, 3, 'T', [-12, 0]);
+    arrow(ctx, xl, y1 + b1, xl, y1 + b1 + P.m1 * G * k, C.f1, 3, 'm₁g', [22, 0]);
+    arrow(ctx, xr + b2 / 2 + 12, y2 + b2 / 2, xr + b2 / 2 + 12, y2 + b2 / 2 - S.T * k, C.a, 3, 'T', [12, 0]);
+    arrow(ctx, xr, y2 + b2, xr, y2 + b2 + P.m2 * G * k, C.f1, 3, 'm₂g', [22, 0]);
+    if (Math.abs(S.a) > 1e-9) { const L = Math.min(64, 16 + Math.abs(S.a) * 6), sg = Math.sign(S.a); arrow(ctx, xl - b1 - 40, y1 + b1 / 2, xl - b1 - 40, y1 + b1 / 2 + sg * L, C.res, 3, 'a', [-10, 0]); arrow(ctx, xr + b2 + 40, y2 + b2 / 2, xr + b2 + 40, y2 + b2 / 2 - sg * L, C.res, 3, 'a', [10, 0]); }
+    arrow(ctx, cx + r + 60, py - 24, cx + r + 60, py - 24 + S.axis * k * 0.5, C.ink2, 2.5); if (!HID) text(ctx, 'блок давит на ось: 2T', cx + r + 70, py - 14, {color: C.ink2, size: 12});
+  } else {
+    const ty = H * 0.3, tx1 = 16, tx2 = W * 0.62, r = 14, s = Math.max(40, Math.min((tx2 - tx1 - 60) / (RANGE + 2.2), (H - ty - 30 - side(P.m2) - H * 0.2 - 12) / RANGE));
+    ctx.fillStyle = C.grid; ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.fillRect(tx1, ty, tx2 - tx1, 10); ctx.strokeRect(tx1, ty, tx2 - tx1, 10);
+    ctx.beginPath(); ctx.moveTo(tx1 + 14, ty + 10); ctx.lineTo(tx1 + 14, H); ctx.moveTo(tx2 - 14, ty + 10); ctx.lineTo(tx2 - 14, H); ctx.stroke();
+    const pcx = tx2 + r * 0.3, pcy = ty - r * 0.3;
+    ctx.beginPath(); ctx.arc(pcx, pcy, r, 0, 2 * Math.PI); ctx.fillStyle = C.sheet; ctx.fill(); ctx.stroke();
+    const b1w = side(P.m1) * 1.5, b1h = side(P.m1) * 0.8, bx = tx2 - 30 - b1w - (RANGE + 0.6) * s + d * s, b2 = side(P.m2), ly = ty + 22 + d * s;
+    ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(bx + b1w, pcy - r); ctx.lineTo(pcx, pcy - r); ctx.moveTo(pcx + r, pcy); ctx.lineTo(pcx + r, ly); ctx.stroke();
+    box(ctx, bx, ty - b1h, b1w, b1h, fmt(P.m1, 1) + ' кг', C); box(ctx, pcx + r - b2 / 2, ly, b2, b2, m2lab, C);
+    const mx = bx + b1w / 2, my = ty - b1h / 2;
+    arrow(ctx, bx + b1w, my - 6, bx + b1w + S.T * k, my - 6, C.a, 3, 'T', [0, -12]);
+    if (S.fr > 1e-9) arrow(ctx, bx, ty - 6, bx - S.fr * k, ty - 6, C.an, 3, 'Fтр', [-4, -12]);
+    arrow(ctx, mx, my, mx, my + P.m1 * G * k, C.f1, 3, 'm₁g', [22, 6]); arrow(ctx, mx - 14, ty - b1h, mx - 14, ty - b1h - P.m1 * G * k, C.f2, 3, 'N', [-12, 0]);
+    arrow(ctx, pcx + r + b2 / 2 + 12, ly + b2 / 2, pcx + r + b2 / 2 + 12, ly + b2 / 2 - S.T * k, C.a, 3, 'T', [12, 0]);
+    arrow(ctx, pcx + r, ly + b2, pcx + r, ly + b2 + P.m2 * G * k, C.f1, 3, 'm₂g', [24, 0]);
+    if (S.a > 1e-9) { const L = Math.min(64, 16 + S.a * 6); arrow(ctx, bx + b1w + 8, ty - b1h - 16, bx + b1w + 8 + L, ty - b1h - 16, C.res, 3, 'a', [0, -12]); }
+    if (!HID && S.frKind === 'покоя') text(ctx, 'система стоит: трение покоя = m₂g', W / 2, 20, {align: 'center', color: C.res, weight: 700, size: 14});
+  }
+  if (ended) text(ctx, 'тела проехали ' + fmt(RANGE, 1) + ' м — «Сначала» или «Пуск»', 10, H - 10, {color: C.ink2, size: 12});
+  if (mode === 'explore') $('rd').innerHTML = rows([['ускорение', nf(Math.abs(S.a)) + ' м/с²' + (P.md === 'atw' && S.a < -1e-9 ? ' (вниз едет правый)' : '')],
+    ['натяжение T', nf(S.T) + ' Н'], P.md === 'atw' ? ['веса грузов', nf(P.m1 * G) + ' и ' + nf(P.m2 * G) + ' Н'] : ['трение (' + S.frKind + ')', nf(S.fr) + ' Н'],
+    ['сила на ось блока', nf(S.axis) + ' Н' + (P.md === 'atw' ? ' (полный вес ' + nf((P.m1 + P.m2) * G) + ')' : '')]]);
+});
+})();
+</script>
+</body>
+</html>

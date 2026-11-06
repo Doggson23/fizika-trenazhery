@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Брусок на доске: вместе или с проскальзыванием</title>
+<link rel="stylesheet" href="../assets/sim.css">
+<style>#cv{aspect-ratio:16/12}@media (max-width:600px){#cv{aspect-ratio:4/4.2}}
+.choices{display:flex;gap:8px;flex-wrap:wrap}.choices button.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}.choices button.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">физика · динамика · два тела с трением · ★</div>
+    <h1>Брусок на доске</h1>
+    <p class="sub">На доске лежит брусок. Тянем доску (или брусок) — поедут они вместе или брусок проскользнёт? Всё решает сила трения покоя между ними: больше μmg она дать не может. g = 10 м/с².</p>
+  </header>
+  <div class="tabs" role="tablist"><button class="tab" id="t-ex" data-tab="explore">Исследовать</button><button class="tab" id="t-task" data-tab="task">Задача</button><button class="tab" id="t-game" data-tab="game">Игра</button></div>
+
+  <section class="lab">
+    <div class="stage"><canvas id="cv" aria-label="Доска с бруском и график ускорений от силы"></canvas>
+      <div class="legend"><span><i style="background:var(--f1)"></i>ускорение бруска</span><span><i style="background:var(--aa)"></i>ускорение доски</span><span><i style="background:var(--res)"></i>сила F</span><span><i style="background:var(--an)"></i>трение между телами</span></div></div>
+
+    <div class="panel" data-pane="explore">
+      <div class="seg" role="group" aria-label="К чему приложена сила"><button data-on="board" aria-pressed="true">Тянем доску</button><button data-on="block" aria-pressed="false">Тянем брусок</button></div>
+      <div class="ctl"><label for="F"><span>Сила F</span><output id="FO"></output></label><input id="F" type="range" min="0" max="30" step="0.5" value="9"></div>
+      <div class="ctl"><label for="M"><span>Масса доски M</span><output id="MO"></output></label><input id="M" type="range" min="0.5" max="5" step="0.5" value="2"></div>
+      <div class="ctl"><label for="m"><span>Масса бруска m</span><output id="mO"></output></label><input id="m" type="range" min="0.5" max="5" step="0.5" value="1"></div>
+      <div class="ctl"><label for="mu"><span>Трение бруска о доску μ</span><output id="muO"></output></label><input id="mu" type="range" min="0.1" max="0.8" step="0.05" value="0.4"></div>
+      <div class="ctl"><label for="mu2"><span>Трение доски о стол μ₂</span><output id="mu2O"></output></label><input id="mu2" type="range" min="0" max="0.3" step="0.05" value="0"></div>
+      <div class="btns"><button class="b" id="play">Пуск</button><button class="b ghost" id="reset">Сначала</button></div>
+      <dl class="read" id="rd"></dl>
+      <div class="rule"><b>Правило.</b> Вместе: a = (F − μ₂(M + m)g)/(M + m), брусок держит трение покоя F<sub>тр</sub> = ma ≤ μmg. Если нужно больше — проскальзывание: брусок получает a = μg, доска — остальное. На графике это излом.</div>
+      <p class="note">Исследуйте: где на графике излом и от чего он зависит? Почему после излома ускорение бруска перестаёт расти? Что меняется, если тянуть брусок, а не доску?</p>
+    </div>
+
+    <div class="panel" data-pane="task" hidden>
+      <h2>Задача</h2>
+      <p id="tq"></p>
+      <div class="field"><span>Ответ</span><input id="tin" inputmode="decimal" aria-label="Ответ"><span class="num" id="tunit"></span></div>
+      <div class="btns"><button class="b" id="tchk">Проверить</button><button class="b ghost" id="thint">Подсказка</button><button class="b ghost" id="tnew">Новая задача</button></div>
+      <div class="msg" id="tmsg"></div>
+      <div class="hint" id="thintBox" hidden></div>
+      <div class="svo" id="tprop" hidden></div>
+      <div class="score"><span>верно <b id="sOk">0</b></span><span>попыток <b id="sAll">0</b></span><span>серия <b id="sSer">0</b></span></div>
+      <p class="note">Стол гладкий, если не сказано иначе. Допуск 1 %.</p>
+    </div>
+
+    <div class="panel" data-pane="game" hidden>
+      <h2>Вместе или проскользнёт?</h2>
+      <p id="gq"></p>
+      <div class="choices" id="gA"><button class="b ghost" data-gc="together">Поедут вместе</button><button class="b ghost" data-gc="slip">Брусок проскользнёт</button></div>
+      <div id="gB" hidden>
+        <div class="field"><span>F =</span><input id="gin" inputmode="decimal" aria-label="Сила, Н"><span class="num">Н</span></div>
+        <div class="btns"><button class="b" id="gchk">Проверить</button><button class="b ghost" id="gimp">Невозможно</button></div>
+      </div>
+      <div class="msg" id="gmsg"></div>
+      <div class="btns"><button class="b" id="gnext">Новое задание</button></div>
+      <div class="score"><span>верно <b id="gOk">0</b></span><span>попыток <b id="gAll">0</b></span><span>серия <b id="gSer">0</b></span></div>
+    </div>
+  </section>
+  <p class="foot">Тренажёр к главе «Законы Ньютона» · <a href="../uchebnik/zakony-nyutona.html#doska">теория в Учебнике</a> · <a href="../index.html">все тренажёры</a></p>
+</div>
+<script src="../assets/sim-core.js"></script>
+<script src="../assets/dinamika-tren.js"></script>
+<script>
+(function(){
+'use strict';
+const {fmt, prep, arrow, text} = SC; const {G, nf, num, close, pick, rows} = TR; const $ = id => document.getElementById(id);
+const LB = 3, BW = 0.8;                                 // длина доски и бруска, м
+let P = {F: 9, M: 2, m: 1, mu: 0.4, mu2: 0, on: 'board'}, xd, xb, vd, vb, t, run = false, ended = '', mode = 'explore';
+function solve(p){
+  const f2 = p.mu2 * (p.M + p.m) * G, fmax = p.mu * p.m * G;
+  if (p.on === 'board') {
+    if (p.F <= f2 + 1e-12) return {ab: 0, ad: 0, fr: 0, kind: 'покоя', reg: p.F === 0 ? 'сила не приложена' : 'стоят: доску держит трение о стол', tab: p.F};
+    const a = (p.F - f2) / (p.M + p.m);
+    if (p.m * a <= fmax + 1e-12) return {ab: a, ad: a, fr: p.m * a, kind: 'покоя', reg: 'едут вместе', tab: f2};
+    return {ab: p.mu * G, ad: (p.F - fmax - f2) / p.M, fr: fmax, kind: 'скольжения', reg: 'брусок проскальзывает назад', tab: f2};
+  }
+  if (p.F <= f2 + 1e-12) { if (p.F <= fmax + 1e-12) return {ab: 0, ad: 0, fr: p.F, kind: 'покоя', reg: 'стоят', tab: p.F}; }
+  else { const a = (p.F - f2) / (p.M + p.m), fr = p.F - p.m * a; if (fr <= fmax + 1e-12) return {ab: a, ad: a, fr, kind: 'покоя', reg: 'едут вместе', tab: f2}; }
+  const ab = (p.F - fmax) / p.m; if (fmax <= f2 + 1e-12) return {ab, ad: 0, fr: fmax, kind: 'скольжения', reg: 'брусок скользит, доска стоит', tab: fmax};
+  return {ab, ad: (fmax - f2) / p.M, fr: fmax, kind: 'скольжения', reg: 'брусок обгоняет доску', tab: f2};
+}
+function threshold(p){ // наименьшая F, при которой начинается проскальзывание (поиск по сетке и делением пополам)
+  const slip = F => { const r = solve(Object.assign({}, p, {F})); return r.kind === 'скольжения' && Math.abs(r.ab - r.ad) > 1e-9; };
+  let hi = null; for (let F = 0; F <= 400; F += 0.5) if (slip(F)) { hi = F; break; } if (hi == null) return NaN;
+  let lo = Math.max(0, hi - 0.5); for (let i = 0; i < 40; i++) { const mid = (lo + hi) / 2; if (slip(mid)) hi = mid; else lo = mid; } return hi; }
+function start(){ xd = 0; vd = 0; xb = LB / 2 - BW / 2; vb = 0; t = 0; ended = ''; }
+function setRun(on){ run = on; $('play').textContent = run ? 'Пауза' : 'Пуск'; }
+function step(dt){ if (P.hide) { run = false; return; } const S = solve(P); vb += S.ab * dt; vd += S.ad * dt; xb += vb * dt; xd += vd * dt; t += dt;
+  const rel = xb - xd; if (rel < -BW / 2) { ended = 'брусок соскользнул с доски назад'; run = false; } if (rel > LB - BW / 2) { ended = 'брусок съехал с доски вперёд'; run = false; } if (t > 3) { ended = ended || 'прошло 3 с'; run = false; }
+  if (!run) $('play').textContent = 'Пуск'; }
+// ---------- исследование
+const readP = () => ({F: +$('F').value, M: +$('M').value, m: +$('m').value, mu: +$('mu').value, mu2: +$('mu2').value, on: document.querySelector('[data-on][aria-pressed="true"]').dataset.on});
+const upd = () => { if (mode === 'explore') { P = readP(); start(); setRun(false); } };
+SC.slider(document, 'F', v => fmt(v, 1) + ' Н', upd); SC.slider(document, 'M', v => fmt(v, 1) + ' кг', upd); SC.slider(document, 'm', v => fmt(v, 1) + ' кг', upd);
+SC.slider(document, 'mu', v => fmt(v, 2), upd); SC.slider(document, 'mu2', v => fmt(v, 2), upd);
+document.querySelectorAll('[data-on]').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('[data-on]').forEach(x => x.setAttribute('aria-pressed', x === b)); upd(); }));
+$('play').addEventListener('click', () => { if (ended) start(); setRun(!run); });
+$('reset').addEventListener('click', () => { start(); setRun(false); });
+// ---------- задачи
+let Q = null; const SCORE = TR.score('s');
+function newTask(){
+  const M = pick([1, 2, 3, 4]), m = pick([1, 2]), mu = pick([0.2, 0.25, 0.3, 0.4, 0.5]), kind = pick(['thr', 'ab', 'ad', 'fr', 'thrBlock']), Fs = mu * G * (M + m), q = {kind};
+  const base = 'На гладком столе лежит доска массой ' + M + ' кг, на ней — брусок массой ' + m + ' кг; коэффициент трения между ними ' + nf(mu) + '. ';
+  if (kind === 'thr') { q.ans = Fs; q.unit = 'Н'; q.P = {F: Math.round(Fs * 1.25), M, m, mu, mu2: 0, on: 'board'}; q.text = base + 'К доске приложили горизонтальную силу. При какой силе брусок начнёт скользить по доске?';
+    q.wrong = [[mu * m * G, 'Это предельная сила трения покоя. Но сила F разгоняет обе массы: F* = (M + m)·μg.'], [mu * G * M, 'Пока тела едут вместе, F разгоняет всю систему массой M + m.']];
+    q.hints = ['Пока тела едут вместе, их ускорение a = F/(M + m), а брусок разгоняет только трение покоя ma.', 'Трение покоя не больше μmg, значит a ≤ μg.', 'F* = μg(M + m).']; }
+  if (kind === 'ab' || kind === 'ad') { const F = Math.ceil(Fs * 1.5); q.P = {F, M, m, mu, mu2: 0, on: 'board'}; const S = solve(q.P);
+    q.ans = kind === 'ab' ? S.ab : S.ad; q.unit = 'м/с²'; q.text = base + 'К доске приложили горизонтальную силу ' + F + ' Н. Найдите ускорение ' + (kind === 'ab' ? 'бруска.' : 'доски.');
+    q.wrong = kind === 'ab' ? [[F / (M + m), 'Проверьте, едут ли тела вместе: при такой силе брусок проскальзывает, и его разгоняет только трение μmg.'], [F / m, 'Сила приложена к доске, а не к бруску.']]
+      : [[F / (M + m), 'Проверьте, едут ли тела вместе: при такой силе брусок проскальзывает.'], [F / M, 'Не учтено трение бруска: оно тормозит доску с силой μmg.']];
+    q.hints = ['Сравните F с порогом F* = μg(M + m) = ' + nf(Fs) + ' Н.', 'F > F* — проскальзывание: трение равно μmg = ' + nf(mu * m * G) + ' Н.', kind === 'ab' ? 'a_бруска = μmg/m = μg.' : 'a_доски = (F − μmg)/M.']; }
+  if (kind === 'fr') { const F = Math.max(1, Math.floor(Fs * 0.6)); q.P = {F, M, m, mu, mu2: 0, on: 'board'}; q.ans = m * F / (M + m); q.unit = 'Н';
+    q.text = base + 'К доске приложили горизонтальную силу ' + F + ' Н. Найдите силу трения между бруском и доской.';
+    q.wrong = [[mu * m * G, 'Брусок не скользит — трение покоя меньше предельного μmg. Найдите его из второго закона для бруска.'], [F, 'Сила F приложена к доске; брусок разгоняет только трение.']];
+    q.hints = ['Сравните F с порогом F* = μg(M + m) = ' + nf(Fs) + ' Н: тела едут вместе.', 'Общее ускорение a = F/(M + m).', 'F_тр = ma.']; }
+  if (kind === 'thrBlock') { q.ans = mu * m * G * (M + m) / M; q.unit = 'Н'; q.P = {F: Math.round(q.ans * 1.3), M, m, mu, mu2: 0, on: 'block'};
+    q.text = base + 'Горизонтальную силу приложили к бруску. При какой силе брусок начнёт скользить по доске?';
+    q.wrong = [[mu * m * G, 'При F = μmg доска тоже разгоняется, и брусок ещё не скользит: трению нужно лишь разгонять доску.'], [Fs, 'Это порог для силы, приложенной к доске. Здесь доску разгоняет трение.']];
+    q.hints = ['Теперь доску разгоняет только трение: Ma = F_тр ≤ μmg, значит a ≤ μmg/M.', 'Пока едут вместе, a = F/(M + m).', 'F* = μmg(M + m)/M.']; }
+  q.prop = 'Ускорение тела, которое разгоняет только трение, не больше μg·(масса давящего тела)/(масса разгоняемого). Отсюда излом на графике a(F).';
+  Q = q; Q.h = 0; P = Object.assign({}, q.P, {hide: true}, q.kind === 'thr' || q.kind === 'thrBlock' ? {F: 0} : {}); start(); setRun(false);
+  $('tq').textContent = q.text; $('tunit').textContent = q.unit; $('tin').value = ''; TR.clear($('tmsg')); $('thintBox').hidden = true; $('tprop').hidden = true;
+}
+$('tnew').addEventListener('click', newTask);
+$('thint').addEventListener('click', () => { if (!Q) return; Q.h = Math.min(3, Q.h + 1); const b = $('thintBox'); b.hidden = false; b.innerHTML = Q.hints.slice(0, Q.h).map((x, i) => (i + 1) + '. ' + x).join('<br>'); });
+$('tchk').addEventListener('click', () => { if (!Q) return; const x = num($('tin').value), m = $('tmsg');
+  if (!isFinite(x)) { TR.msg(m, 'bad', 'Введите число.'); return; }
+  const ok = close(x, Q.ans); SCORE.add(ok);
+  if (ok) { Q.solved = true; TR.msg(m, 'ok', 'Верно: ' + nf(Q.ans) + ' ' + Q.unit + '.'); $('tprop').hidden = false; $('tprop').innerHTML = '<b>Свойство.</b> ' + Q.prop; P = Object.assign({}, Q.P); start(); setRun(true); }
+  else { const w = Q.wrong.find(p => close(x, p[0], 0.015)); TR.msg(m, 'bad', w ? w[1] : 'Пока нет. Сначала выясните, едут ли тела вместе, — или возьмите подсказку.'); } });
+// ---------- игра
+const GS = TR.score('g'); let GQ = null;
+function newRound(){
+  const M = pick([1, 2, 3, 4]), m = pick([1, 2, 3]), mu = pick([0.2, 0.3, 0.4, 0.5]), kind = Math.random() < 0.6 ? 'A' : 'B', q = {kind, done: false};
+  if (kind === 'A') { const on = pick(['board', 'block']), p = {F: 0, M, m, mu, mu2: 0, on}, Fs = threshold(p);
+    let F; do { F = Math.round(Fs * (0.3 + Math.random() * 1.6) * 2) / 2; } while (Math.abs(F - Fs) < 0.12 * Fs || F <= 0);
+    p.F = F; q.P = p; q.ans = F > Fs ? 'slip' : 'together'; q.Fs = Fs;
+    q.text = 'Стол гладкий. Доска <b>' + M + ' кг</b>, на ней брусок <b>' + m + ' кг</b>, μ = ' + nf(mu) + '. Силу <b>' + nf(F) + ' Н</b> приложили к <b>' + (on === 'board' ? 'доске' : 'бруску') + '</b>. Что будет?';
+    q.why = 'Порог проскальзывания F* = ' + (on === 'board' ? 'μg(M + m)' : 'μmg(M + m)/M') + ' = ' + nf(Fs) + ' Н; F ' + (F > Fs ? '>' : '<') + ' F*.'; }
+  else { const imp = Math.random() < 0.35, X = imp ? Math.round((mu * G + pick([0.5, 1, 2])) * 10) / 10 : Math.round(mu * G * pick([0.25, 0.5, 0.6, 0.75]) * 10) / 10;
+    q.imp = X > mu * G; q.ans = q.imp ? null : (M + m) * X; q.P = {F: q.imp ? Math.round(mu * G * (M + m) * 1.6) : q.ans, M, m, mu, mu2: 0, on: 'board'};
+    q.text = 'Стол гладкий. Доска <b>' + M + ' кг</b>, на ней брусок <b>' + m + ' кг</b>, μ = ' + nf(mu) + '. Какую силу приложить к доске, чтобы брусок двигался с ускорением <b>' + nf(X) + ' м/с²</b>?';
+    q.why = q.imp ? 'Невозможно: брусок разгоняет только трение, его ускорение не больше μg = ' + nf(mu * G) + ' м/с². Сильнее тянем доску — она просто выскальзывает из-под бруска.' : 'a = ' + nf(X) + ' м/с² ≤ μg = ' + nf(mu * G) + ' м/с², тела едут вместе: F = (M + m)·a = ' + nf(q.ans) + ' Н.'; }
+  GQ = q; P = Object.assign({}, q.P, {F: kind === 'A' ? q.P.F : 0, hide: true}); start(); setRun(false);
+  $('gq').innerHTML = q.text; $('gA').hidden = kind !== 'A'; $('gB').hidden = kind !== 'B'; $('gin').value = ''; TR.clear($('gmsg'));
+  document.querySelectorAll('[data-gc]').forEach(b => { b.className = 'b ghost'; b.disabled = false; });
+}
+function finish(ok){ GQ.done = true; GS.add(ok); TR.msg($('gmsg'), ok ? 'ok' : 'bad', (ok ? 'Верно! ' : 'Нет. ') + GQ.why); P = Object.assign({}, GQ.P); start(); setRun(true); }
+document.querySelectorAll('[data-gc]').forEach(b => b.addEventListener('click', () => { if (!GQ || GQ.done || GQ.kind !== 'A') return;
+  document.querySelectorAll('[data-gc]').forEach(x => { x.disabled = true; if (x.dataset.gc === GQ.ans) x.className = 'b ghost right'; else if (x === b) x.className = 'b ghost wrong'; }); finish(b.dataset.gc === GQ.ans); }));
+$('gchk').addEventListener('click', () => { if (!GQ || GQ.done) return; const x = num($('gin').value); if (!isFinite(x)) { TR.msg($('gmsg'), 'bad', 'Введите силу числом или нажмите «Невозможно».'); return; } finish(!GQ.imp && close(x, GQ.ans, 0.015)); });
+$('gimp').addEventListener('click', () => { if (!GQ || GQ.done) return; finish(!!GQ.imp); });
+$('gnext').addEventListener('click', newRound);
+if (/[?&]test/.test(location.search)) { window.__ans = () => Q && Q.ans; window.__gans = () => GQ && (GQ.kind === 'A' ? {choose: '[data-gc="' + GQ.ans + '"]'} : GQ.imp ? {imp: true} : {value: GQ.ans}); }
+// ---------- вкладки
+SC.tabs(document, k => { mode = k; if (k === 'task') { if (!Q) newTask(); else { P = Object.assign({}, Q.P, {hide: !Q.solved}); start(); setRun(false); } }
+  if (k === 'game') { if (!GQ) newRound(); else { P = Object.assign({}, GQ.P, {hide: !GQ.done}); start(); setRun(false); } }
+  if (k === 'explore') { P = readP(); start(); setRun(false); } });
+// ---------- рисование
+const cv = $('cv');
+SC.loop(cv, dt => {
+  if (run) step(SC.reduce ? 3 : dt * 0.6);
+  const {ctx, W, H} = prep(cv), C = SC.col(), S = solve(P), hTop = H * 0.42; ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, W, H);
+  // --- сцена: камера следует за доской
+  const s = Math.min((W - 40) / (LB + 2.2), hTop / 1.6), gy = hTop - 18, bx0 = W / 2 - LB / 2 * s, cam = xd;
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+  ctx.strokeStyle = C.rule; ctx.lineWidth = 1; for (let u = Math.floor(cam - 10); u < cam + 10; u += 0.5) { const x = bx0 + (u - cam) * s; if (x < -10 || x > W + 10) continue; ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x - 8, gy + 8); ctx.stroke(); }
+  const dh = 0.22 * s, bh = 0.42 * s, dTop = gy - dh, blX = bx0 + (xb - xd) * s;
+  ctx.fillStyle = C.grid; ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.fillRect(bx0, dTop, LB * s, dh); ctx.strokeRect(bx0, dTop, LB * s, dh);
+  text(ctx, 'доска ' + fmt(P.M, 1) + ' кг', bx0 + 8, dTop + dh / 2, {size: 12, weight: 600});
+  ctx.fillStyle = C.sheet; ctx.fillRect(blX, dTop - bh, BW * s, bh); ctx.strokeRect(blX, dTop - bh, BW * s, bh); text(ctx, fmt(P.m, 1) + ' кг', blX + BW * s / 2, dTop - bh / 2, {align: 'center', size: 12, weight: 600});
+  const kF = Math.min(90, s * 0.9) / Math.max(10, P.F, 1);
+  if (P.F > 0) { if (P.on === 'board') arrow(ctx, bx0 + LB * s, dTop + dh / 2, bx0 + LB * s + P.F * kF, dTop + dh / 2, C.res, 4, 'F', [0, -12]); else arrow(ctx, blX + BW * s, dTop - bh / 2, blX + BW * s + P.F * kF, dTop - bh / 2, C.res, 4, 'F', [0, -12]); }
+  if (!P.hide && S.fr > 1e-9) { const sg = P.on === 'board' ? 1 : -1, L = S.fr * kF, cx = blX + BW * s / 2; arrow(ctx, cx, dTop - 4, cx + sg * L, dTop - 4, C.an, 3); arrow(ctx, cx, dTop + 5, cx - sg * L, dTop + 5, C.an, 3); }
+  const vk = s * 0.12; if (Math.abs(vb) > 1e-3) arrow(ctx, blX + BW * s / 2, dTop - bh - 12, blX + BW * s / 2 + vb * vk, dTop - bh - 12, C.f1, 2.5, 'v₁', [0, -11]);
+  if (Math.abs(vd) > 1e-3) arrow(ctx, bx0 + LB * s * 0.8, gy + 16, bx0 + LB * s * 0.8 + vd * vk, gy + 16, C.a, 2.5, 'v₂', [0, 11]);
+  text(ctx, P.hide ? 'что будет — узнаем после ответа' : S.reg, 10, 14, {color: P.hide ? C.ink2 : S.kind === 'скольжения' ? C.bad : C.ok, weight: 700, size: 13}); if (ended) text(ctx, ended, 10, 32, {color: C.res, weight: 700, size: 13});
+  // --- график a(F)
+  const gx = 46, gw = W - gx - 16, g0 = hTop + 18, gh = H - g0 - 30, Fm = Math.max(30, P.F * 1.15), pts = 240;
+  const curve = []; let amax = 1; for (let i = 0; i <= pts; i++) { const F = Fm * i / pts, r = solve(Object.assign({}, P, {F})); curve.push([F, r.ab, r.ad]); amax = Math.max(amax, r.ab, r.ad); }
+  amax = Math.min(amax * 1.08, 40); const X = F => gx + F / Fm * gw, Y = a => g0 + gh - Math.min(a, amax) / amax * gh;
+  ctx.strokeStyle = C.rule; ctx.lineWidth = 1; ctx.strokeRect(gx, g0, gw, gh);
+  for (let k = 0; k <= 5; k++) { const F = Fm * k / 5; text(ctx, nf(Math.round(F)), X(F), g0 + gh + 12, {align: 'center', color: C.ink2, size: 11}); const a = amax * k / 5; text(ctx, nf(Math.round(a * 10) / 10), gx - 6, Y(a), {align: 'right', color: C.ink2, size: 11}); }
+  text(ctx, 'F, Н', gx + gw, g0 + gh + 24, {align: 'right', color: C.ink2, size: 11}); text(ctx, 'a, м/с²', gx + 4, g0 + 10, {color: C.ink2, size: 11});
+  if (P.hide) { text(ctx, 'график a(F) появится после ответа', gx + gw / 2, g0 + gh / 2, {align: 'center', color: C.ink2, size: 14}); return; }
+  [[2, C.a, 4], [1, C.f1, 2.4]].forEach(([j, col, lw]) => { ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); curve.forEach((c, i) => i ? ctx.lineTo(X(c[0]), Y(c[j])) : ctx.moveTo(X(c[0]), Y(c[j]))); ctx.stroke(); });
+  const Fs = threshold(P);
+  if (isFinite(Fs) && Fs < Fm) { ctx.setLineDash([5, 4]); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(X(Fs), g0); ctx.lineTo(X(Fs), g0 + gh); ctx.stroke(); ctx.setLineDash([]); text(ctx, 'F* = ' + nf(Fs) + ' Н', X(Fs) + 5, g0 + 12, {color: C.ink2, size: 12, weight: 600}); }
+  ctx.strokeStyle = C.res; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(X(P.F), g0); ctx.lineTo(X(P.F), g0 + gh); ctx.stroke();
+  [[S.ad, C.a], [S.ab, C.f1]].forEach(([a, col]) => { ctx.beginPath(); ctx.arc(X(P.F), Y(a), 5, 0, 2 * Math.PI); ctx.fillStyle = col; ctx.fill(); });
+  if (mode === 'explore') $('rd').innerHTML = rows([['режим', S.reg, S.kind === 'скольжения' ? 'w' : 'g'], ['ускорение бруска', nf(S.ab) + ' м/с²'], ['ускорение доски', nf(S.ad) + ' м/с²'],
+    ['трение между телами (' + S.kind + ')', nf(S.fr) + ' Н (предел ' + nf(P.mu * P.m * G) + ')'], ['порог проскальзывания F*', isFinite(Fs) ? nf(Fs) + ' Н' : '—'], ['трение доски о стол', nf(S.tab) + ' Н']]);
+});
+})();
+</script>
+</body>
+</html>
