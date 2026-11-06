@@ -1,0 +1,280 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Мигание: digitalWrite и delay</title><link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: слева — стенд (схема, диаграмма, код), справа — пульт; на телефоне пульт уходит под стенд. */
+:root{
+  --paper:#F5F6F8; --sheet:#FFFFFF; --ink:#14161A; --ink-2:#555C66; --rule:#DCE0E5;
+  --grid:#E6EAEE; --grid-major:#C9CFD6; --traj:#C89A00; --mark:#FFD400; --mark-soft:#FFF5BF;
+  --vx:#B07D00; --vy:#2F6FA8; --env:#7A5BB5; --target:#C0392B; --ok:#2E7D4F; --ok-soft:#E3F2E8; --bad:#A33A2E; --bad-soft:#F7E4E1;
+  --display:"Unbounded","Golos Text",system-ui,sans-serif; --body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:16px}
+h1{font:700 clamp(24px,4vw,36px)/1.15 var(--display);margin:0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:4px 0 0}
+.eyebrow{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:600 14px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.stage{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px;min-width:0}
+canvas{display:block;width:100%;aspect-ratio:16/10;max-width:100%;border-radius:4px;touch-action:manipulation}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2);padding:8px 4px 2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:14px;min-width:0}
+.panel h2{font:600 15px var(--display);margin:0}
+.ctl{display:grid;gap:4px}
+.ctl label{display:flex;justify-content:space-between;font-size:14px}
+.ctl output,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--traj)}
+.checks{display:grid;gap:6px;font-size:14px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 14px var(--body);padding:9px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+.read{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14px;border-top:1px solid var(--rule);padding-top:12px}
+.read dt{color:var(--ink-2)} .read dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.task{display:grid;gap:10px}
+.task p{margin:0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:14px}
+.field input{font:500 15px var(--mono);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.msg{font-size:14px;padding:10px 12px;border-radius:6px;display:none}
+.msg.ok{display:block;background:var(--ok-soft);color:var(--ok)} .msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}
+.hint{font-size:14px;background:var(--mark-soft);border-left:3px solid var(--traj);padding:8px 10px;border-radius:0 6px 6px 0}
+.svo{font-size:14px;border:1px solid var(--traj);background:var(--mark-soft);padding:10px 12px;border-radius:6px}
+.svo b{font-weight:600}
+.score{display:flex;gap:14px;font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.score span b{font-size:18px}
+.f{font-family:var(--mono);font-size:.95em;white-space:nowrap}
+sub,sup{font-size:.72em}
+.foot{font-size:13px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.crumb{font-size:14px;color:var(--ink-2)}.crumb a{color:var(--ink-2)}
+pre.code{margin:10px 0 0;font:13px/1.5 var(--mono);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;overflow-x:auto;white-space:pre;tab-size:2}
+pre.code .k{color:var(--vy)} pre.code .c{color:var(--ink-2)} pre.code .n{color:var(--traj);font-weight:600} pre.code .hl{background:var(--mark-soft);border-radius:3px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:500 13px var(--body);padding:5px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--traj);background:var(--mark-soft)}
+.chip:focus-visible,select:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+select{font:500 14px var(--body);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
+.mon{font:13px/1.45 var(--mono);background:#0E1116;color:#B8F5C8;border-radius:6px;padding:8px 10px;min-height:64px;max-height:150px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.row3 .field{grid-template-columns:auto 1fr}
+.segs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font:600 13px var(--mono)}
+.segs label{display:grid;justify-items:center;gap:2px;cursor:pointer}
+.kbd{font:600 12px var(--mono);border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;padding:0 5px}
+nav.crumb{display:block}
+</style></head><body>
+<!--title:Мигание: digitalWrite и delay-->
+<nav class="wrap crumb"><a href="/">← Тезаурус</a> · <a href="/inzheneriya/">Инженерия</a> · <a href="/zadano/">Задано мне</a></nav>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">инженерия · Arduino · занятие «Мигание»</div>
+    <h1>Мигание: digitalWrite и delay</h1>
+    <p class="sub">Первая программа на Arduino: включить вывод, подождать, выключить, подождать — и так по кругу в <span class="f">loop()</span>. Из двух чисел в <span class="f">delay()</span> складывается всё: период, частота и характер мигания.</p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Режим">
+    <button class="tab" role="tab" id="t-ex" aria-selected="true" data-mode="explore">Исследовать</button>
+    <button class="tab" role="tab" id="t-task" aria-selected="false" data-mode="task">Задача</button>
+    <button class="tab" role="tab" id="t-game" aria-selected="false" data-mode="game">Игра</button>
+  </div>
+  <div class="lab">
+    <div class="stage">
+      <canvas id="cv" width="960" height="600" aria-label="Временная диаграмма: напряжение на выводе 13 от времени и светодиод"></canvas>
+      <div class="legend"><span><i style="background:var(--traj)"></i>напряжение на выводе 13</span><span><i style="background:var(--vy)"></i>период T</span><span><i style="background:var(--target)"></i>сейчас</span></div>
+      <pre class="code" id="code" aria-label="Код скетча"></pre>
+    </div>
+    <aside class="panel">
+      <section id="p-explore" class="task">
+        <h2>Пульт</h2>
+        <div class="chips" role="group" aria-label="Примеры">
+          <button class="chip" data-a="330" data-b="330">поворотник</button>
+          <button class="chip" data-a="200" data-b="1800">маяк</button>
+          <button class="chip" data-a="1000" data-b="1000">секундомер</button>
+          <button class="chip" data-a="10" data-b="40">стробоскоп</button>
+          <button class="chip" data-a="5" data-b="5">«ровный» свет</button>
+        </div>
+        <div class="ctl"><label for="a"><span>delay после HIGH, мс</span> <output id="aO" class="num"></output></label><input id="a" type="range" min="5" max="2000" step="5" value="500"></div>
+        <div class="ctl"><label for="b"><span>delay после LOW, мс</span> <output id="bO" class="num"></output></label><input id="b" type="range" min="5" max="2000" step="5" value="500"></div>
+        <dl class="read">
+          <dt>Период T = a + b</dt><dd id="rT"></dd>
+          <dt>Частота f = 1/T</dt><dd id="rF"></dd>
+          <dt>Вспышек в минуту</dt><dd id="rN"></dd>
+          <dt>Доля «горит» a/T</dt><dd id="rD"></dd>
+        </dl>
+        <p class="foot" id="eye"></p>
+        <p class="foot">Найдите: при каких delay светодиод перестаёт мигать и кажется просто тусклым? Поворотник автомобиля по правилам мигает 60–120 раз в минуту — подберите такой.</p>
+      </section>
+      <section id="p-task" class="task" hidden>
+        <h2>Задача</h2>
+        <p>Модель маяка: светодиод на выводе 13 даёт вспышку длительностью <b>200 мс</b>, всего <b>30 вспышек в минуту</b>. Какое число записать во второй <span class="f">delay</span> (после LOW)? С какой частотой мигает светодиод?</p>
+        <div class="field"><label for="ansB">b =</label><input id="ansB" inputmode="decimal" placeholder="число" autocomplete="off"><span>мс</span></div>
+        <div class="field"><label for="ansF">f =</label><input id="ansF" inputmode="decimal" placeholder="число" autocomplete="off"><span>Гц</span></div>
+        <div class="btns"><button class="b" id="check">Проверить</button><button class="b ghost" id="hintBtn">Подсказка (0/3)</button></div>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        <div id="hints" class="task"></div>
+        <div class="svo" id="svo" hidden><b>Свойство.</b> Период мигания — сумма всех delay в <span class="f">loop()</span>; сами команды digitalWrite занимают микросекунды. Частота f = 1/T: при T в секундах — в герцах.</div>
+      </section>
+      <section id="p-game" class="task" hidden>
+        <h2>Игра</h2>
+        <p id="gText"></p>
+        <div class="field"><label for="gA" id="gLab">ответ</label><input id="gA" inputmode="decimal" placeholder="число" autocomplete="off"><span id="gU"></span></div>
+        <div class="btns"><button class="b" id="gCheck">Проверить</button><button class="b ghost" id="never">Невозможно</button><button class="b ghost" id="gNext">Другая задача</button></div>
+        <div class="msg" id="gMsg" role="status" aria-live="polite"></div>
+        <div class="score"><span>верно <b id="sHit">0</b></span><span>всего <b id="sShot">0</b></span><span>серия <b id="sStreak">0</b></span></div>
+        <p class="foot">Допуск — 1 %. Если такого мигания одной парой delay не получить — жмите «Невозможно».</p>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- общее для тренажёров Arduino (холст, цвета, ввод чисел, подсказки, счёт, вкладки)
+  const $ = id => document.getElementById(id), cv = $('cv'), ctx = cv.getContext('2d');
+  let C = {}, U = 1;
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function resize(){ const dpr = window.devicePixelRatio || 1, w = Math.max(280, cv.clientWidth || 640);
+    const W = Math.round(w*dpr), H = Math.round(w*0.625*dpr); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; U = dpr*Math.max(0.85, Math.min(1.15, w/700)); }
+  function readColors(){ const s = getComputedStyle(document.documentElement); ['sheet','paper','ink','ink-2','rule','grid','grid-major','traj','mark','mark-soft','vx','vy','target','env','ok','bad'].forEach(k => C[k] = s.getPropertyValue('--'+k).trim()); }
+  resize(); readColors();
+  new ResizeObserver(() => { const o = cv.width; resize(); if (cv.width !== o) draw(); }).observe(cv);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+  const fmt = (x, d=2) => (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).replace('.', ',');
+  const fmtN = (x, d=2) => { let s = fmt(x, d); if (s.indexOf(',') >= 0) s = s.replace(/0+$/, '').replace(/,$/, ''); return s; };
+  // число: запятая, дробь 4/3, а также 0b1100110, B1100110 (как в Arduino), 0x66
+  const parse = s => { s = String(s == null ? '' : s).trim().replace(/,/g, '.').replace(/\s+/g,'');
+    let m = s.match(/^(?:0b|B)([01]+)$/i); if (m) return parseInt(m[1], 2);
+    m = s.match(/^0x([0-9a-f]+)$/i); if (m) return parseInt(m[1], 16);
+    m = s.match(/^(\d*\.?\d+)\/(\d*\.?\d+)$/); return m ? parseFloat(m[1])/parseFloat(m[2]) : (/^-?\d*\.?\d+$/.test(s) ? parseFloat(s) : NaN); };
+  const rnd = (a, b) => a + Math.floor(Math.random()*(b - a + 1)), pick = a => a[rnd(0, a.length - 1)];
+  const gcd = (a, b) => b ? gcd(b, a % b) : a, lcm = (a, b) => a/gcd(a, b)*b;
+  const S = {mode:'explore', hints:0, solved:false, game:null, score:{hit:0, shot:0, streak:0}};
+  const fnt = (px, w) => (w || '') + ' ' + px*U + 'px "Golos Text", system-ui, sans-serif', mono = (px, w) => (w || '') + ' ' + px*U + 'px "JetBrains Mono", ui-monospace, monospace';
+  function placeholder(text){ ctx.fillStyle = C['ink-2']; ctx.font = fnt(15); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, cv.width/2, cv.height/2); }
+  // светодиод: rgb — [r,g,b] цвета свечения, k — яркость 0…1
+  function led(cx, cy, r, rgb, k, legs){ k = Math.max(0, Math.min(1, k));
+    if (k > 0.01){ const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r*2.6); g.addColorStop(0, 'rgba(' + rgb.join(',') + ',' + (0.85*k) + ')'); g.addColorStop(1, 'rgba(' + rgb.join(',') + ',0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r*2.6, 0, 2*Math.PI); ctx.fill(); }
+    const body = rgb.map(c => Math.round(60 + (c*0.45 - 30) + c*0.55*k));
+    ctx.fillStyle = 'rgb(' + body.map(c => Math.max(25, Math.min(255, c))).join(',') + ')'; ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, 0); ctx.lineTo(cx + r, cy + r*1.25); ctx.lineTo(cx - r, cy + r*1.25); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = Math.max(1, 1.6*U); ctx.stroke();
+    if (legs){ ctx.beginPath(); ctx.moveTo(cx - r*.4, cy + r*1.25); ctx.lineTo(cx - r*.4, cy + r*2.3); ctx.moveTo(cx + r*.4, cy + r*1.25); ctx.lineTo(cx + r*.4, cy + r*2.0); ctx.stroke(); } }
+  function hintLadder(H){ $('hintBtn').addEventListener('click', () => { if (S.hints >= H.length) return; const d = document.createElement('div'); d.className = 'hint'; d.textContent = (S.hints + 1) + '. ' + H[S.hints]; $('hints').appendChild(d);
+    S.hints++; $('hintBtn').textContent = 'Подсказка (' + S.hints + '/' + H.length + ')'; if (S.hints >= H.length) $('hintBtn').disabled = true; }); }
+  function say(id, ok, text){ const m = $(id); m.className = ok ? 'msg ok' : 'msg bad'; m.textContent = text; }
+  function score(ok){ S.score.shot++; if (ok){ S.score.hit++; S.score.streak++; } else S.score.streak = 0; $('sHit').textContent = S.score.hit; $('sShot').textContent = S.score.shot; $('sStreak').textContent = S.score.streak; }
+  function verdict(ok, text){ if (S.game.done) { say('gMsg', ok, text); return; } S.game.done = true; score(ok); say('gMsg', ok, text); }
+  const near = (a, g) => g.abs != null ? Math.abs(a - g.ans) <= g.abs : Math.abs(a - g.ans) <= (g.tol || 0.01)*Math.abs(g.ans);
+  function tabs(onMode){ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); S.mode = t.dataset.mode;
+    ['explore','task','game'].forEach(k => $('p-' + k).hidden = k !== S.mode); onMode(S.mode); draw(); })); }
+  // код Arduino с подсветкой: строки — массив; {n:…} — живое число
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  function code(lines){ $('code').innerHTML = lines.map(l => esc(l)
+    .replace(/(\/\/.*)$/, '<span class="c">$1</span>')
+    .replace(/\b(void|int|byte|bool|unsigned|long|for|if|else|return|true|false|const)\b(?![^<]*<\/span>)/g, '<span class="k">$1</span>')
+    .replace(/⟨(.*?)⟩/g, '<span class="n">$1</span>')).join('\n'); }
+  // ---------- мигание: вывод 13, delay(a) после HIGH, delay(b) после LOW
+  S.a = 500; S.b = 500; S.tryV = null; const t0 = performance.now();
+  const view = () => S.mode === 'explore' ? {a:S.a, b:S.b} : S.mode === 'task' ? (S.solved ? {a:200, b:1800} : S.tryV) : (S.game && S.game.show);
+  function niceStep(x){ for (const s of [1,2,5,10,20,50,100,200,250,500,1000,2000]) if (x/s <= 8) return s; return 5000; }
+  function draw(){
+    ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, cv.width, cv.height);
+    const v = view(), L = 48*U, R = cv.width - 150*U, T = 20*U, B = cv.height - 38*U;
+    const cx = cv.width - 75*U, cy = cv.height/2 - 14*U;
+    if (!v){ placeholder(S.mode === 'task' ? 'решите задачу — здесь появится диаграмма' : 'ответьте — диаграмма появится после проверки'); led(cx, cy, 30*U, [255,60,40], 0, true); return; }
+    const P = v.a + v.b, Wn = P >= 400 ? 4000 : 10*P, X = t => L + (R - L)*t/Wn, Y = u => B - (B - T)*u/6, st = niceStep(Wn);
+    ctx.lineWidth = 1; ctx.font = mono(11); ctx.fillStyle = C['ink-2'];
+    const every = Math.max(1, Math.ceil(54*U/(X(st) - X(0))));
+    for (let t = 0; t <= Wn + 1e-9; t += st/5){ const major = Math.abs(t/st - Math.round(t/st)) < 1e-6 && Math.round(t/st) % every === 0; ctx.strokeStyle = major ? C['grid-major'] : C.grid; ctx.beginPath(); ctx.moveTo(X(t) + .5, T); ctx.lineTo(X(t) + .5, B); ctx.stroke();
+      if (major){ ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(t >= 1000 && st >= 500 ? fmtN(t/1000, 2) + ' с' : fmtN(t, 0) + ' мс', X(t), B + 6*U); } }
+    for (let u = 0; u <= 6; u++){ ctx.strokeStyle = C['grid-major']; ctx.beginPath(); ctx.moveTo(L, Y(u) + .5); ctx.lineTo(R, Y(u) + .5); ctx.stroke(); }
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; [0, 5].forEach(u => ctx.fillText(u + ' В', L - 6*U, Y(u)));
+    // сигнал
+    ctx.strokeStyle = C.traj; ctx.lineWidth = 3*U; ctx.lineJoin = 'miter'; ctx.beginPath(); ctx.moveTo(X(0), Y(5));
+    for (let t = 0; t < Wn; t += P){ const t1 = Math.min(t + v.a, Wn), t2 = Math.min(t + P, Wn); ctx.lineTo(X(t1), Y(5)); if (t1 < Wn){ ctx.lineTo(X(t1), Y(0)); ctx.lineTo(X(t2), Y(0)); if (t2 < Wn) ctx.lineTo(X(t2), Y(5)); } }
+    ctx.stroke();
+    // период и подписи первого цикла
+    const yy = Y(5.6); ctx.strokeStyle = C.vy; ctx.fillStyle = C.vy; ctx.lineWidth = 2*U; ctx.beginPath(); ctx.moveTo(X(0), yy); ctx.lineTo(X(P), yy); ctx.moveTo(X(0), yy - 5*U); ctx.lineTo(X(0), yy + 5*U); ctx.moveTo(X(P), yy - 5*U); ctx.lineTo(X(P), yy + 5*U); ctx.stroke();
+    ctx.font = fnt(13, 600); ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('T = ' + fmtN(P, 1) + ' мс', X(P) + 8*U, yy);
+    ctx.font = fnt(12); ctx.fillStyle = C['ink-2']; ctx.textAlign = 'center';
+    if (X(v.a) - X(0) > 60*U) { ctx.textBaseline = 'top'; ctx.fillText('HIGH · ' + fmtN(v.a, 1) + ' мс', (X(0) + X(v.a))/2, Y(5) + 8*U); }
+    if (X(P) - X(v.a) > 60*U) { ctx.textBaseline = 'bottom'; ctx.fillText('LOW · ' + fmtN(v.b, 1) + ' мс', (X(v.a) + X(P))/2, Y(0) - 8*U); }
+    // «сейчас» и светодиод
+    const f = 1000/P, anim = !RM, tn = ((performance.now() - t0) % Wn), on = (tn % P) < v.a;
+    if (anim){ ctx.strokeStyle = C.target; ctx.lineWidth = 2*U; ctx.beginPath(); ctx.moveTo(X(tn), T); ctx.lineTo(X(tn), B); ctx.stroke(); }
+    const k = f > 40 || !anim ? v.a/P : (on ? 1 : 0);
+    led(cx, cy, 30*U, [255,60,40], k, true);
+    ctx.fillStyle = C['ink-2']; ctx.font = mono(12); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(f > 40 ? 'ровный свет' : !anim ? 'в среднем' : on ? 'горит' : 'не горит', cx, cy + 74*U);
+    ctx.fillText('f = ' + fmtN(f, 2) + ' Гц', cx, cy + 92*U);
+  }
+  const loopTick = () => { if (view()) draw(); requestAnimationFrame(loopTick); };
+  function showCode(a, b){ code(['void setup() {', '  pinMode(13, OUTPUT);       // вывод 13 — выход', '}', 'void loop() {', '  digitalWrite(13, HIGH);    // 5 В — светодиод горит',
+    '  delay(⟨' + a + '⟩);', '  digitalWrite(13, LOW);     // 0 В — погас', '  delay(⟨' + b + '⟩);', '}']); }
+  function sync(){ S.a = +$('a').value; S.b = +$('b').value; const P = S.a + S.b, f = 1000/P;
+    $('aO').textContent = S.a + ' мс'; $('bO').textContent = S.b + ' мс'; $('rT').textContent = P + ' мс'; $('rF').textContent = fmtN(f, 2) + ' Гц';
+    $('rN').textContent = fmtN(60000/P, 1); $('rD').textContent = fmtN(100*S.a/P, 1) + ' %';
+    $('eye').innerHTML = f > 50 ? '<b>Мигания не видно.</b> ' + fmtN(f, 0) + ' вспышек в секунду глаз сливает в ровный свет, а яркость задаёт доля «горит». Так работает ШИМ — см. тренажёр <a href="inzh-shim.html">«ШИМ»</a>.'
+      : f > 12 ? 'Мерцание заметно: глаз уже почти не различает отдельные вспышки.' : '';
+    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', +c.dataset.a === S.a && +c.dataset.b === S.b));
+    showCode(S.a, S.b); draw(); }
+  ['a','b'].forEach(id => $(id).addEventListener('input', sync));
+  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => { $('a').value = c.dataset.a; $('b').value = c.dataset.b; sync(); }));
+
+  // ---------- задача: T = 60 000/30 = 2000 мс; b = 2000 − 200 = 1800 мс; f = 1/2 с = 0,5 Гц
+  hintLadder(['30 вспышек в минуту — значит, одна вспышка вместе с паузой (период T) длится 60 с / 30. Переведите в миллисекунды.',
+    'T = 2000 мс. Период складывается из двух delay: T = a + b, где a = 200 мс — сама вспышка.',
+    'b = 2000 − 200 мс. Частота — сколько периодов в секунду: f = 1/T, T = 2 с.']);
+  $('check').addEventListener('click', () => { const b = parse($('ansB').value), f = parse($('ansF').value);
+    if (isNaN(b)) return say('msg', false, 'Введите b — число миллисекунд.');
+    if (Math.abs(b - 2000) < 1) return say('msg', false, 'Это весь период: 60 000 мс / 30 = 2000 мс. Но 200 мс из него уже занимает вспышка — второй delay короче.');
+    if (Math.abs(b - 1.8) < 0.01) return say('msg', false, 'Это секунды. delay считает миллисекунды, а дробь отбрасывает: delay(1.8) — это delay(1), маяк почти не будет гаснуть.');
+    if (Math.abs(b - 30) < 0.5) return say('msg', false, '30 — это вспышек в минуту, а в delay пишут миллисекунды.');
+    if (Math.abs(b - 1800) > 1){ if (b > 0 && b <= 6000){ S.tryV = {a:200, b:b}; draw(); }
+      return say('msg', false, b > 0 ? 'При b = ' + fmtN(b, 1) + ' мс период ' + fmtN(200 + b, 1) + ' мс — это ' + fmtN(60000/(200 + b), 1) + ' вспышек в минуту, а нужно 30. На диаграмме — ваш вариант.' : 'delay не бывает отрицательным или нулевым для паузы маяка.'); }
+    if (isNaN(f)) return say('msg', false, 'b верно. Теперь частоту в герцах.');
+    if (Math.abs(f - 30) < 0.5) return say('msg', false, '30 в минуту — не герцы: герц — одно мигание в секунду.');
+    if (Math.abs(f - 2) < 0.01) return say('msg', false, '2 — это период в секундах. Частота — обратная величина: f = 1/T.');
+    if (Math.abs(f - 0.5) > 0.005) return say('msg', false, 'b верно, частота — нет. f = 1/T, а T = 2 с.');
+    S.solved = true; say('msg', true, 'Верно: delay(1800), f = 0,5 Гц — одна вспышка каждые 2 секунды.'); $('svo').hidden = false; showCode(200, 1800); draw(); });
+
+  // ---------- игра
+  const GEN = [
+    () => { const a = pick([100,150,200,250,500]), b = pick([100,150,250,300,500,750]); return {q:'Скетч: delay(' + a + ') после HIGH и delay(' + b + ') после LOW. С какой частотой мигает светодиод?', lab:'f =', u:'Гц', ans:1000/(a + b), tol:.01, show:{a, b}, code:[a, b]}; },
+    () => { const T = pick([250,300,400,500,600,750,1000,1200,1500,2000,3000]), a = T*pick([.2,.4,.5]); return {q:'Скетч: delay(' + a + ') и delay(' + (T - a) + '). Сколько вспышек в минуту?', lab:'N =', u:'в мин', ans:60000/T, abs:.5, show:{a, b:T - a}, code:[a, T - a]}; },
+    () => { const N = pick([20,30,40,50,60,75,80,100,120]), T = 60000/N, a = pick([50,100,150,200]); return {q:'Нужно ' + N + ' вспышек в минуту, каждая длится ' + a + ' мс. Какой второй delay — после LOW?', lab:'b =', u:'мс', ans:T - a, abs:1, after:{a, b:T - a}, code:[a, '?']}; },
+    () => { const f = pick([1,2,4,5]), d = pick([.1,.25,.5]), T = 1000/f; return {q:'Светодиод должен мигать с частотой ' + f + ' Гц и гореть ' + Math.round(d*100) + ' % времени. Какой delay после HIGH?', lab:'a =', u:'мс', ans:d*T, abs:1, after:{a:d*T, b:T - d*T}, code:['?', '?']}; },
+    () => { const f = pick([4,5,8]), T = 1000/f, a = T + pick([50,100,200]); return {q:'Нужна частота ' + f + ' Гц, и каждая вспышка должна длиться ' + a + ' мс. Какой второй delay?', lab:'b =', u:'мс', ans:null, code:[a, '?'], why:'при ' + f + ' Гц весь период — ' + T + ' мс, а одна вспышка ' + a + ' мс уже длиннее периода.'}; },
+    () => { const a = pick([250,500,1000]), b = pick([250,500,1000,1500]); return {q:'Скетч: delay(' + a + ') и delay(' + b + '). Сколько секунд за минуту светодиод горит?', lab:'t =', u:'с', ans:60*a/(a + b), abs:.5, show:{a, b}, code:[a, b]}; }];
+  function newGame(i){ S.game = (i == null ? pick(GEN) : GEN[i])(); $('gText').textContent = S.game.q; $('gLab').textContent = S.game.lab; $('gU').textContent = S.game.u; $('gA').value = ''; $('gMsg').className = 'msg'; showCode(S.game.code[0], S.game.code[1]); draw(); }
+  function reveal(){ const g = S.game; if (g.after){ g.show = g.after; showCode(fmtN(g.after.a, 1), fmtN(g.after.b, 1)); } draw(); }
+  $('gCheck').addEventListener('click', () => { const g = S.game, a = parse($('gA').value);
+    if (g.ans == null){ verdict(false, 'Подходящего delay нет: ' + g.why + ' Правильный ответ — «Невозможно».'); return; }
+    if (isNaN(a)) return say('gMsg', false, 'Введите число.');
+    const ok = near(a, g); verdict(ok, ok ? 'Верно.' : 'Нет, верно ' + fmtN(g.ans, 2) + ' ' + g.u + '.'); reveal(); });
+  $('never').addEventListener('click', () => { const g = S.game; verdict(g.ans == null, g.ans == null ? 'Верно: ' + g.why + ' Нужно уменьшить вспышку или частоту.' : 'Это возможно: ответ ' + fmtN(g.ans, 2) + ' ' + g.u + '.'); if (g.ans != null) reveal(); });
+  $('gNext').addEventListener('click', () => newGame());
+  window.__game = i => newGame(i); window.__ans = () => S.game.ans; // для автопроверки
+  tabs(m => { if (m === 'game' && !S.game) newGame(); else if (m === 'game') showCode(S.game.code[0], S.game.code[1]); else if (m === 'task') showCode(200, S.solved ? 1800 : '?'); else sync(); });
+  sync(); if (!RM) requestAnimationFrame(loopTick);
+
+})();
+</script>
+</body></html>

@@ -1,0 +1,287 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Таймеры millis: несколько дел сразу</title><link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: слева — стенд (схема, диаграмма, код), справа — пульт; на телефоне пульт уходит под стенд. */
+:root{
+  --paper:#F5F6F8; --sheet:#FFFFFF; --ink:#14161A; --ink-2:#555C66; --rule:#DCE0E5;
+  --grid:#E6EAEE; --grid-major:#C9CFD6; --traj:#C89A00; --mark:#FFD400; --mark-soft:#FFF5BF;
+  --vx:#B07D00; --vy:#2F6FA8; --env:#7A5BB5; --target:#C0392B; --ok:#2E7D4F; --ok-soft:#E3F2E8; --bad:#A33A2E; --bad-soft:#F7E4E1;
+  --display:"Unbounded","Golos Text",system-ui,sans-serif; --body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:16px}
+h1{font:700 clamp(24px,4vw,36px)/1.15 var(--display);margin:0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:4px 0 0}
+.eyebrow{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:600 14px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.stage{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px;min-width:0}
+canvas{display:block;width:100%;aspect-ratio:16/10;max-width:100%;border-radius:4px;touch-action:manipulation}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2);padding:8px 4px 2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:14px;min-width:0}
+.panel h2{font:600 15px var(--display);margin:0}
+.ctl{display:grid;gap:4px}
+.ctl label{display:flex;justify-content:space-between;font-size:14px}
+.ctl output,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--traj)}
+.checks{display:grid;gap:6px;font-size:14px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 14px var(--body);padding:9px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+.read{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14px;border-top:1px solid var(--rule);padding-top:12px}
+.read dt{color:var(--ink-2)} .read dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.task{display:grid;gap:10px}
+.task p{margin:0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:14px}
+.field input{font:500 15px var(--mono);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.msg{font-size:14px;padding:10px 12px;border-radius:6px;display:none}
+.msg.ok{display:block;background:var(--ok-soft);color:var(--ok)} .msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}
+.hint{font-size:14px;background:var(--mark-soft);border-left:3px solid var(--traj);padding:8px 10px;border-radius:0 6px 6px 0}
+.svo{font-size:14px;border:1px solid var(--traj);background:var(--mark-soft);padding:10px 12px;border-radius:6px}
+.svo b{font-weight:600}
+.score{display:flex;gap:14px;font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.score span b{font-size:18px}
+.f{font-family:var(--mono);font-size:.95em;white-space:nowrap}
+sub,sup{font-size:.72em}
+.foot{font-size:13px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.crumb{font-size:14px;color:var(--ink-2)}.crumb a{color:var(--ink-2)}
+pre.code{margin:10px 0 0;font:13px/1.5 var(--mono);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;overflow-x:auto;white-space:pre;tab-size:2}
+pre.code .k{color:var(--vy)} pre.code .c{color:var(--ink-2)} pre.code .n{color:var(--traj);font-weight:600} pre.code .hl{background:var(--mark-soft);border-radius:3px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:500 13px var(--body);padding:5px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--traj);background:var(--mark-soft)}
+.chip:focus-visible,select:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+select{font:500 14px var(--body);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
+.mon{font:13px/1.45 var(--mono);background:#0E1116;color:#B8F5C8;border-radius:6px;padding:8px 10px;min-height:64px;max-height:150px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.row3 .field{grid-template-columns:auto 1fr}
+.segs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font:600 13px var(--mono)}
+.segs label{display:grid;justify-items:center;gap:2px;cursor:pointer}
+.kbd{font:600 12px var(--mono);border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;padding:0 5px}
+nav.crumb{display:block}
+</style></head><body>
+<!--title:Таймеры millis: несколько дел сразу-->
+<nav class="wrap crumb"><a href="/">← Тезаурус</a> · <a href="/inzheneriya/">Инженерия</a> · <a href="/zadano/">Задано мне</a></nav>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">инженерия · Arduino · занятие «Таймеры millis»</div>
+    <h1>Таймеры millis: несколько дел сразу</h1>
+    <p class="sub"><span class="f">delay()</span> останавливает всю программу. <span class="f">millis()</span> лишь сообщает, сколько миллисекунд прошло с включения платы, — и loop сам решает, пора ли действовать. Сравните, как мигают два светодиода в двух версиях скетча.</p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Режим">
+    <button class="tab" role="tab" id="t-ex" aria-selected="true" data-mode="explore">Исследовать</button>
+    <button class="tab" role="tab" id="t-task" aria-selected="false" data-mode="task">Задача</button>
+    <button class="tab" role="tab" id="t-game" aria-selected="false" data-mode="game">Игра</button>
+  </div>
+  <div class="lab">
+    <div class="stage">
+      <canvas id="cv" width="960" height="600" aria-label="Временная диаграмма двух светодиодов и работы loop"></canvas>
+      <div class="legend"><span><i style="background:var(--target)"></i>LED на выводе 12</span><span><i style="background:var(--ok)"></i>LED на выводе 13</span><span><i style="background:var(--env)"></i>переключились вместе</span></div>
+      <pre class="code" id="code" aria-label="Код скетча"></pre>
+    </div>
+    <aside class="panel">
+      <section id="p-explore" class="task">
+        <h2>Пульт</h2>
+        <div class="checks" role="radiogroup" aria-label="Версия скетча">
+          <label><input type="radio" name="ver" id="vM" checked> на millis()</label>
+          <label><input type="radio" name="ver" id="vD"> на delay()</label>
+        </div>
+        <div class="ctl"><label for="p1"><span>LED 12: период P<sub>1</sub>, мс</span> <output id="p1O" class="num"></output></label><input id="p1" type="range" min="100" max="1500" step="50" value="400"></div>
+        <div class="ctl"><label for="p2"><span>LED 13: период P<sub>2</sub>, мс</span> <output id="p2O" class="num"></output></label><input id="p2" type="range" min="100" max="1500" step="50" value="600"></div>
+        <dl class="read">
+          <dt>LED 12 переключается каждые</dt><dd id="r1"></dd>
+          <dt>LED 13 переключается каждые</dt><dd id="r2"></dd>
+          <dt>Вспышек в минуту: LED 12</dt><dd id="f1"></dd>
+          <dt>Вспышек в минуту: LED 13</dt><dd id="f2"></dd>
+        </dl>
+        <p class="foot">Найдите на диаграмме моменты, когда оба светодиода переключаются вместе. Как этот момент связан с P<sub>1</sub> и P<sub>2</sub>? Переключите версию на delay — что стало с периодами?</p>
+        <p class="foot">Где нужна «многозадачность»: светофор с кнопкой пешехода, метеостанция (датчик раз в 2 с, экран раз в 0,5 с), игрушка с мигающими глазами и звуком.</p>
+      </section>
+      <section id="p-task" class="task" hidden>
+        <h2>Задача</h2>
+        <p>Скетч на millis: LED 12 переключается каждые <b>300 мс</b>, LED 13 — каждые <b>500 мс</b>. Через сколько миллисекунд после старта они впервые переключатся одновременно? Сколько раз за минуту <b>загорится</b> LED 12?</p>
+        <div class="field"><label for="ansT">t =</label><input id="ansT" inputmode="decimal" placeholder="число" autocomplete="off"><span>мс</span></div>
+        <div class="field"><label for="ansN">N =</label><input id="ansN" inputmode="numeric" placeholder="число" autocomplete="off"><span>в мин</span></div>
+        <div class="btns"><button class="b" id="check">Проверить</button><button class="b ghost" id="hintBtn">Подсказка (0/3)</button></div>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        <div id="hints" class="task"></div>
+        <div class="svo" id="svo" hidden><b>Свойство.</b> С millis() каждое дело живёт по своим часам: loop крутится десятки тысяч раз в секунду и только проверяет «пора ли?». Дела с периодами P<sub>1</sub> и P<sub>2</sub> совпадают через НОК(P<sub>1</sub>, P<sub>2</sub>). С delay() дела стоят в очереди: каждое ждёт все остальные.</div>
+      </section>
+      <section id="p-game" class="task" hidden>
+        <h2>Игра</h2>
+        <p id="gText"></p>
+        <div class="field"><label for="gA" id="gLab">ответ</label><input id="gA" inputmode="decimal" placeholder="число" autocomplete="off"><span id="gU"></span></div>
+        <div class="btns"><button class="b" id="gCheck">Проверить</button><button class="b ghost" id="never">Невозможно</button><button class="b ghost" id="gNext">Другая задача</button></div>
+        <div class="msg" id="gMsg" role="status" aria-live="polite"></div>
+        <div class="score"><span>верно <b id="sHit">0</b></span><span>всего <b id="sShot">0</b></span><span>серия <b id="sStreak">0</b></span></div>
+        <p class="foot">Допуск — 1 %. Если задуманное в таком коде не получить — жмите «Невозможно».</p>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- общее для тренажёров Arduino (холст, цвета, ввод чисел, подсказки, счёт, вкладки)
+  const $ = id => document.getElementById(id), cv = $('cv'), ctx = cv.getContext('2d');
+  let C = {}, U = 1;
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function resize(){ const dpr = window.devicePixelRatio || 1, w = Math.max(280, cv.clientWidth || 640);
+    const W = Math.round(w*dpr), H = Math.round(w*0.625*dpr); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; U = dpr*Math.max(0.85, Math.min(1.15, w/700)); }
+  function readColors(){ const s = getComputedStyle(document.documentElement); ['sheet','paper','ink','ink-2','rule','grid','grid-major','traj','mark','mark-soft','vx','vy','target','env','ok','bad'].forEach(k => C[k] = s.getPropertyValue('--'+k).trim()); }
+  resize(); readColors();
+  new ResizeObserver(() => { const o = cv.width; resize(); if (cv.width !== o) draw(); }).observe(cv);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+  const fmt = (x, d=2) => (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).replace('.', ',');
+  const fmtN = (x, d=2) => { let s = fmt(x, d); if (s.indexOf(',') >= 0) s = s.replace(/0+$/, '').replace(/,$/, ''); return s; };
+  // число: запятая, дробь 4/3, а также 0b1100110, B1100110 (как в Arduino), 0x66
+  const parse = s => { s = String(s == null ? '' : s).trim().replace(/,/g, '.').replace(/\s+/g,'');
+    let m = s.match(/^(?:0b|B)([01]+)$/i); if (m) return parseInt(m[1], 2);
+    m = s.match(/^0x([0-9a-f]+)$/i); if (m) return parseInt(m[1], 16);
+    m = s.match(/^(\d*\.?\d+)\/(\d*\.?\d+)$/); return m ? parseFloat(m[1])/parseFloat(m[2]) : (/^-?\d*\.?\d+$/.test(s) ? parseFloat(s) : NaN); };
+  const rnd = (a, b) => a + Math.floor(Math.random()*(b - a + 1)), pick = a => a[rnd(0, a.length - 1)];
+  const gcd = (a, b) => b ? gcd(b, a % b) : a, lcm = (a, b) => a/gcd(a, b)*b;
+  const S = {mode:'explore', hints:0, solved:false, game:null, score:{hit:0, shot:0, streak:0}};
+  const fnt = (px, w) => (w || '') + ' ' + px*U + 'px "Golos Text", system-ui, sans-serif', mono = (px, w) => (w || '') + ' ' + px*U + 'px "JetBrains Mono", ui-monospace, monospace';
+  function placeholder(text){ ctx.fillStyle = C['ink-2']; ctx.font = fnt(15); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, cv.width/2, cv.height/2); }
+  // светодиод: rgb — [r,g,b] цвета свечения, k — яркость 0…1
+  function led(cx, cy, r, rgb, k, legs){ k = Math.max(0, Math.min(1, k));
+    if (k > 0.01){ const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r*2.6); g.addColorStop(0, 'rgba(' + rgb.join(',') + ',' + (0.85*k) + ')'); g.addColorStop(1, 'rgba(' + rgb.join(',') + ',0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r*2.6, 0, 2*Math.PI); ctx.fill(); }
+    const body = rgb.map(c => Math.round(60 + (c*0.45 - 30) + c*0.55*k));
+    ctx.fillStyle = 'rgb(' + body.map(c => Math.max(25, Math.min(255, c))).join(',') + ')'; ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, 0); ctx.lineTo(cx + r, cy + r*1.25); ctx.lineTo(cx - r, cy + r*1.25); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = Math.max(1, 1.6*U); ctx.stroke();
+    if (legs){ ctx.beginPath(); ctx.moveTo(cx - r*.4, cy + r*1.25); ctx.lineTo(cx - r*.4, cy + r*2.3); ctx.moveTo(cx + r*.4, cy + r*1.25); ctx.lineTo(cx + r*.4, cy + r*2.0); ctx.stroke(); } }
+  function hintLadder(H){ $('hintBtn').addEventListener('click', () => { if (S.hints >= H.length) return; const d = document.createElement('div'); d.className = 'hint'; d.textContent = (S.hints + 1) + '. ' + H[S.hints]; $('hints').appendChild(d);
+    S.hints++; $('hintBtn').textContent = 'Подсказка (' + S.hints + '/' + H.length + ')'; if (S.hints >= H.length) $('hintBtn').disabled = true; }); }
+  function say(id, ok, text){ const m = $(id); m.className = ok ? 'msg ok' : 'msg bad'; m.textContent = text; }
+  function score(ok){ S.score.shot++; if (ok){ S.score.hit++; S.score.streak++; } else S.score.streak = 0; $('sHit').textContent = S.score.hit; $('sShot').textContent = S.score.shot; $('sStreak').textContent = S.score.streak; }
+  function verdict(ok, text){ if (S.game.done) { say('gMsg', ok, text); return; } S.game.done = true; score(ok); say('gMsg', ok, text); }
+  const near = (a, g) => g.abs != null ? Math.abs(a - g.ans) <= g.abs : Math.abs(a - g.ans) <= (g.tol || 0.01)*Math.abs(g.ans);
+  function tabs(onMode){ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); S.mode = t.dataset.mode;
+    ['explore','task','game'].forEach(k => $('p-' + k).hidden = k !== S.mode); onMode(S.mode); draw(); })); }
+  // код Arduino с подсветкой: строки — массив; {n:…} — живое число
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  function code(lines){ $('code').innerHTML = lines.map(l => esc(l)
+    .replace(/(\/\/.*)$/, '<span class="c">$1</span>')
+    .replace(/\b(void|int|byte|bool|unsigned|long|for|if|else|return|true|false|const)\b(?![^<]*<\/span>)/g, '<span class="k">$1</span>')
+    .replace(/⟨(.*?)⟩/g, '<span class="n">$1</span>')).join('\n'); }
+  // ---------- millis против delay: два светодиода, окно 6 с
+  const t0 = performance.now(), WN = 6000;
+  S.p1 = 400; S.p2 = 600; S.ver = 'millis';
+  // моменты переключений в окне
+  function toggles(v){ const a = [], b = [];
+    if (v.m === 'millis'){ for (let t = v.P1; t <= WN; t += v.P1) a.push(t); if (v.P2) for (let t = v.P2; t <= WN; t += v.P2) b.push(t); }
+    else { const T = v.P1 + v.P2; for (let t = 0; t <= WN; t += T) a.push(t); for (let t = v.P1; t <= WN; t += T) b.push(t); }
+    return [a, b]; }
+  const stateAt = (arr, t) => arr.filter(x => x <= t).length % 2 === 1;
+  function view(){
+    if (S.mode === 'explore') return {m:S.ver, P1:S.p1, P2:S.p2, marks:true};
+    if (S.mode === 'task') return {m:'millis', P1:300, P2:500, marks:S.solved};
+    const g = S.game; return g ? (g.done ? (g.after || g.show) : g.show) : null; }
+  function draw(){
+    ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, cv.width, cv.height);
+    const v = view(), L = 74*U, R = cv.width - 128*U, T = 26*U, B = cv.height - 40*U, X = t => L + (R - L)*t/WN;
+    const lx = cv.width - 64*U;
+    if (!v){ placeholder('millis() считает от 0 до 4 294 967 295 мс'); led(lx, cv.height*.3, 22*U, [255,60,40], 0, false); led(lx, cv.height*.62, 22*U, [40,200,90], 0, false); return; }
+    const [A, Bt] = toggles(v), rows = v.P2 ? 3 : 2, rh = (B - T)/rows;
+    ctx.lineWidth = 1; for (let t = 0; t <= WN; t += 100){ ctx.strokeStyle = t % 1000 ? C.grid : C['grid-major']; ctx.beginPath(); ctx.moveTo(X(t) + .5, T); ctx.lineTo(X(t) + .5, B); ctx.stroke(); }
+    ctx.fillStyle = C['ink-2']; ctx.font = mono(11); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; for (let t = 0; t <= WN; t += 1000) ctx.fillText(t/1000 + ' с', X(t), B + 6*U);
+    const lanes = [[A, C.target, 'LED 12'], v.P2 ? [Bt, C.ok, 'LED 13'] : null].filter(Boolean);
+    lanes.forEach(([arr, col, name], j) => { const y0 = T + rh*j + rh*.2, y1 = T + rh*j + rh*.8;
+      ctx.fillStyle = C.ink; ctx.font = fnt(12.5, 600); ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(name, L - 10*U, (y0 + y1)/2);
+      ctx.strokeStyle = C['grid-major']; ctx.beginPath(); ctx.moveTo(L, y1 + .5); ctx.lineTo(R, y1 + .5); ctx.stroke();
+      const edges = [0].concat(arr.filter(t => t > 0), [WN]); let on = arr.includes(0);
+      for (let k = 0; k < edges.length - 1; k++){ if (k > 0) on = !on; if (on){ ctx.fillStyle = col; ctx.globalAlpha = .85; ctx.fillRect(X(edges[k]), y0, X(edges[k + 1]) - X(edges[k]), y1 - y0); ctx.globalAlpha = 1; } }
+      ctx.strokeStyle = col; ctx.lineWidth = 2*U; arr.forEach(t => { ctx.beginPath(); ctx.moveTo(X(t), y0 - 4*U); ctx.lineTo(X(t), y1 + 4*U); ctx.stroke(); }); ctx.lineWidth = 1; });
+    // третья дорожка — чем занят loop
+    if (rows === 3){ const y0 = T + rh*2 + rh*.3, y1 = T + rh*2 + rh*.7;
+      ctx.fillStyle = C.ink; ctx.font = fnt(12.5, 600); ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText('loop()', L - 10*U, (y0 + y1)/2);
+      if (v.m === 'millis'){ ctx.strokeStyle = C['ink-2']; for (let t = 0; t < WN; t += 40){ ctx.beginPath(); ctx.moveTo(X(t) + .5, y0); ctx.lineTo(X(t) + .5, y1); ctx.stroke(); }
+        const lbl = R - L > 330*U ? 'крутится без остановки и проверяет время' : 'крутится и проверяет'; ctx.font = fnt(12); const lw = ctx.measureText(lbl).width + 10*U; ctx.fillStyle = C.sheet; ctx.fillRect(L + 6*U, y0 + 3*U, lw, y1 - y0 - 6*U); ctx.fillStyle = C['ink-2']; ctx.textAlign = 'left'; ctx.fillText(lbl, L + 10*U, (y0 + y1)/2); }
+      else { for (let t = 0, k = 0; t < WN; k++){ const d = k % 2 ? v.P2 : v.P1, t2 = Math.min(WN, t + d); ctx.fillStyle = k % 2 ? C.ok : C.target; ctx.globalAlpha = .22; ctx.fillRect(X(t), y0, X(t2) - X(t), y1 - y0); ctx.globalAlpha = 1;
+          ctx.strokeStyle = C['ink-2']; ctx.strokeRect(X(t) + .5, y0 + .5, X(t2) - X(t), y1 - y0); if (X(t2) - X(t) > 60*U){ ctx.fillStyle = C.ink; ctx.font = mono(10.5); ctx.textAlign = 'center'; ctx.fillText('delay(' + d + ')', (X(t) + X(t2))/2, (y0 + y1)/2); } t = t2; } } }
+    // совпадения
+    if (v.marks && v.P2){ const both = A.filter(t => t > 0 && Bt.includes(t)); ctx.strokeStyle = C.env; ctx.fillStyle = C.env; ctx.setLineDash([6*U, 4*U]); ctx.lineWidth = 2*U;
+      both.forEach(t => { ctx.beginPath(); ctx.moveTo(X(t), T - 6*U); ctx.lineTo(X(t), T + rh*2); ctx.stroke(); }); ctx.setLineDash([]); ctx.lineWidth = 1;
+      ctx.font = fnt(12, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; both.forEach(t => ctx.fillText(fmtN(t, 0), X(t), T - 7*U)); }
+    // «сейчас» и живые светодиоды
+    const tn = RM ? null : (performance.now() - t0) % WN;
+    if (tn != null){ ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5*U; ctx.beginPath(); ctx.moveTo(X(tn), T); ctx.lineTo(X(tn), B); ctx.stroke(); }
+    led(lx, cv.height*.3, 22*U, [255,60,40], tn == null ? 0 : stateAt(A, tn) ? 1 : 0, false);
+    if (v.P2) led(lx, cv.height*.62, 22*U, [40,200,90], tn == null ? 0 : stateAt(Bt, tn) ? 1 : 0, false);
+    ctx.fillStyle = C['ink-2']; ctx.font = mono(10.5); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText('12', lx, cv.height*.3 + 32*U); if (v.P2) ctx.fillText('13', lx, cv.height*.62 + 32*U);
+    if (tn != null) ctx.fillText('millis() = ' + Math.floor(tn), lx, B - 4*U); }
+  const loopTick = () => { if (view()) draw(); requestAnimationFrame(loopTick); };
+  function showCode(m, a, b){ code(m === 'millis' ? ['unsigned long t1 = 0, t2 = 0;   // когда переключали в последний раз', 'bool s1 = false, s2 = false;', 'void setup() { pinMode(12, OUTPUT); pinMode(13, OUTPUT); }',
+      'void loop() {', '  if (millis() - t1 >= ⟨' + a + '⟩) {      // пора переключить LED 12?', '    t1 = millis(); s1 = !s1; digitalWrite(12, s1);', '  }',
+      '  if (millis() - t2 >= ⟨' + b + '⟩) {      // пора переключить LED 13?', '    t2 = millis(); s2 = !s2; digitalWrite(13, s2);', '  }', '}']
+    : ['bool s1 = false, s2 = false;', 'void setup() { pinMode(12, OUTPUT); pinMode(13, OUTPUT); }', 'void loop() {', '  s1 = !s1; digitalWrite(12, s1);', '  delay(⟨' + a + '⟩);                  // всё стоит', '  s2 = !s2; digitalWrite(13, s2);', '  delay(⟨' + b + '⟩);                  // и снова всё стоит', '}']); }
+  function sync(){ S.p1 = +$('p1').value; S.p2 = +$('p2').value; S.ver = $('vD').checked ? 'delay' : 'millis';
+    const q1 = S.ver === 'millis' ? S.p1 : S.p1 + S.p2, q2 = S.ver === 'millis' ? S.p2 : S.p1 + S.p2;
+    $('p1O').textContent = S.p1 + ' мс'; $('p2O').textContent = S.p2 + ' мс'; $('r1').textContent = q1 + ' мс'; $('r2').textContent = q2 + ' мс';
+    $('f1').textContent = fmtN(60000/(2*q1), 1); $('f2').textContent = fmtN(60000/(2*q2), 1); showCode(S.ver, S.p1, S.p2); draw(); }
+  ['p1','p2','vM','vD'].forEach(id => $(id).addEventListener('input', sync));
+
+  // ---------- задача: НОК(300, 500) = 1500 мс; вспышка LED 12 = 2·300 = 600 мс → 60 000/600 = 100 в минуту
+  hintLadder(['LED 12 переключается в моменты 300, 600, 900, … мс, LED 13 — в 500, 1000, … Найдите первое общее число в двух списках (или на диаграмме).',
+    'Общий момент кратен и 300, и 500: это наименьшее общее кратное НОК(300, 500). Вспышка = «включился» + «выключился», то есть два переключения.',
+    'НОК(300, 500) = 1500 мс. Одна вспышка LED 12 длится 2·300 = 600 мс, а в минуте 60 000 мс.']);
+  $('check').addEventListener('click', () => { const t = parse($('ansT').value), n = parse($('ansN').value);
+    if (isNaN(t)) return say('msg', false, 'Введите момент в миллисекундах.');
+    if (Math.abs(t - 800) < 1) return say('msg', false, '800 = 300 + 500 — так было бы в версии с delay, где светодиоды ждут друг друга. С millis каждый живёт по своим часам.');
+    if (Math.abs(t - 150000) < 1) return say('msg', false, '300·500 — общее кратное, но не наименьшее. Они совпадут гораздо раньше.');
+    if (Math.abs(t - 3000) < 1) return say('msg', false, 'В 3000 мс они действительно совпадут, но уже во второй раз.');
+    if (Math.abs(t) < .5) return say('msg', false, 'В момент 0 никто не переключается: первый раз — когда millis() − t дорастёт до периода.');
+    if (Math.abs(t - 300) < 1 || Math.abs(t - 500) < 1) return say('msg', false, 'В этот момент переключается только один светодиод — посмотрите на диаграмму.');
+    if (Math.abs(t - 1500) > 1) return say('msg', false, 'В ' + fmtN(t, 0) + ' мс ' + (t % 300 === 0 ? 'переключается LED 12, но не LED 13.' : t % 500 === 0 ? 'переключается LED 13, но не LED 12.' : 'не переключается ни один.'));
+    if (isNaN(n)) return say('msg', false, 'Момент верный. Теперь — вспышки LED 12 в минуту.');
+    if (Math.abs(n - 200) < .5) return say('msg', false, '200 — это переключений. Загорается светодиод на каждом втором: «вкл» и «выкл» — одна вспышка.');
+    if (Math.abs(n - 100) > .5) return say('msg', false, 'Момент верный, число вспышек — нет. Сколько длится одна вспышка вместе с паузой?');
+    S.solved = true; say('msg', true, 'Верно: впервые вместе через 1500 мс (дальше — через каждые 1500), LED 12 загорается 100 раз в минуту.'); $('svo').hidden = false; draw(); });
+
+  // ---------- игра
+  const PAIRS = [[200,300],[300,400],[250,400],[400,600],[300,750],[500,750],[200,500],[600,900],[400,500]];
+  const GEN = [
+    () => { const P = pick([100,150,200,250,300,500,600,750,1000,1500]); return {q:'if (millis() − t >= ' + P + ') { t = millis(); переключить LED 12; }  Сколько раз в минуту LED 12 загорается?', lab:'N =', u:'в мин', ans:60000/(2*P), tol:.01, show:{m:'millis', P1:P}, code:['millis', P, '—']}; },
+    () => { const [a, b] = pick(PAIRS); return {q:'Скетч на millis: LED 12 переключается каждые ' + a + ' мс, LED 13 — каждые ' + b + ' мс. Через сколько мс после старта они впервые переключатся вместе?', lab:'t =', u:'мс', ans:lcm(a, b), abs:1, show:{m:'millis', P1:a, P2:b}, after:{m:'millis', P1:a, P2:b, marks:true}, code:['millis', a, b]}; },
+    () => { const a = pick([200,300,400,500]), b = pick([100,200,300,600]); return {q:'Скетч на delay: «переключить LED 12; delay(' + a + '); переключить LED 13; delay(' + b + ');». Через сколько мс переключается LED 12?', lab:'T =', u:'мс', ans:a + b, abs:1, after:{m:'delay', P1:a, P2:b}, code:['delay', a, b]}; },
+    () => ({q:'millis() хранится в unsigned long: 32 бита, наибольшее число 4 294 967 295 мс. Через сколько суток после включения счётчик переполнится и начнёт с нуля?', lab:'≈', u:'сут', ans:4294967296/86400000, tol:.01, code:['millis', 1000, 1000]}),
+    () => { const b = pick([400,500,600]), need = pick([200,300]); return {q:'Скетч на delay: «переключить LED 12; delay(x); переключить LED 13; delay(' + b + ');». Второй delay трогать нельзя. Каким сделать x, чтобы LED 12 переключался каждые ' + need + ' мс?', lab:'x =', u:'мс', ans:null, code:['delay', 'x', b],
+      why:'LED 12 переключается раз за проход loop, а проход длится x + ' + b + ' мс — это всегда больше ' + need + ' мс. Решение — переписать на millis.'}; }];
+  function newGame(i){ S.game = (i == null ? pick(GEN) : GEN[i])(); $('gText').textContent = S.game.q; $('gLab').textContent = S.game.lab; $('gU').textContent = S.game.u; $('gA').value = ''; $('gMsg').className = 'msg'; showCode.apply(null, S.game.code); draw(); }
+  $('gCheck').addEventListener('click', () => { const g = S.game, a = parse($('gA').value);
+    if (g.ans == null){ verdict(false, 'Так не получится: ' + g.why + ' Правильный ответ — «Невозможно».'); draw(); return; }
+    if (isNaN(a)) return say('gMsg', false, 'Введите число.');
+    const ok = near(a, g); verdict(ok, ok ? 'Верно.' : 'Нет, верно ' + fmtN(g.ans, 2) + ' ' + g.u + '.'); draw(); });
+  $('never').addEventListener('click', () => { const g = S.game; verdict(g.ans == null, g.ans == null ? 'Верно: ' + g.why : 'Это возможно: ответ ' + fmtN(g.ans, 2) + ' ' + g.u + '.'); draw(); });
+  $('gNext').addEventListener('click', () => newGame());
+  window.__game = i => newGame(i); window.__ans = () => S.game.ans; // для автопроверки
+  tabs(m => { if (m === 'game'){ if (!S.game) newGame(); else showCode.apply(null, S.game.code); } else if (m === 'task') showCode('millis', 300, 500); else sync(); });
+  sync(); if (!RM) requestAnimationFrame(loopTick);
+
+})();
+</script>
+</body></html>

@@ -5,6 +5,7 @@
 - `index.html` — оглавление
 - `slozhenie-sil.html` — «Сложение сил: проекции» (9 класс)
 - `inzh-shim.html`, `inzh-svetodiod.html` — инженерные тренажёры (ШИМ; светодиод и резистор)
+- `inzh-blink.html`, `inzh-ogni.html`, `inzh-millis.html`, `inzh-rgb.html`, `inzh-7seg.html` — тренажёры кружка Arduino (мигание и delay; бегущие огни; таймеры millis; RGB и Serial; 7-сегментный индикатор). Собираются из исходников хаба `AI/courses/lim/trenazhery/` (`build.py`), скетчи на страницах компилируются под Nano
 - `oge-kinematika.html` — «ОГЭ · Кинематика» (9 класс, 5 попыток) — прежняя отдельная страница
 - `exam.html?t=<id>` — общий движок тестов: читает `tests/<id>.json`
   - Т1 `exam-topic` — проверка по выбору ученика (у задания или у части), попытки без ограничения

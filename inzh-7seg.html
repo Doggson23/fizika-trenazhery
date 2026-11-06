@@ -1,0 +1,282 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>7-сегментный индикатор: код цифры</title><link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: слева — стенд (схема, диаграмма, код), справа — пульт; на телефоне пульт уходит под стенд. */
+:root{
+  --paper:#F5F6F8; --sheet:#FFFFFF; --ink:#14161A; --ink-2:#555C66; --rule:#DCE0E5;
+  --grid:#E6EAEE; --grid-major:#C9CFD6; --traj:#C89A00; --mark:#FFD400; --mark-soft:#FFF5BF;
+  --vx:#B07D00; --vy:#2F6FA8; --env:#7A5BB5; --target:#C0392B; --ok:#2E7D4F; --ok-soft:#E3F2E8; --bad:#A33A2E; --bad-soft:#F7E4E1;
+  --display:"Unbounded","Golos Text",system-ui,sans-serif; --body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:16px}
+h1{font:700 clamp(24px,4vw,36px)/1.15 var(--display);margin:0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:4px 0 0}
+.eyebrow{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:600 14px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.stage{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px;min-width:0}
+canvas{display:block;width:100%;aspect-ratio:16/10;max-width:100%;border-radius:4px;touch-action:manipulation}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2);padding:8px 4px 2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:14px;min-width:0}
+.panel h2{font:600 15px var(--display);margin:0}
+.ctl{display:grid;gap:4px}
+.ctl label{display:flex;justify-content:space-between;font-size:14px}
+.ctl output,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--traj)}
+.checks{display:grid;gap:6px;font-size:14px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 14px var(--body);padding:9px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+.read{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14px;border-top:1px solid var(--rule);padding-top:12px}
+.read dt{color:var(--ink-2)} .read dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.task{display:grid;gap:10px}
+.task p{margin:0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:14px}
+.field input{font:500 15px var(--mono);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.msg{font-size:14px;padding:10px 12px;border-radius:6px;display:none}
+.msg.ok{display:block;background:var(--ok-soft);color:var(--ok)} .msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}
+.hint{font-size:14px;background:var(--mark-soft);border-left:3px solid var(--traj);padding:8px 10px;border-radius:0 6px 6px 0}
+.svo{font-size:14px;border:1px solid var(--traj);background:var(--mark-soft);padding:10px 12px;border-radius:6px}
+.svo b{font-weight:600}
+.score{display:flex;gap:14px;font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.score span b{font-size:18px}
+.f{font-family:var(--mono);font-size:.95em;white-space:nowrap}
+sub,sup{font-size:.72em}
+.foot{font-size:13px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.crumb{font-size:14px;color:var(--ink-2)}.crumb a{color:var(--ink-2)}
+pre.code{margin:10px 0 0;font:13px/1.5 var(--mono);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;overflow-x:auto;white-space:pre;tab-size:2}
+pre.code .k{color:var(--vy)} pre.code .c{color:var(--ink-2)} pre.code .n{color:var(--traj);font-weight:600} pre.code .hl{background:var(--mark-soft);border-radius:3px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:500 13px var(--body);padding:5px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--traj);background:var(--mark-soft)}
+.chip:focus-visible,select:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+select{font:500 14px var(--body);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
+.mon{font:13px/1.45 var(--mono);background:#0E1116;color:#B8F5C8;border-radius:6px;padding:8px 10px;min-height:64px;max-height:150px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.row3 .field{grid-template-columns:auto 1fr}
+.segs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font:600 13px var(--mono)}
+.segs label{display:grid;justify-items:center;gap:2px;cursor:pointer}
+.kbd{font:600 12px var(--mono);border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;padding:0 5px}
+nav.crumb{display:block}
+</style></head><body>
+<!--title:7-сегментный индикатор: код цифры-->
+<nav class="wrap crumb"><a href="/">← Тезаурус</a> · <a href="/inzheneriya/">Инженерия</a> · <a href="/zadano/">Задано мне</a></nav>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">инженерия · Arduino · занятие «7-сегментный индикатор»</div>
+    <h1>7-сегментный индикатор: код цифры</h1>
+    <p class="sub">Семь светодиодов-полосок a…g на выводах 2…8. Какие сегменты горят, удобно хранить одним числом: бит 0 отвечает за сегмент a, бит 6 — за g. Нажимайте на сегменты или выбирайте символ — код пересчитается.</p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Режим">
+    <button class="tab" role="tab" id="t-ex" aria-selected="true" data-mode="explore">Исследовать</button>
+    <button class="tab" role="tab" id="t-task" aria-selected="false" data-mode="task">Задача</button>
+    <button class="tab" role="tab" id="t-game" aria-selected="false" data-mode="game">Игра</button>
+  </div>
+  <div class="lab">
+    <div class="stage">
+      <canvas id="cv" width="960" height="600" aria-label="Семисегментный индикатор и таблица выводов"></canvas>
+      <div class="legend"><span>сегмент a — вывод 2 — бит 0</span><span>…</span><span>сегмент g — вывод 8 — бит 6</span></div>
+      <pre class="code" id="code" aria-label="Код скетча"></pre>
+    </div>
+    <aside class="panel">
+      <section id="p-explore" class="task">
+        <h2>Пульт</h2>
+        <div class="segs" role="group" aria-label="Сегменты">
+          <label><input type="checkbox" id="s0">a</label><label><input type="checkbox" id="s1">b</label><label><input type="checkbox" id="s2">c</label><label><input type="checkbox" id="s3">d</label>
+          <label><input type="checkbox" id="s4">e</label><label><input type="checkbox" id="s5">f</label><label><input type="checkbox" id="s6">g</label>
+        </div>
+        <div class="chips" id="sym" role="group" aria-label="Символы"></div>
+        <div class="checks" role="radiogroup" aria-label="Тип индикатора">
+          <label><input type="radio" name="cm" id="cK" checked> общий катод: сегмент горит при HIGH</label>
+          <label><input type="radio" name="cm" id="cA"> общий анод: горит при LOW</label>
+        </div>
+        <dl class="read">
+          <dt>Код (двоичный)</dt><dd id="rB"></dd>
+          <dt>Код (десятичный / hex)</dt><dd id="rD"></dd>
+          <dt>На индикаторе</dt><dd id="rS"></dd>
+          <dt>Горит сегментов</dt><dd id="rN"></dd>
+          <dt>Ток при 10 мА на сегмент</dt><dd id="rI"></dd>
+        </dl>
+        <p class="foot">Найдите: какой код у цифры 8 и почему он равен 127? Какие буквы можно показать, а какие (K, M, W) — нет? Творческое: «бегущая восьмёрка» по сегментам, кубик с выпадающей цифрой, табло счёта.</p>
+      </section>
+      <section id="p-task" class="task" hidden>
+        <h2>Задача</h2>
+        <p>Индикатор с общим катодом, сегмент a — бит 0, …, g — бит 6. Какое число передать в <span class="f">show()</span>, чтобы появилась цифра <b>4</b>? Сколько сегментов при этом горит? Код можно ввести десятичным числом или как <span class="f">0b…</span>.</p>
+        <div class="field"><label for="ansC">код =</label><input id="ansC" inputmode="text" placeholder="102 или 0b…" autocomplete="off"><span></span></div>
+        <div class="field"><label for="ansN">горит</label><input id="ansN" inputmode="numeric" placeholder="число" autocomplete="off"><span>сегм.</span></div>
+        <div class="btns"><button class="b" id="check">Проверить</button><button class="b ghost" id="hintBtn">Подсказка (0/3)</button></div>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        <div id="hints" class="task"></div>
+        <div class="svo" id="svo" hidden><b>Свойство.</b> 7 сегментов — 7 бит, 2<sup>7</sup> = 128 комбинаций, цифр среди них 10. В записи <span class="f">0b…</span> бит 0 стоит справа: 0b1100110 читается справа налево — a=0, b=1, c=1, d=0, e=0, f=1, g=1.</div>
+      </section>
+      <section id="p-game" class="task" hidden>
+        <h2>Игра</h2>
+        <p id="gText"></p>
+        <div class="field"><label for="gA" id="gLab">ответ</label><input id="gA" inputmode="text" placeholder="число" autocomplete="off"><span id="gU"></span></div>
+        <div class="btns"><button class="b" id="gCheck">Проверить</button><button class="b ghost" id="never">Невозможно</button><button class="b ghost" id="gNext">Другая задача</button></div>
+        <div class="msg" id="gMsg" role="status" aria-live="polite"></div>
+        <div class="score"><span>верно <b id="sHit">0</b></span><span>всего <b id="sShot">0</b></span><span>серия <b id="sStreak">0</b></span></div>
+        <p class="foot">Коды принимаются десятичными, 0b… и B… (как в Arduino). Если код — не цифра или задача невыполнима, жмите «Невозможно».</p>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- общее для тренажёров Arduino (холст, цвета, ввод чисел, подсказки, счёт, вкладки)
+  const $ = id => document.getElementById(id), cv = $('cv'), ctx = cv.getContext('2d');
+  let C = {}, U = 1;
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function resize(){ const dpr = window.devicePixelRatio || 1, w = Math.max(280, cv.clientWidth || 640);
+    const W = Math.round(w*dpr), H = Math.round(w*0.625*dpr); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; U = dpr*Math.max(0.85, Math.min(1.15, w/700)); }
+  function readColors(){ const s = getComputedStyle(document.documentElement); ['sheet','paper','ink','ink-2','rule','grid','grid-major','traj','mark','mark-soft','vx','vy','target','env','ok','bad'].forEach(k => C[k] = s.getPropertyValue('--'+k).trim()); }
+  resize(); readColors();
+  new ResizeObserver(() => { const o = cv.width; resize(); if (cv.width !== o) draw(); }).observe(cv);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+  const fmt = (x, d=2) => (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).replace('.', ',');
+  const fmtN = (x, d=2) => { let s = fmt(x, d); if (s.indexOf(',') >= 0) s = s.replace(/0+$/, '').replace(/,$/, ''); return s; };
+  // число: запятая, дробь 4/3, а также 0b1100110, B1100110 (как в Arduino), 0x66
+  const parse = s => { s = String(s == null ? '' : s).trim().replace(/,/g, '.').replace(/\s+/g,'');
+    let m = s.match(/^(?:0b|B)([01]+)$/i); if (m) return parseInt(m[1], 2);
+    m = s.match(/^0x([0-9a-f]+)$/i); if (m) return parseInt(m[1], 16);
+    m = s.match(/^(\d*\.?\d+)\/(\d*\.?\d+)$/); return m ? parseFloat(m[1])/parseFloat(m[2]) : (/^-?\d*\.?\d+$/.test(s) ? parseFloat(s) : NaN); };
+  const rnd = (a, b) => a + Math.floor(Math.random()*(b - a + 1)), pick = a => a[rnd(0, a.length - 1)];
+  const gcd = (a, b) => b ? gcd(b, a % b) : a, lcm = (a, b) => a/gcd(a, b)*b;
+  const S = {mode:'explore', hints:0, solved:false, game:null, score:{hit:0, shot:0, streak:0}};
+  const fnt = (px, w) => (w || '') + ' ' + px*U + 'px "Golos Text", system-ui, sans-serif', mono = (px, w) => (w || '') + ' ' + px*U + 'px "JetBrains Mono", ui-monospace, monospace';
+  function placeholder(text){ ctx.fillStyle = C['ink-2']; ctx.font = fnt(15); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, cv.width/2, cv.height/2); }
+  // светодиод: rgb — [r,g,b] цвета свечения, k — яркость 0…1
+  function led(cx, cy, r, rgb, k, legs){ k = Math.max(0, Math.min(1, k));
+    if (k > 0.01){ const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r*2.6); g.addColorStop(0, 'rgba(' + rgb.join(',') + ',' + (0.85*k) + ')'); g.addColorStop(1, 'rgba(' + rgb.join(',') + ',0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r*2.6, 0, 2*Math.PI); ctx.fill(); }
+    const body = rgb.map(c => Math.round(60 + (c*0.45 - 30) + c*0.55*k));
+    ctx.fillStyle = 'rgb(' + body.map(c => Math.max(25, Math.min(255, c))).join(',') + ')'; ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, 0); ctx.lineTo(cx + r, cy + r*1.25); ctx.lineTo(cx - r, cy + r*1.25); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = Math.max(1, 1.6*U); ctx.stroke();
+    if (legs){ ctx.beginPath(); ctx.moveTo(cx - r*.4, cy + r*1.25); ctx.lineTo(cx - r*.4, cy + r*2.3); ctx.moveTo(cx + r*.4, cy + r*1.25); ctx.lineTo(cx + r*.4, cy + r*2.0); ctx.stroke(); } }
+  function hintLadder(H){ $('hintBtn').addEventListener('click', () => { if (S.hints >= H.length) return; const d = document.createElement('div'); d.className = 'hint'; d.textContent = (S.hints + 1) + '. ' + H[S.hints]; $('hints').appendChild(d);
+    S.hints++; $('hintBtn').textContent = 'Подсказка (' + S.hints + '/' + H.length + ')'; if (S.hints >= H.length) $('hintBtn').disabled = true; }); }
+  function say(id, ok, text){ const m = $(id); m.className = ok ? 'msg ok' : 'msg bad'; m.textContent = text; }
+  function score(ok){ S.score.shot++; if (ok){ S.score.hit++; S.score.streak++; } else S.score.streak = 0; $('sHit').textContent = S.score.hit; $('sShot').textContent = S.score.shot; $('sStreak').textContent = S.score.streak; }
+  function verdict(ok, text){ if (S.game.done) { say('gMsg', ok, text); return; } S.game.done = true; score(ok); say('gMsg', ok, text); }
+  const near = (a, g) => g.abs != null ? Math.abs(a - g.ans) <= g.abs : Math.abs(a - g.ans) <= (g.tol || 0.01)*Math.abs(g.ans);
+  function tabs(onMode){ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); S.mode = t.dataset.mode;
+    ['explore','task','game'].forEach(k => $('p-' + k).hidden = k !== S.mode); onMode(S.mode); draw(); })); }
+  // код Arduino с подсветкой: строки — массив; {n:…} — живое число
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  function code(lines){ $('code').innerHTML = lines.map(l => esc(l)
+    .replace(/(\/\/.*)$/, '<span class="c">$1</span>')
+    .replace(/\b(void|int|byte|bool|unsigned|long|for|if|else|return|true|false|const)\b(?![^<]*<\/span>)/g, '<span class="k">$1</span>')
+    .replace(/⟨(.*?)⟩/g, '<span class="n">$1</span>')).join('\n'); }
+  // ---------- 7 сегментов: бит i — сегмент 'abcdefg'[i] — вывод 2 + i
+  const SEG = 'abcdefg', mk = s => [...s].reduce((c, ch) => c | (1 << SEG.indexOf(ch)), 0);
+  const DIG = ['abcdef','bc','abdeg','abcdg','bcfg','acdfg','acdefg','abc','abcdefg','abcdfg'].map(mk);
+  const LET = {A:'abcefg', b:'cdefg', C:'adef', d:'bcdeg', E:'adefg', F:'aefg', H:'bcefg', L:'def', P:'abefg', U:'bcdef', '-':'g'};
+  Object.keys(LET).forEach(k => LET[k] = mk(LET[k]));
+  const bin7 = c => '0b' + c.toString(2).padStart(7, '0'), pop = c => c.toString(2).split('').filter(x => x === '1').length;
+  const symOf = c => { const d = DIG.indexOf(c); if (d >= 0) return 'цифра ' + d; const l = Object.keys(LET).find(k => LET[k] === c); return l ? 'буква ' + l : c ? 'не цифра и не буква' : 'пусто'; };
+  S.code = DIG[4]; S.anode = false; S.taskTry = null; S.polys = [];
+  function segPoly(s, X, Y, Ls, th){ const g = th*.18, h = (Ls - g)/2, t = th/2;
+    const H = (cx, cy) => [[cx - h, cy], [cx - h + t, cy - t], [cx + h - t, cy - t], [cx + h, cy], [cx + h - t, cy + t], [cx - h + t, cy + t]];
+    const V = (cx, cy) => [[cx, cy - h], [cx + t, cy - h + t], [cx + t, cy + h - t], [cx, cy + h], [cx - t, cy + h - t], [cx - t, cy - h + t]];
+    return {a:H(X, Y - Ls), b:V(X + Ls/2, Y - Ls/2), c:V(X + Ls/2, Y + Ls/2), d:H(X, Y + Ls), e:V(X - Ls/2, Y + Ls/2), f:V(X - Ls/2, Y - Ls/2), g:H(X, Y)}[s]; }
+  const shown = () => S.mode === 'explore' ? S.code : S.mode === 'task' ? (S.solved ? DIG[4] : S.taskTry) : S.game ? (S.game.done ? (S.game.after != null ? S.game.after : S.game.show) : S.game.show) : null;
+  function draw(){
+    ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, cv.width, cv.height);
+    const W = cv.width, H = cv.height, pad = 14*U, bw = W*.42, code = shown();
+    ctx.fillStyle = '#16181C'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(pad, pad, bw, H - 2*pad, 10*U) : ctx.rect(pad, pad, bw, H - 2*pad); ctx.fill();
+    const Ls = Math.min(bw*.5, (H - 2*pad)*.36), th = Ls*.2, X = pad + bw/2, Y = H/2; S.polys = [];
+    for (let i = 0; i < 7; i++){ const s = SEG[i], p = segPoly(s, X, Y, Ls, th), on = code != null && (code >> i) & 1; S.polys.push([i, p]);
+      ctx.beginPath(); p.forEach(([x, y], k) => k ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath();
+      if (on){ ctx.shadowColor = 'rgba(255,70,50,.9)'; ctx.shadowBlur = 18*U; ctx.fillStyle = '#FF453A'; } else { ctx.shadowBlur = 0; ctx.fillStyle = '#2C2F35'; }
+      ctx.fill(); ctx.shadowBlur = 0;
+      const c = p.reduce((m, q) => [m[0] + q[0]/6, m[1] + q[1]/6], [0, 0]), dx = 'bc'.includes(s) ? 1 : 'ef'.includes(s) ? -1 : 0, dy = s === 'a' ? -1 : s === 'd' ? 1 : 0;
+      ctx.fillStyle = '#8A9099'; ctx.font = mono(12, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(s, s === 'g' ? X : c[0] + dx*th*1.4, s === 'g' ? Y - th*1.25 : c[1] + dy*th*1.3); }
+    if (code == null){ ctx.fillStyle = '#C9D1D9'; ctx.font = fnt(44, 700); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', X + Ls*.95, Y - Ls*.9); }
+    // таблица выводов
+    const tx = pad*2 + bw, tw = W - tx - pad, rh = Math.min(30*U, (H - 2*pad - 70*U)/8);
+    ctx.font = mono(12, 600); ctx.fillStyle = C['ink-2']; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    const cols = [0, .2, .45, .7].map(f => tx + f*tw); ['сегм.', 'вывод', 'бит', S.anode && S.mode === 'explore' ? 'анод' : 'катод'].forEach((t, i) => ctx.fillText(t, cols[i], pad + rh*.5));
+    for (let i = 0; i < 7; i++){ const y = pad + rh*(i + 1.5), on = code != null && (code >> i) & 1, lvl = code == null ? '?' : (on ^ (S.anode && S.mode === 'explore')) ? 'HIGH' : 'LOW';
+      if (on){ ctx.fillStyle = C['mark-soft']; ctx.fillRect(tx - 6*U, y - rh/2 + 2*U, tw + 6*U, rh - 4*U); }
+      ctx.fillStyle = C.ink; ctx.font = mono(13, on ? 600 : 400); [SEG[i], 'D' + (2 + i), String(i), lvl].forEach((t, k) => ctx.fillText(t, cols[k], y)); }
+    ctx.fillStyle = C.ink; ctx.font = mono(15, 600); ctx.fillText(code == null ? 'код = ?' : bin7(code) + ' = ' + code, tx, pad + rh*9.2);
+    ctx.fillStyle = C['ink-2']; ctx.font = fnt(12.5); ctx.fillText(code == null ? '' : symOf(code) + (tw > 300*U ? ' · бит 6 (g) слева, бит 0 (a) справа' : ''), tx, pad + rh*9.2 + 22*U); }
+  function showCode(c, anode){ code(['// сегменты a…g → выводы 2…8; бит i кода — сегмент (a — бит 0, g — бит 6)', 'byte digits[10] = {', '  0b0111111, 0b0000110, 0b1011011, 0b1001111, 0b1100110,', '  0b1101101, 0b1111101, 0b0000111, 0b1111111, 0b1101111 };',
+    'void setup() { for (int i = 2; i <= 8; i++) pinMode(i, OUTPUT); }', 'void show(byte code) {', '  for (int i = 0; i < 7; i++)', anode ? '    digitalWrite(2 + i, !bitRead(code, i));   // общий анод: горит при LOW' : '    digitalWrite(2 + i, bitRead(code, i));    // общий катод: горит при HIGH', '}',
+    'void loop() { show(⟨' + (c == null ? '?' : bin7(c)) + '⟩); }    // ' + (c == null ? 'что покажет?' : symOf(c))]); }
+  function sync(from){ if (from !== 'code') S.code = [0,1,2,3,4,5,6].reduce((c, i) => c | ($('s' + i).checked ? 1 << i : 0), 0);
+    [0,1,2,3,4,5,6].forEach(i => $('s' + i).checked = !!((S.code >> i) & 1)); S.anode = $('cA').checked;
+    $('rB').textContent = bin7(S.code); $('rD').textContent = S.code + ' / 0x' + S.code.toString(16).toUpperCase(); $('rS').textContent = symOf(S.code);
+    $('rN').textContent = pop(S.code); $('rI').textContent = pop(S.code)*10 + ' мА';
+    document.querySelectorAll('#sym .chip').forEach(b => b.setAttribute('aria-pressed', +b.dataset.c === S.code)); showCode(S.code, S.anode); draw(); }
+  const symBox = $('sym'); [...'0123456789'].map(d => [d, DIG[+d]]).concat(Object.keys(LET).map(k => [k, LET[k]])).forEach(([t, c]) => {
+    const b = document.createElement('button'); b.className = 'chip'; b.textContent = t; b.dataset.c = c; b.addEventListener('click', () => { S.code = c; sync('code'); }); symBox.appendChild(b); });
+  [0,1,2,3,4,5,6].forEach(i => $('s' + i).addEventListener('input', () => sync())); ['cK','cA'].forEach(id => $(id).addEventListener('input', () => sync('code')));
+  cv.addEventListener('click', e => { if (S.mode !== 'explore') return; const r = cv.getBoundingClientRect(), x = (e.clientX - r.left)*cv.width/r.width, y = (e.clientY - r.top)*cv.height/r.height;
+    for (const [i, p] of S.polys){ ctx.beginPath(); p.forEach(([px, py], k) => k ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath(); ctx.lineWidth = 14*U;
+      if (ctx.isPointInPath(x, y) || ctx.isPointInStroke(x, y)){ S.code ^= 1 << i; sync('code'); return; } } });
+
+  // ---------- задача: 4 = b, c, f, g = биты 1, 2, 5, 6 → 2 + 4 + 32 + 64 = 102 = 0b1100110; горят 4 сегмента
+  hintLadder(['Какие сегменты нужны для четвёрки? Нарисуйте её на «восьмёрке»: две верхние вертикали, средняя черта и правая нижняя.',
+    'Это b, c, f, g. По таблице им соответствуют биты 1, 2, 5, 6. Бит i «стоит» 2^i.',
+    'Код = 2 + 4 + 32 + 64. В двоичной записи — единицы на местах 6, 5, 2, 1, считая справа с нуля: 0b1100110.']);
+  $('check').addEventListener('click', () => { const c = parse($('ansC').value), n = parse($('ansN').value);
+    if (isNaN(c)) return say('msg', false, 'Введите код: например 77 или 0b1001101.');
+    if (c === 4) return say('msg', false, '4 — это сама цифра. Нужен код: число, у которого единицы стоят в битах горящих сегментов.');
+    if (c === 51){ S.taskTry = 51; draw(); return say('msg', false, 'Биты записаны в обратном порядке: в 0b… слева стоит бит 6 (g), справа бит 0 (a). Ваш код зажёг другие сегменты — см. слева.'); }
+    if (c === 25){ S.taskTry = 25; draw(); return say('msg', false, 'Это код для общего анода (инвертированный). В задаче — общий катод.'); }
+    if (c !== 102){ if (c >= 0 && c < 128 && c === Math.round(c)){ S.taskTry = c; draw(); return say('msg', false, 'Код ' + c + ' = ' + bin7(c) + ' — это ' + symOf(c) + '. Сверьте горящие сегменты с четвёркой.'); }
+      return say('msg', false, 'Код семи сегментов — целое число от 0 до 127.'); }
+    if (isNaN(n)) return say('msg', false, 'Код верный. Сколько сегментов горит?');
+    if (n === 7) return say('msg', false, '7 — все сегменты, это восьмёрка. Посчитайте единицы в 0b1100110.');
+    if (n !== 4) return say('msg', false, 'Код верный, число сегментов — нет. Посчитайте единицы в 0b1100110.');
+    S.solved = true; say('msg', true, 'Верно: 102 = 0b1100110, горят b, c, f, g — 4 сегмента.'); $('svo').hidden = false; showCode(102, false); draw(); });
+
+  // ---------- игра
+  const LK = Object.keys(LET).filter(k => k !== '-');
+  const GEN = [
+    () => { const d = rnd(0, 9); return {q:'Общий катод. Какой код у цифры ' + d + '? (десятичным или 0b…)', lab:'код =', u:'', ans:DIG[d], abs:.1, show:null, after:DIG[d]}; },
+    () => { const d = rnd(0, 9); return {q:'show(' + bin7(DIG[d]) + '); — какая цифра на индикаторе?', lab:'цифра', u:'', ans:d, abs:.1, show:DIG[d]}; },
+    () => { const l = pick(LK); return {q:'show(' + bin7(LET[l]) + '); — какая цифра на индикаторе?', lab:'цифра', u:'', ans:null, show:LET[l], why:'такой набор сегментов — буква «' + l + '», ни одной цифре он не соответствует.'}; },
+    () => { const d = rnd(0, 9); return {q:'Сколько сегментов горит у цифры ' + d + '?', lab:'n =', u:'сегм.', ans:pop(DIG[d]), abs:.1, show:null, after:DIG[d]}; },
+    () => { const d = rnd(0, 9), I = pick([5,10,15,20]); return {q:'Каждый сегмент берёт ' + I + ' мА. Какой ток течёт через общий катод, когда горит цифра ' + d + '?', lab:'I =', u:'мА', ans:pop(DIG[d])*I, abs:.1, show:null, after:DIG[d]}; },
+    () => { const d = rnd(0, 9); return {q:'Коды для общего анода хранят сразу инвертированными (семь бит). Какое число записать для цифры ' + d + '?', lab:'код =', u:'', ans:127 - DIG[d], abs:.1, show:null, after:DIG[d]}; },
+    () => { const v = pick([10, 12, 25, 42]); return {q:'Какой код передать в show(), чтобы один индикатор показал число ' + v + '?', lab:'код =', u:'', ans:null, show:null, why:'один разряд показывает одну цифру. Для ' + v + ' нужно два индикатора — например, 4-разрядный модуль с динамической индикацией.'}; }];
+  function newGame(i){ S.game = (i == null ? pick(GEN) : GEN[i])(); $('gText').textContent = S.game.q; $('gLab').textContent = S.game.lab; $('gU').textContent = S.game.u; $('gA').value = ''; $('gMsg').className = 'msg'; showCode(S.game.show, false); draw(); }
+  $('gCheck').addEventListener('click', () => { const g = S.game, a = parse($('gA').value);
+    if (g.ans == null){ verdict(false, 'Так нельзя: ' + g.why + ' Правильный ответ — «Невозможно».'); draw(); return; }
+    if (isNaN(a)) return say('gMsg', false, 'Введите число.');
+    const ok = near(a, g), extra = g.lab === 'код =' ? ' = ' + bin7(g.ans) : '';
+    verdict(ok, ok ? 'Верно' + extra + '.' : 'Нет, верно ' + g.ans + extra + '.'); if (g.after != null) showCode(g.after, false); draw(); });
+  $('never').addEventListener('click', () => { const g = S.game; verdict(g.ans == null, g.ans == null ? 'Верно: ' + g.why : 'Это возможно: ответ ' + g.ans + '.'); draw(); });
+  $('gNext').addEventListener('click', () => newGame());
+  window.__game = i => newGame(i); window.__ans = () => S.game.ans; // для автопроверки
+  tabs(m => { if (m === 'game'){ if (!S.game) newGame(); else showCode(S.game.done && S.game.after != null ? S.game.after : S.game.show, false); } else if (m === 'task') showCode(S.solved ? 102 : null, false); else sync('code'); });
+  sync('code');
+
+})();
+</script>
+</body></html>

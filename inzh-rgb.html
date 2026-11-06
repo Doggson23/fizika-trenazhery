@@ -1,0 +1,291 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>RGB-светодиод и Serial: смешение цветов</title><link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: слева — стенд (схема, диаграмма, код), справа — пульт; на телефоне пульт уходит под стенд. */
+:root{
+  --paper:#F5F6F8; --sheet:#FFFFFF; --ink:#14161A; --ink-2:#555C66; --rule:#DCE0E5;
+  --grid:#E6EAEE; --grid-major:#C9CFD6; --traj:#C89A00; --mark:#FFD400; --mark-soft:#FFF5BF;
+  --vx:#B07D00; --vy:#2F6FA8; --env:#7A5BB5; --target:#C0392B; --ok:#2E7D4F; --ok-soft:#E3F2E8; --bad:#A33A2E; --bad-soft:#F7E4E1;
+  --display:"Unbounded","Golos Text",system-ui,sans-serif; --body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:16px}
+h1{font:700 clamp(24px,4vw,36px)/1.15 var(--display);margin:0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:4px 0 0}
+.eyebrow{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:600 14px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.stage{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px;min-width:0}
+canvas{display:block;width:100%;aspect-ratio:16/10;max-width:100%;border-radius:4px;touch-action:manipulation}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2);padding:8px 4px 2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:14px;min-width:0}
+.panel h2{font:600 15px var(--display);margin:0}
+.ctl{display:grid;gap:4px}
+.ctl label{display:flex;justify-content:space-between;font-size:14px}
+.ctl output,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--traj)}
+.checks{display:grid;gap:6px;font-size:14px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 14px var(--body);padding:9px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+.read{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14px;border-top:1px solid var(--rule);padding-top:12px}
+.read dt{color:var(--ink-2)} .read dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.task{display:grid;gap:10px}
+.task p{margin:0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:14px}
+.field input{font:500 15px var(--mono);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.msg{font-size:14px;padding:10px 12px;border-radius:6px;display:none}
+.msg.ok{display:block;background:var(--ok-soft);color:var(--ok)} .msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}
+.hint{font-size:14px;background:var(--mark-soft);border-left:3px solid var(--traj);padding:8px 10px;border-radius:0 6px 6px 0}
+.svo{font-size:14px;border:1px solid var(--traj);background:var(--mark-soft);padding:10px 12px;border-radius:6px}
+.svo b{font-weight:600}
+.score{display:flex;gap:14px;font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.score span b{font-size:18px}
+.f{font-family:var(--mono);font-size:.95em;white-space:nowrap}
+sub,sup{font-size:.72em}
+.foot{font-size:13px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.crumb{font-size:14px;color:var(--ink-2)}.crumb a{color:var(--ink-2)}
+pre.code{margin:10px 0 0;font:13px/1.5 var(--mono);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;overflow-x:auto;white-space:pre;tab-size:2}
+pre.code .k{color:var(--vy)} pre.code .c{color:var(--ink-2)} pre.code .n{color:var(--traj);font-weight:600} pre.code .hl{background:var(--mark-soft);border-radius:3px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:500 13px var(--body);padding:5px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--traj);background:var(--mark-soft)}
+.chip:focus-visible,select:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+select{font:500 14px var(--body);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
+.mon{font:13px/1.45 var(--mono);background:#0E1116;color:#B8F5C8;border-radius:6px;padding:8px 10px;min-height:64px;max-height:150px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.row3 .field{grid-template-columns:auto 1fr}
+.segs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font:600 13px var(--mono)}
+.segs label{display:grid;justify-items:center;gap:2px;cursor:pointer}
+.kbd{font:600 12px var(--mono);border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;padding:0 5px}
+nav.crumb{display:block}
+</style></head><body>
+<!--title:RGB-светодиод и Serial: смешение цветов-->
+<nav class="wrap crumb"><a href="/">← Тезаурус</a> · <a href="/inzheneriya/">Инженерия</a> · <a href="/zadano/">Задано мне</a></nav>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">инженерия · Arduino · занятие «RGB и Serial»</div>
+    <h1>RGB-светодиод и Serial: смешение цветов</h1>
+    <p class="sub">В одном корпусе три светодиода — красный, зелёный, синий, — у каждого свой вывод с ШИМ. Яркости складываются: красный + зелёный дают жёлтый, все три — белый. Цвет можно прислать с компьютера строкой в мониторе порта.</p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Режим">
+    <button class="tab" role="tab" id="t-ex" aria-selected="true" data-mode="explore">Исследовать</button>
+    <button class="tab" role="tab" id="t-task" aria-selected="false" data-mode="task">Задача</button>
+    <button class="tab" role="tab" id="t-game" aria-selected="false" data-mode="game">Игра</button>
+  </div>
+  <div class="lab">
+    <div class="stage">
+      <canvas id="cv" width="960" height="600" aria-label="Сложение трёх цветов и RGB-светодиод"></canvas>
+      <div class="legend"><span>выводы: R → 9, G → 10, B → 11</span><span>U на выводе = x/255 · 5 В</span></div>
+      <pre class="code" id="code" aria-label="Код скетча"></pre>
+    </div>
+    <aside class="panel">
+      <section id="p-explore" class="task">
+        <h2>Пульт</h2>
+        <div class="checks" role="radiogroup" aria-label="Тип светодиода">
+          <label><input type="radio" name="cm" id="cK" checked> общий катод (−): горит при HIGH</label>
+          <label><input type="radio" name="cm" id="cA"> общий анод (+): горит при LOW</label>
+        </div>
+        <div class="ctl"><label for="r"><span>яркость R</span> <output id="rO" class="num"></output></label><input id="r" type="range" min="0" max="255" step="1" value="255"></div>
+        <div class="ctl"><label for="g"><span>яркость G</span> <output id="gO" class="num"></output></label><input id="g" type="range" min="0" max="255" step="1" value="128"></div>
+        <div class="ctl"><label for="bb"><span>яркость B</span> <output id="bO" class="num"></output></label><input id="bb" type="range" min="0" max="255" step="1" value="0"></div>
+        <dl class="read">
+          <dt>Цвет</dt><dd id="rHex"></dd>
+          <dt>analogWrite(9, …)</dt><dd id="w9"></dd>
+          <dt>analogWrite(10, …)</dt><dd id="w10"></dd>
+          <dt>analogWrite(11, …)</dt><dd id="w11"></dd>
+        </dl>
+        <div class="ctl"><label for="ser">Монитор порта, 9600 бод</label>
+          <div class="field" style="grid-template-columns:1fr auto"><input id="ser" placeholder="например 255,0,128" autocomplete="off" inputmode="text"><button class="b" id="send">Отправить</button></div>
+          <div class="mon" id="mon" aria-live="polite">— введите три числа через запятую и нажмите «Отправить»</div></div>
+        <p class="foot">Найдите: какие пары дают голубой и пурпурный? Что видно при 255, 255, 255 — и почему настоящий светодиод даёт не совсем белый? Творческое: «настроение» лампы, индикатор температуры от синего к красному, подсветка аквариума.</p>
+      </section>
+      <section id="p-task" class="task" hidden>
+        <h2>Задача</h2>
+        <p>Нужен оранжевый <b>#FF8000</b> (R = 255, G = 128, B = 0). У вас светодиод с <b>общим анодом</b> на выводах 9, 10, 11. Какие числа записать в analogWrite для каждого вывода?</p>
+        <div class="row3">
+          <div class="field"><label for="tR">9:</label><input id="tR" inputmode="numeric" placeholder="R" autocomplete="off"></div>
+          <div class="field"><label for="tG">10:</label><input id="tG" inputmode="numeric" placeholder="G" autocomplete="off"></div>
+          <div class="field"><label for="tB">11:</label><input id="tB" inputmode="numeric" placeholder="B" autocomplete="off"></div>
+        </div>
+        <div class="btns"><button class="b" id="check">Проверить</button><button class="b ghost" id="hintBtn">Подсказка (0/3)</button></div>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        <div id="hints" class="task"></div>
+        <div class="svo" id="svo" hidden><b>Свойство.</b> Цвет светодиода — сложение трёх свечений. У общего анода общий вывод на +5 В, ток течёт, когда вывод цвета в LOW, поэтому пишут 255 − x: 0 — ярче всего, 255 — погашен.</div>
+      </section>
+      <section id="p-game" class="task" hidden>
+        <h2>Игра</h2>
+        <p id="gText"></p>
+        <div class="row3" id="gRow">
+          <div class="field"><label for="gR">9:</label><input id="gR" inputmode="numeric" placeholder="R" autocomplete="off"></div>
+          <div class="field"><label for="gG">10:</label><input id="gG" inputmode="numeric" placeholder="G" autocomplete="off"></div>
+          <div class="field"><label for="gB">11:</label><input id="gB" inputmode="numeric" placeholder="B" autocomplete="off"></div>
+        </div>
+        <div class="field" id="gOne"><label for="gA" id="gLab">ответ</label><input id="gA" inputmode="decimal" placeholder="число" autocomplete="off"><span id="gU"></span></div>
+        <div class="btns"><button class="b" id="gCheck">Проверить</button><button class="b ghost" id="never">Невозможно</button><button class="b ghost" id="gNext">Другая задача</button></div>
+        <div class="msg" id="gMsg" role="status" aria-live="polite"></div>
+        <div class="score"><span>верно <b id="sHit">0</b></span><span>всего <b id="sShot">0</b></span><span>серия <b id="sStreak">0</b></span></div>
+        <p class="foot">Цвет засчитывается, если каждая яркость отличается от нужной не больше чем на 24. Числа — для 1 %.</p>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- общее для тренажёров Arduino (холст, цвета, ввод чисел, подсказки, счёт, вкладки)
+  const $ = id => document.getElementById(id), cv = $('cv'), ctx = cv.getContext('2d');
+  let C = {}, U = 1;
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function resize(){ const dpr = window.devicePixelRatio || 1, w = Math.max(280, cv.clientWidth || 640);
+    const W = Math.round(w*dpr), H = Math.round(w*0.625*dpr); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; U = dpr*Math.max(0.85, Math.min(1.15, w/700)); }
+  function readColors(){ const s = getComputedStyle(document.documentElement); ['sheet','paper','ink','ink-2','rule','grid','grid-major','traj','mark','mark-soft','vx','vy','target','env','ok','bad'].forEach(k => C[k] = s.getPropertyValue('--'+k).trim()); }
+  resize(); readColors();
+  new ResizeObserver(() => { const o = cv.width; resize(); if (cv.width !== o) draw(); }).observe(cv);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+  const fmt = (x, d=2) => (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).replace('.', ',');
+  const fmtN = (x, d=2) => { let s = fmt(x, d); if (s.indexOf(',') >= 0) s = s.replace(/0+$/, '').replace(/,$/, ''); return s; };
+  // число: запятая, дробь 4/3, а также 0b1100110, B1100110 (как в Arduino), 0x66
+  const parse = s => { s = String(s == null ? '' : s).trim().replace(/,/g, '.').replace(/\s+/g,'');
+    let m = s.match(/^(?:0b|B)([01]+)$/i); if (m) return parseInt(m[1], 2);
+    m = s.match(/^0x([0-9a-f]+)$/i); if (m) return parseInt(m[1], 16);
+    m = s.match(/^(\d*\.?\d+)\/(\d*\.?\d+)$/); return m ? parseFloat(m[1])/parseFloat(m[2]) : (/^-?\d*\.?\d+$/.test(s) ? parseFloat(s) : NaN); };
+  const rnd = (a, b) => a + Math.floor(Math.random()*(b - a + 1)), pick = a => a[rnd(0, a.length - 1)];
+  const gcd = (a, b) => b ? gcd(b, a % b) : a, lcm = (a, b) => a/gcd(a, b)*b;
+  const S = {mode:'explore', hints:0, solved:false, game:null, score:{hit:0, shot:0, streak:0}};
+  const fnt = (px, w) => (w || '') + ' ' + px*U + 'px "Golos Text", system-ui, sans-serif', mono = (px, w) => (w || '') + ' ' + px*U + 'px "JetBrains Mono", ui-monospace, monospace';
+  function placeholder(text){ ctx.fillStyle = C['ink-2']; ctx.font = fnt(15); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, cv.width/2, cv.height/2); }
+  // светодиод: rgb — [r,g,b] цвета свечения, k — яркость 0…1
+  function led(cx, cy, r, rgb, k, legs){ k = Math.max(0, Math.min(1, k));
+    if (k > 0.01){ const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r*2.6); g.addColorStop(0, 'rgba(' + rgb.join(',') + ',' + (0.85*k) + ')'); g.addColorStop(1, 'rgba(' + rgb.join(',') + ',0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r*2.6, 0, 2*Math.PI); ctx.fill(); }
+    const body = rgb.map(c => Math.round(60 + (c*0.45 - 30) + c*0.55*k));
+    ctx.fillStyle = 'rgb(' + body.map(c => Math.max(25, Math.min(255, c))).join(',') + ')'; ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, 0); ctx.lineTo(cx + r, cy + r*1.25); ctx.lineTo(cx - r, cy + r*1.25); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = Math.max(1, 1.6*U); ctx.stroke();
+    if (legs){ ctx.beginPath(); ctx.moveTo(cx - r*.4, cy + r*1.25); ctx.lineTo(cx - r*.4, cy + r*2.3); ctx.moveTo(cx + r*.4, cy + r*1.25); ctx.lineTo(cx + r*.4, cy + r*2.0); ctx.stroke(); } }
+  function hintLadder(H){ $('hintBtn').addEventListener('click', () => { if (S.hints >= H.length) return; const d = document.createElement('div'); d.className = 'hint'; d.textContent = (S.hints + 1) + '. ' + H[S.hints]; $('hints').appendChild(d);
+    S.hints++; $('hintBtn').textContent = 'Подсказка (' + S.hints + '/' + H.length + ')'; if (S.hints >= H.length) $('hintBtn').disabled = true; }); }
+  function say(id, ok, text){ const m = $(id); m.className = ok ? 'msg ok' : 'msg bad'; m.textContent = text; }
+  function score(ok){ S.score.shot++; if (ok){ S.score.hit++; S.score.streak++; } else S.score.streak = 0; $('sHit').textContent = S.score.hit; $('sShot').textContent = S.score.shot; $('sStreak').textContent = S.score.streak; }
+  function verdict(ok, text){ if (S.game.done) { say('gMsg', ok, text); return; } S.game.done = true; score(ok); say('gMsg', ok, text); }
+  const near = (a, g) => g.abs != null ? Math.abs(a - g.ans) <= g.abs : Math.abs(a - g.ans) <= (g.tol || 0.01)*Math.abs(g.ans);
+  function tabs(onMode){ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); S.mode = t.dataset.mode;
+    ['explore','task','game'].forEach(k => $('p-' + k).hidden = k !== S.mode); onMode(S.mode); draw(); })); }
+  // код Arduino с подсветкой: строки — массив; {n:…} — живое число
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  function code(lines){ $('code').innerHTML = lines.map(l => esc(l)
+    .replace(/(\/\/.*)$/, '<span class="c">$1</span>')
+    .replace(/\b(void|int|byte|bool|unsigned|long|for|if|else|return|true|false|const)\b(?![^<]*<\/span>)/g, '<span class="k">$1</span>')
+    .replace(/⟨(.*?)⟩/g, '<span class="n">$1</span>')).join('\n'); }
+  // ---------- RGB: яркости 0…255, выводы 9/10/11; общий анод — пишем 255 − x
+  S.c = [255,128,0]; S.anode = false; S.taskTry = null;
+  const hex = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase();
+  const NAMED = [['красный',[255,0,0]],['зелёный',[0,255,0]],['синий',[0,0,255]],['жёлтый',[255,255,0]],['голубой',[0,255,255]],['пурпурный',[255,0,255]],['белый',[255,255,255]],
+    ['оранжевый',[255,128,0]],['фиолетовый',[128,0,255]],['розовый',[255,0,128]],['салатовый',[128,255,0]],['бирюзовый',[0,255,128]],['тусклый красный',[64,0,0]],['тёплый белый',[255,180,90]]];
+  const nameOf = c => { let best = null, d = 1e9; NAMED.forEach(([n, v]) => { const x = Math.max(...v.map((q, i) => Math.abs(q - c[i]))); if (x < d){ d = x; best = n; } }); return c.every(v => v === 0) ? 'погашен' : d <= 24 ? best : '—'; };
+  const inv = c => c.map(v => 255 - v);
+  function mixLed(cx, cy, r, c){ const m = Math.max(...c); led(cx, cy, r, m ? c.map(v => Math.round(v*255/m)) : [120,120,120], m/255, true); }
+  function venn(x0, y0, w, h, c){ ctx.save(); ctx.fillStyle = '#0E1116'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x0, y0, w, h, 8*U) : ctx.rect(x0, y0, w, h); ctx.fill(); ctx.clip();
+    const R = Math.min(w, h)*.24, cx = x0 + w/2, cy = y0 + h/2 + R*.08, P = [[cx - R*.55, cy - R*.4], [cx + R*.55, cy - R*.4], [cx, cy + R*.55]];
+    ctx.globalCompositeOperation = 'lighter'; [[c[0],0,0],[0,c[1],0],[0,0,c[2]]].forEach((col, i) => { ctx.fillStyle = 'rgb(' + col.join(',') + ')'; ctx.beginPath(); ctx.arc(P[i][0], P[i][1], R, 0, 2*Math.PI); ctx.fill(); });
+    ctx.globalCompositeOperation = 'source-over'; ctx.font = fnt(13, 700); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    [['R', -1.05, -.75], ['G', 1.05, -.75], ['B', 0, 1.25]].forEach(([t, dx, dy], i) => { ctx.fillStyle = '#C9D1D9'; ctx.fillText(t + ' ' + c[i], cx + dx*R, cy + dy*R); });
+    ctx.restore(); }
+  function swatch(x0, y0, w, h, c, label){ ctx.fillStyle = 'rgb(' + c.join(',') + ')'; ctx.strokeStyle = C.rule; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x0, y0, w, h, 8*U) : ctx.rect(x0, y0, w, h); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = (c[0]*.3 + c[1]*.59 + c[2]*.11) > 140 ? '#14161A' : '#F5F6F8'; ctx.font = fnt(14, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, x0 + w/2, y0 + h/2); }
+  function bars(x0, y0, w, wr){ const names = [['9', 'R', '#E5484D'], ['10', 'G', '#30A46C'], ['11', 'B', '#3E63DD']], bh = 10*U;
+    names.forEach(([pin, ch, col], i) => { const y = y0 + i*28*U, v = wr[i]; ctx.fillStyle = C['ink-2']; ctx.font = mono(11); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(pin + ' ' + ch, x0, y); const bx = x0 + 44*U, bw = w - 44*U - 96*U; ctx.fillStyle = C.grid; ctx.fillRect(bx, y - bh/2, bw, bh); ctx.fillStyle = col; ctx.fillRect(bx, y - bh/2, bw*v/255, bh);
+      ctx.fillStyle = C.ink; ctx.textAlign = 'right'; ctx.fillText(v + ' → ' + fmt(5*v/255, 2) + ' В', x0 + w, y); }); }
+  function draw(){
+    ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, cv.width, cv.height);
+    const W = cv.width, H = cv.height, pad = 14*U, vw = W*.56, vh = H - 2*pad - 100*U, lx = vw + pad + (W - vw - pad)/2, ly = pad + vh*.42;
+    if (S.mode === 'explore'){ venn(pad, pad, vw - pad, vh, S.c); mixLed(lx, ly, 34*U, S.c);
+      ctx.fillStyle = C.ink; ctx.font = mono(13, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(hex(S.c) + ' · ' + nameOf(S.c), lx, ly + 90*U);
+      bars(pad, pad + vh + 24*U, W - 2*pad, S.anode ? inv(S.c) : S.c); return; }
+    if (S.mode === 'task'){ swatch(pad, pad, vw - pad, vh, [255,128,0], 'цель: #FF8000');
+      const seen = S.solved ? [255,127,0] : S.taskTry ? inv(S.taskTry) : null; mixLed(lx, ly, 34*U, seen || [0,0,0]);
+      ctx.fillStyle = C.ink; ctx.font = mono(13, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(seen ? 'видно: ' + hex(seen) : 'ваш светодиод', lx, ly + 90*U);
+      bars(pad, pad + vh + 24*U, W - 2*pad, S.solved ? [0,127,255] : S.taskTry || [255,255,255]); return; }
+    const g = S.game; if (!g) return;
+    if (g.color){ swatch(pad, pad, vw - pad, vh, g.color, g.name + ' · ' + hex(g.color)); const seen = g.seen; mixLed(lx, ly, 34*U, seen || [0,0,0]);
+      ctx.fillStyle = C.ink; ctx.font = mono(13, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(seen ? 'вышло: ' + hex(seen) : (g.anode ? 'общий анод' : 'общий катод'), lx, ly + 90*U);
+      bars(pad, pad + vh + 24*U, W - 2*pad, g.wr || [0,0,0]); return; }
+    ctx.fillStyle = '#0E1116'; ctx.fillRect(pad, pad, W - 2*pad, vh); ctx.fillStyle = '#B8F5C8'; ctx.font = mono(22, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(g.str ? g.str.replace('\n', ' ⏎') : '✕', W/2, pad + vh/2); ctx.fillStyle = C['ink-2']; ctx.font = fnt(13); ctx.fillText(g.str ? '⏎ — символ перевода строки «\\n», он тоже байт' : '', W/2, pad + vh + 40*U); }
+  function showCode(anode){ code(['// RGB-светодиод: R → 9, G → 10, B → 11 (выводы с ШИМ)', 'const bool ANODE = ⟨' + anode + '⟩;    // общий анод? тогда 255 − x',
+    'void setColor(int r, int g, int b) {', '  if (ANODE) { r = 255 - r; g = 255 - g; b = 255 - b; }', '  analogWrite(9, r); analogWrite(10, g); analogWrite(11, b);', '}',
+    'void setup() { Serial.begin(9600); }', 'void loop() {', '  if (Serial.available()) {            // пришла строка «255,128,0»',
+    '    int r = constrain(Serial.parseInt(), 0, 255);', '    int g = constrain(Serial.parseInt(), 0, 255);', '    int b = constrain(Serial.parseInt(), 0, 255);',
+    '    setColor(r, g, b);', '    Serial.print("R="); Serial.print(r); Serial.print(" G="); Serial.print(g);', '    Serial.print(" B="); Serial.println(b);', '  }', '}']); }
+  function sync(){ S.c = [+$('r').value, +$('g').value, +$('bb').value]; S.anode = $('cA').checked; const wr = S.anode ? inv(S.c) : S.c;
+    $('rO').textContent = S.c[0]; $('gO').textContent = S.c[1]; $('bO').textContent = S.c[2]; $('rHex').textContent = hex(S.c) + ' · ' + nameOf(S.c);
+    ['w9','w10','w11'].forEach((id, i) => $(id).textContent = wr[i]); showCode(S.anode); draw(); }
+  ['r','g','bb','cK','cA'].forEach(id => $(id).addEventListener('input', sync));
+  function send(){ const s = $('ser').value, nums = (s.match(/-?\d+/g) || []).map(Number), out = [0,1,2].map(i => Math.max(0, Math.min(255, nums[i] == null ? 0 : nums[i])));
+    let log = '> ' + s + '   (' + (s.length + 1) + ' байт с «\\n»)\nR=' + out[0] + ' G=' + out[1] + ' B=' + out[2];
+    if (nums.length < 3) log += '\n(чисел меньше трёх: parseInt по тайм-ауту вернул 0)'; if (nums.some(v => v > 255 || v < 0)) log += '\n(constrain обрезал число до 0…255)';
+    $('mon').textContent = log; ['r','g','bb'].forEach((id, i) => $(id).value = out[i]); sync(); }
+  $('send').addEventListener('click', send); $('ser').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+  // ---------- задача: общий анод → 255 − (255, 128, 0) = (0, 127, 255)
+  hintLadder(['У общего анода общий вывод подключён к +5 В. Светодиод цвета горит, когда на его выводе низкое напряжение — тогда есть разность потенциалов и течёт ток.',
+    'Значит, яркость = 255 − x, где x — число в analogWrite. Чтобы получить яркость R = 255, нужно x = 255 − 255.',
+    'R: 255 − 255 = 0; G: 255 − 128 = 127; B: 255 − 0 = 255.']);
+  $('check').addEventListener('click', () => { const v = ['tR','tG','tB'].map(id => parse($(id).value));
+    if (v.some(isNaN)) return say('msg', false, 'Введите три целых числа 0…255 — для выводов 9, 10 и 11.');
+    if (v.some(x => x < 0 || x > 255)) return say('msg', false, 'analogWrite понимает только 0…255.');
+    S.taskTry = v.map(Math.round); draw();
+    const d = (a, b) => Math.max(...a.map((x, i) => Math.abs(x - b[i])));
+    if (d(v, [255,128,0]) <= 1) return say('msg', false, 'Так пишут для общего катода. У общего анода вышло бы ' + hex(inv(S.taskTry)) + ' — голубовато-синий, см. справа.');
+    if (d(v, [0,127,255]) > 1) return say('msg', false, 'Светодиод покажет ' + hex(inv(S.taskTry)) + ' — сравните с целью. При общем аноде яркость = 255 − x.');
+    S.solved = true; say('msg', true, 'Верно: analogWrite(9, 0), (10, 127), (11, 255) — красный на полную, зелёный наполовину, синий погашен.'); $('svo').hidden = false; draw(); });
+
+  // ---------- игра
+  const TOL = 24;
+  const colorGen = anode => () => { const [name, c] = pick(NAMED); return {q:'Получите цвет «' + name + '» ' + hex(c) + '. Светодиод с общим ' + (anode ? 'анодом' : 'катодом') + '. Какие числа записать в analogWrite?', color:c, name, anode, ans:anode ? inv(c) : c}; };
+  const GEN = [colorGen(false), colorGen(true),
+    () => { const c = [pick([0,64,128,255]), pick([0,32,200,255]), pick([0,5,128,255])], s = c.join(',') + '\n'; return {q:'Монитор порта отправляет строку «' + c.join(',') + '» с переводом строки. Сколько байт уйдёт в Arduino?', lab:'n =', u:'байт', ans:s.length, abs:.5, str:s}; },
+    () => { const c = [pick([0,128,255]), pick([0,64,255]), pick([0,200,255])], s = c.join(',') + '\n'; return {q:'Строка «' + c.join(',') + '» + перевод строки, скорость 9600 бод, каждый символ — 10 бит (старт, 8 бит, стоп). Сколько миллисекунд идёт передача?', lab:'t =', u:'мс', ans:s.length*10/9600*1000, tol:.01, str:s}; },
+    () => pick([{q:'Сделайте, чтобы светодиод светился чёрным цветом. Какие числа записать в analogWrite (общий катод)?', why:'чёрный — это отсутствие света. Светодиод может только погаснуть (0, 0, 0), а светиться чёрным не может.'},
+      {q:'Красный уже на полной яркости: analogWrite(9, 255). Каким числом сделать его ещё вдвое ярче, не меняя схему?', why:'255 — это ШИМ без пауз, вывод всё время в HIGH. Ярче без другой схемы (меньший резистор, драйвер) не получить.'}])];
+  GEN[4] = (f => () => Object.assign(f(), {ans:null, lab:'x =', u:'', str:null}))(GEN[4]);
+  function newGame(i){ S.game = (i == null ? pick(GEN) : GEN[i])(); const g = S.game; $('gText').textContent = g.q; $('gRow').hidden = !g.color; $('gOne').hidden = !!g.color;
+    if (!g.color){ $('gLab').textContent = g.lab; $('gU').textContent = g.u; } ['gR','gG','gB','gA'].forEach(id => $(id).value = ''); $('gMsg').className = 'msg'; showCode(!!g.anode); draw(); }
+  $('gCheck').addEventListener('click', () => { const g = S.game;
+    if (g.ans == null){ verdict(false, 'Так не получится: ' + g.why + ' Правильный ответ — «Невозможно».'); return; }
+    if (g.color){ const v = ['gR','gG','gB'].map(id => parse($(id).value)); if (v.some(isNaN) || v.some(x => x < 0 || x > 255)) return say('gMsg', false, 'Введите три числа 0…255.');
+      g.wr = v.map(Math.round); g.seen = g.anode ? inv(g.wr) : g.wr; const ok = Math.max(...g.seen.map((x, i) => Math.abs(x - g.color[i]))) <= TOL;
+      verdict(ok, (ok ? 'Верно.' : 'Не тот цвет: вышло ' + hex(g.seen) + '.') + ' Точно: ' + g.ans.join(', ') + (g.anode ? ' (общий анод: 255 − x).' : '.')); draw(); return; }
+    const a = parse($('gA').value); if (isNaN(a)) return say('gMsg', false, 'Введите число.');
+    const ok = near(a, g); verdict(ok, ok ? 'Верно.' : 'Нет, верно ' + fmtN(g.ans, 2) + ' ' + g.u + (g.lab === 'n =' ? ': цифры, запятые и «\\n» — по байту на символ.' : '.')); });
+  $('never').addEventListener('click', () => { const g = S.game; verdict(g.ans == null, g.ans == null ? 'Верно: ' + g.why : 'Это возможно' + (g.color ? ': ' + g.ans.join(', ') : ': ответ ' + fmtN(g.ans, 2) + ' ' + g.u) + '.'); });
+  $('gNext').addEventListener('click', () => newGame());
+  window.__game = i => newGame(i); window.__ans = () => S.game.ans; // для автопроверки
+  tabs(m => { if (m === 'game'){ if (!S.game) newGame(); else showCode(!!S.game.anode); } else if (m === 'task') showCode(true); else sync(); });
+  sync();
+
+})();
+</script>
+</body></html>

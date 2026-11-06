@@ -1,0 +1,288 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Бегущие огни: массив и цикл for</title><link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: слева — стенд (схема, диаграмма, код), справа — пульт; на телефоне пульт уходит под стенд. */
+:root{
+  --paper:#F5F6F8; --sheet:#FFFFFF; --ink:#14161A; --ink-2:#555C66; --rule:#DCE0E5;
+  --grid:#E6EAEE; --grid-major:#C9CFD6; --traj:#C89A00; --mark:#FFD400; --mark-soft:#FFF5BF;
+  --vx:#B07D00; --vy:#2F6FA8; --env:#7A5BB5; --target:#C0392B; --ok:#2E7D4F; --ok-soft:#E3F2E8; --bad:#A33A2E; --bad-soft:#F7E4E1;
+  --display:"Unbounded","Golos Text",system-ui,sans-serif; --body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#101215; --sheet:#181B20; --ink:#ECEEF1; --ink-2:#A3AAB4; --rule:#2B3037;
+  --grid:#1F2328; --grid-major:#323840; --traj:#FFD400; --mark:#FFD400; --mark-soft:#3A3310;
+  --vx:#FFE36B; --vy:#7FB8EE; --env:#B9A2EC; --target:#FF7A6B; --ok:#7FD3A0; --ok-soft:#173226; --bad:#FF9C8F; --bad-soft:#3A1D1D; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:16px}
+h1{font:700 clamp(24px,4vw,36px)/1.15 var(--display);margin:0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:4px 0 0}
+.eyebrow{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:600 14px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.stage{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px;min-width:0}
+canvas{display:block;width:100%;aspect-ratio:16/10;max-width:100%;border-radius:4px;touch-action:manipulation}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2);padding:8px 4px 2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:14px;min-width:0}
+.panel h2{font:600 15px var(--display);margin:0}
+.ctl{display:grid;gap:4px}
+.ctl label{display:flex;justify-content:space-between;font-size:14px}
+.ctl output,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--traj)}
+.checks{display:grid;gap:6px;font-size:14px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:600 14px var(--body);padding:9px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+button.b.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+.read{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14px;border-top:1px solid var(--rule);padding-top:12px}
+.read dt{color:var(--ink-2)} .read dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.task{display:grid;gap:10px}
+.task p{margin:0}
+.field{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:14px}
+.field input{font:500 15px var(--mono);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.msg{font-size:14px;padding:10px 12px;border-radius:6px;display:none}
+.msg.ok{display:block;background:var(--ok-soft);color:var(--ok)} .msg.bad{display:block;background:var(--bad-soft);color:var(--bad)}
+.hint{font-size:14px;background:var(--mark-soft);border-left:3px solid var(--traj);padding:8px 10px;border-radius:0 6px 6px 0}
+.svo{font-size:14px;border:1px solid var(--traj);background:var(--mark-soft);padding:10px 12px;border-radius:6px}
+.svo b{font-weight:600}
+.score{display:flex;gap:14px;font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.score span b{font-size:18px}
+.f{font-family:var(--mono);font-size:.95em;white-space:nowrap}
+sub,sup{font-size:.72em}
+.foot{font-size:13px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.crumb{font-size:14px;color:var(--ink-2)}.crumb a{color:var(--ink-2)}
+pre.code{margin:10px 0 0;font:13px/1.5 var(--mono);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;overflow-x:auto;white-space:pre;tab-size:2}
+pre.code .k{color:var(--vy)} pre.code .c{color:var(--ink-2)} pre.code .n{color:var(--traj);font-weight:600} pre.code .hl{background:var(--mark-soft);border-radius:3px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:500 13px var(--body);padding:5px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--traj);background:var(--mark-soft)}
+.chip:focus-visible,select:focus-visible{outline:2px solid var(--vy);outline-offset:2px}
+select{font:500 14px var(--body);padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
+.mon{font:13px/1.45 var(--mono);background:#0E1116;color:#B8F5C8;border-radius:6px;padding:8px 10px;min-height:64px;max-height:150px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.row3 .field{grid-template-columns:auto 1fr}
+.segs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font:600 13px var(--mono)}
+.segs label{display:grid;justify-items:center;gap:2px;cursor:pointer}
+.kbd{font:600 12px var(--mono);border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;padding:0 5px}
+nav.crumb{display:block}
+</style></head><body>
+<!--title:Бегущие огни: массив и цикл for-->
+<nav class="wrap crumb"><a href="/">← Тезаурус</a> · <a href="/inzheneriya/">Инженерия</a> · <a href="/zadano/">Задано мне</a></nav>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">инженерия · Arduino · занятие «Бегущие огни»</div>
+    <h1>Бегущие огни: массив и цикл for</h1>
+    <p class="sub">Номера выводов лежат в массиве <span class="f">pins[]</span>, а цикл <span class="f">for</span> перебирает его индексы. Индекс i — это «который по счёту» (с нуля), а <span class="f">pins[i]</span> — номер вывода на плате. Ниже — диаграмма шагов: строка — светодиод, столбец — шаг длиной t мс.</p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Режим">
+    <button class="tab" role="tab" id="t-ex" aria-selected="true" data-mode="explore">Исследовать</button>
+    <button class="tab" role="tab" id="t-task" aria-selected="false" data-mode="task">Задача</button>
+    <button class="tab" role="tab" id="t-game" aria-selected="false" data-mode="game">Игра</button>
+  </div>
+  <div class="lab">
+    <div class="stage">
+      <canvas id="cv" width="960" height="600" aria-label="Линейка светодиодов и диаграмма шагов цикла"></canvas>
+      <div class="legend"><span><i style="background:var(--traj)"></i>светодиод горит на этом шаге</span><span><i style="background:var(--mark)"></i>текущий шаг</span></div>
+      <pre class="code" id="code" aria-label="Код скетча"></pre>
+    </div>
+    <aside class="panel">
+      <section id="p-explore" class="task">
+        <h2>Пульт</h2>
+        <div class="ctl"><label for="pat">Узор</label>
+          <select id="pat">
+            <option value="fwd">вперёд</option><option value="back">назад</option><option value="bounce">туда-обратно («сканер»)</option>
+            <option value="skip">через один</option><option value="fill">заполнение</option>
+          </select></div>
+        <div class="ctl"><label for="n"><span>Светодиодов N</span> <output id="nO" class="num"></output></label><input id="n" type="range" min="3" max="10" step="1" value="8"></div>
+        <div class="ctl"><label for="t"><span>Шаг t, мс</span> <output id="tO" class="num"></output></label><input id="t" type="range" min="20" max="500" step="10" value="120"></div>
+        <dl class="read">
+          <dt>Шагов за проход loop</dt><dd id="rK"></dd>
+          <dt>Проход длится</dt><dd id="rT"></dd>
+          <dt>Проходов в минуту</dt><dd id="rM"></dd>
+          <dt>Загораний pins[0] за проход</dt><dd id="r0"></dd>
+          <dt>Загораний pins[N−1] за проход</dt><dd id="rL"></dd>
+        </dl>
+        <p class="foot">Найдите: почему в «сканере» второй цикл начинается с N−2 и кончается на 1? Что будет с крайними огнями, если пройти от N−1 до 0? Где так светится: гирлянды, шкала громкости, указатель «бегущий поворотник».</p>
+      </section>
+      <section id="p-task" class="task" hidden>
+        <h2>Задача</h2>
+        <p>Восемь светодиодов: <span class="f">pins[] = {2, 3, 4, 5, 6, 7, 8, 9}</span>, шаг <span class="f">t = 60</span> мс, функция <span class="f">flash(i)</span> зажигает pins[i] на t мс. Код <span class="f">loop()</span> — слева под схемой. Сколько миллисекунд длится один проход loop? Сколько раз за проход загорается светодиод на <b>выводе 9</b>?</p>
+        <div class="field"><label for="ansT">T =</label><input id="ansT" inputmode="decimal" placeholder="число" autocomplete="off"><span>мс</span></div>
+        <div class="field"><label for="ansK">раз</label><input id="ansK" inputmode="numeric" placeholder="число" autocomplete="off"><span></span></div>
+        <div class="btns"><button class="b" id="check">Проверить</button><button class="b ghost" id="hintBtn">Подсказка (0/3)</button></div>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        <div id="hints" class="task"></div>
+        <div class="svo" id="svo" hidden><b>Свойство.</b> Время прохода = число шагов × t. Цикл <span class="f">for (i = a; i &lt; b; i++)</span> делает b − a шагов, <span class="f">i &lt;= b</span> — на один больше. У массива из N элементов индексы от 0 до N − 1.</div>
+      </section>
+      <section id="p-game" class="task" hidden>
+        <h2>Игра</h2>
+        <p id="gText"></p>
+        <div class="field"><label for="gA" id="gLab">ответ</label><input id="gA" inputmode="decimal" placeholder="число" autocomplete="off"><span id="gU"></span></div>
+        <div class="btns"><button class="b" id="gCheck">Проверить</button><button class="b ghost" id="never">Ошибка в коде</button><button class="b ghost" id="gNext">Другая задача</button></div>
+        <div class="msg" id="gMsg" role="status" aria-live="polite"></div>
+        <div class="score"><span>верно <b id="sHit">0</b></span><span>всего <b id="sShot">0</b></span><span>серия <b id="sStreak">0</b></span></div>
+        <p class="foot">Массив всегда <span class="f">{2, 3, 4, 5, 6, 7, 8, 9}</span>. Если цикл выходит за границы массива — жмите «Ошибка в коде».</p>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- общее для тренажёров Arduino (холст, цвета, ввод чисел, подсказки, счёт, вкладки)
+  const $ = id => document.getElementById(id), cv = $('cv'), ctx = cv.getContext('2d');
+  let C = {}, U = 1;
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function resize(){ const dpr = window.devicePixelRatio || 1, w = Math.max(280, cv.clientWidth || 640);
+    const W = Math.round(w*dpr), H = Math.round(w*0.625*dpr); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; U = dpr*Math.max(0.85, Math.min(1.15, w/700)); }
+  function readColors(){ const s = getComputedStyle(document.documentElement); ['sheet','paper','ink','ink-2','rule','grid','grid-major','traj','mark','mark-soft','vx','vy','target','env','ok','bad'].forEach(k => C[k] = s.getPropertyValue('--'+k).trim()); }
+  resize(); readColors();
+  new ResizeObserver(() => { const o = cv.width; resize(); if (cv.width !== o) draw(); }).observe(cv);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+  const fmt = (x, d=2) => (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).replace('.', ',');
+  const fmtN = (x, d=2) => { let s = fmt(x, d); if (s.indexOf(',') >= 0) s = s.replace(/0+$/, '').replace(/,$/, ''); return s; };
+  // число: запятая, дробь 4/3, а также 0b1100110, B1100110 (как в Arduino), 0x66
+  const parse = s => { s = String(s == null ? '' : s).trim().replace(/,/g, '.').replace(/\s+/g,'');
+    let m = s.match(/^(?:0b|B)([01]+)$/i); if (m) return parseInt(m[1], 2);
+    m = s.match(/^0x([0-9a-f]+)$/i); if (m) return parseInt(m[1], 16);
+    m = s.match(/^(\d*\.?\d+)\/(\d*\.?\d+)$/); return m ? parseFloat(m[1])/parseFloat(m[2]) : (/^-?\d*\.?\d+$/.test(s) ? parseFloat(s) : NaN); };
+  const rnd = (a, b) => a + Math.floor(Math.random()*(b - a + 1)), pick = a => a[rnd(0, a.length - 1)];
+  const gcd = (a, b) => b ? gcd(b, a % b) : a, lcm = (a, b) => a/gcd(a, b)*b;
+  const S = {mode:'explore', hints:0, solved:false, game:null, score:{hit:0, shot:0, streak:0}};
+  const fnt = (px, w) => (w || '') + ' ' + px*U + 'px "Golos Text", system-ui, sans-serif', mono = (px, w) => (w || '') + ' ' + px*U + 'px "JetBrains Mono", ui-monospace, monospace';
+  function placeholder(text){ ctx.fillStyle = C['ink-2']; ctx.font = fnt(15); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, cv.width/2, cv.height/2); }
+  // светодиод: rgb — [r,g,b] цвета свечения, k — яркость 0…1
+  function led(cx, cy, r, rgb, k, legs){ k = Math.max(0, Math.min(1, k));
+    if (k > 0.01){ const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r*2.6); g.addColorStop(0, 'rgba(' + rgb.join(',') + ',' + (0.85*k) + ')'); g.addColorStop(1, 'rgba(' + rgb.join(',') + ',0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r*2.6, 0, 2*Math.PI); ctx.fill(); }
+    const body = rgb.map(c => Math.round(60 + (c*0.45 - 30) + c*0.55*k));
+    ctx.fillStyle = 'rgb(' + body.map(c => Math.max(25, Math.min(255, c))).join(',') + ')'; ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, 0); ctx.lineTo(cx + r, cy + r*1.25); ctx.lineTo(cx - r, cy + r*1.25); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = Math.max(1, 1.6*U); ctx.stroke();
+    if (legs){ ctx.beginPath(); ctx.moveTo(cx - r*.4, cy + r*1.25); ctx.lineTo(cx - r*.4, cy + r*2.3); ctx.moveTo(cx + r*.4, cy + r*1.25); ctx.lineTo(cx + r*.4, cy + r*2.0); ctx.stroke(); } }
+  function hintLadder(H){ $('hintBtn').addEventListener('click', () => { if (S.hints >= H.length) return; const d = document.createElement('div'); d.className = 'hint'; d.textContent = (S.hints + 1) + '. ' + H[S.hints]; $('hints').appendChild(d);
+    S.hints++; $('hintBtn').textContent = 'Подсказка (' + S.hints + '/' + H.length + ')'; if (S.hints >= H.length) $('hintBtn').disabled = true; }); }
+  function say(id, ok, text){ const m = $(id); m.className = ok ? 'msg ok' : 'msg bad'; m.textContent = text; }
+  function score(ok){ S.score.shot++; if (ok){ S.score.hit++; S.score.streak++; } else S.score.streak = 0; $('sHit').textContent = S.score.hit; $('sShot').textContent = S.score.shot; $('sStreak').textContent = S.score.streak; }
+  function verdict(ok, text){ if (S.game.done) { say('gMsg', ok, text); return; } S.game.done = true; score(ok); say('gMsg', ok, text); }
+  const near = (a, g) => g.abs != null ? Math.abs(a - g.ans) <= g.abs : Math.abs(a - g.ans) <= (g.tol || 0.01)*Math.abs(g.ans);
+  function tabs(onMode){ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); S.mode = t.dataset.mode;
+    ['explore','task','game'].forEach(k => $('p-' + k).hidden = k !== S.mode); onMode(S.mode); draw(); })); }
+  // код Arduino с подсветкой: строки — массив; {n:…} — живое число
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  function code(lines){ $('code').innerHTML = lines.map(l => esc(l)
+    .replace(/(\/\/.*)$/, '<span class="c">$1</span>')
+    .replace(/\b(void|int|byte|bool|unsigned|long|for|if|else|return|true|false|const)\b(?![^<]*<\/span>)/g, '<span class="k">$1</span>')
+    .replace(/⟨(.*?)⟩/g, '<span class="n">$1</span>')).join('\n'); }
+  // ---------- бегущие огни: pins[] = {2, 3, …}, кадр = набор горящих индексов на шаге t
+  const RED = [255,60,40], t0 = performance.now();
+  S.pat = 'fwd'; S.n = 8; S.t = 120;
+  const range = (a, b, s) => { const r = []; if (s > 0) for (let i = a; i < b; i += s) r.push(i); else for (let i = a; i > b; i += s) r.push(i); return r; };
+  function frames(pat, N){
+    if (pat === 'fwd') return range(0, N, 1).map(i => [i]);
+    if (pat === 'back') return range(N - 1, -1, -1).map(i => [i]);
+    if (pat === 'bounce') return range(0, N, 1).concat(range(N - 2, 0, -1)).map(i => [i]);
+    if (pat === 'skip') return range(0, N, 2).map(i => [i]);
+    return range(0, N, 1).map(i => range(0, i + 1, 1)).concat([[]]); }
+  const lights = (F, i) => F.filter((f, k) => f.includes(i) && !F[(k - 1 + F.length) % F.length].includes(i)).length || (F.length && F.every(f => f.includes(i)) ? 1 : 0);
+  const pinsLine = N => 'int pins[] = {' + range(0, N, 1).map(i => i + 2).join(', ') + '};   // pins[0] … pins[' + (N - 1) + ']';
+  function codeFor(pat, N, t){
+    const head = [pinsLine(N), 'int t = ⟨' + t + '⟩;', 'void setup() {', '  for (int i = 0; i < ' + N + '; i++) pinMode(pins[i], OUTPUT);', '}'];
+    const fl = ['void flash(int i) {           // зажечь pins[i] на t мс', '  digitalWrite(pins[i], HIGH);', '  delay(t);', '  digitalWrite(pins[i], LOW);', '}'];
+    const L = {fwd:['  for (int i = 0; i < ' + N + '; i++) flash(i);'], back:['  for (int i = ' + (N - 1) + '; i >= 0; i--) flash(i);'],
+      bounce:['  for (int i = 0; i < ' + N + '; i++) flash(i);     // туда', '  for (int i = ' + (N - 2) + '; i > 0; i--) flash(i);     // обратно, без краёв'],
+      skip:['  for (int i = 0; i < ' + N + '; i += 2) flash(i);'],
+      fill:['  for (int i = 0; i < ' + N + '; i++) {', '    digitalWrite(pins[i], HIGH);   // включаем по одному', '    delay(t);', '  }', '  for (int i = 0; i < ' + N + '; i++) digitalWrite(pins[i], LOW);', '  delay(t);']}[pat];
+    return head.concat(pat === 'fill' ? [] : fl, ['void loop() {'], L, ['}']); }
+  const TASK_F = frames('bounce', 8);
+  function view(){
+    if (S.mode === 'explore'){ const F = frames(S.pat, S.n); return {N:S.n, F:F, t:S.t, cur:RM ? -1 : Math.floor((performance.now() - t0)/S.t) % F.length}; }
+    if (S.mode === 'task') return S.solved ? {N:8, F:TASK_F, t:60, cur:RM ? -1 : Math.floor((performance.now() - t0)/60) % TASK_F.length} : {N:8, F:null};
+    const g = S.game; if (!g) return {N:8, F:null};
+    return g.done ? {N:8, F:g.vis.map(i => [i]), t:g.t || 100, cur:-1, order:g.vis, ghost:g.ghost} : {N:8, F:null}; }
+  function draw(){
+    ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, cv.width, cv.height);
+    const V = view(), N = V.N, Ns = N + (V.ghost ? 1 : 0), L = 58*U, R = cv.width - 18*U, dx = (R - L)/Ns, r = Math.min(15*U, dx*0.3), ly = 34*U + r;
+    const on = V.F && V.cur >= 0 ? V.F[V.cur] : [];
+    for (let i = 0; i < Ns; i++){ const x = L + dx*(i + .5), ghost = i >= N;
+      ctx.fillStyle = ghost ? C.bad : C['ink-2']; ctx.font = mono(10.5); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('pins[' + i + ']', x, ly - r - 8*U);
+      if (ghost){ ctx.setLineDash([5*U, 4*U]); ctx.strokeStyle = C.bad; ctx.lineWidth = 1.5*U; ctx.strokeRect(x - r, ly - r, 2*r, 2.25*r); ctx.setLineDash([]);
+        ctx.fillStyle = C.bad; ctx.font = fnt(16, 700); ctx.textBaseline = 'middle'; ctx.fillText('?', x, ly + r*.2); ctx.font = mono(10.5); ctx.textBaseline = 'top'; ctx.fillText('нет', x, ly + r*1.25 + 12*U); continue; }
+      const lit = on.includes(i) || (V.order && V.order.includes(i));
+      led(x, ly, r, RED, lit ? 1 : 0, true);
+      if (V.order && V.order.includes(i)){ ctx.fillStyle = '#fff'; ctx.font = fnt(12, 700); ctx.textBaseline = 'middle'; ctx.fillText(V.order.map((v, k) => v === i ? k + 1 : null).filter(v => v).join(','), x, ly + r*.3); }
+      ctx.fillStyle = C['ink-2']; ctx.font = mono(10.5); ctx.textBaseline = 'top'; ctx.fillText('D' + (i + 2), x, ly + r*2.3 + 4*U); }
+    const top = ly + r*2.3 + 26*U, bot = cv.height - 30*U;
+    if (!V.F){ ctx.fillStyle = C['ink-2']; ctx.font = fnt(15); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(S.mode === 'task' ? 'решите задачу — появится диаграмма шагов' : 'ответьте — покажем, какие огни загорятся', cv.width/2, (top + bot)/2); return; }
+    const F = V.F, K = Math.max(1, F.length), cw = (R - L)/K, rh = Math.min((bot - top)/N, 32*U);
+    if (V.cur >= 0){ ctx.fillStyle = C['mark-soft']; ctx.fillRect(L + cw*V.cur, top - 4*U, cw, rh*N + 8*U); }
+    for (let i = 0; i < N; i++){ ctx.fillStyle = C['ink-2']; ctx.font = mono(10.5); ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText('i=' + i, L - 8*U, top + rh*(i + .5));
+      for (let k = 0; k < K; k++){ const x = L + cw*k, y = top + rh*i;
+        if (F[k] && F[k].includes(i)){ ctx.fillStyle = k === V.cur ? C.mark : C.traj; ctx.fillRect(x + 1.5*U, y + 2*U, cw - 3*U, rh - 4*U); }
+        else { ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.strokeRect(x + 1.5*U + .5, y + 2*U + .5, cw - 3*U, rh - 4*U); } } }
+    ctx.fillStyle = C['ink-2']; ctx.font = fnt(12.5); ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText(V.order ? 'порядок: i = ' + V.order.join(', ') + (V.ghost ? ', ' + V.ghost : '') : K + ' шагов × ' + V.t + ' мс = ' + K*V.t + ' мс за проход', L, top + rh*N + 8*U); }
+  const loopTick = () => { const V = view(); if (V.F && V.cur >= 0) draw(); requestAnimationFrame(loopTick); };
+  function sync(){ S.pat = $('pat').value; S.n = +$('n').value; S.t = +$('t').value; const F = frames(S.pat, S.n), K = F.length;
+    $('nO').textContent = S.n; $('tO').textContent = S.t + ' мс'; $('rK').textContent = K; $('rT').textContent = K*S.t + ' мс'; $('rM').textContent = fmtN(60000/(K*S.t), 1);
+    $('r0').textContent = lights(F, 0); $('rL').textContent = lights(F, S.n - 1); code(codeFor(S.pat, S.n, S.t)); draw(); }
+  ['pat','n','t'].forEach(id => $(id).addEventListener('input', sync));
+
+  // ---------- задача: туда 0…7 (8 шагов) + обратно 6…1 (6 шагов) = 14 × 60 = 840 мс; вывод 9 = pins[7] — 1 раз
+  const taskCode = () => code([pinsLine(8), 'int t = ⟨60⟩;', 'void loop() {', '  for (int i = 0; i < 8; i++) flash(i);', '  for (int i = 6; i > 0; i--) flash(i);', '}']);
+  hintLadder(['Посчитайте шаги каждого цикла отдельно: какие значения принимает i? Каждый шаг — один вызов flash, то есть t мс.',
+    'Первый цикл: i = 0, 1, …, 7 — 8 шагов. Второй: i = 6, 5, …, 1 (условие i > 0, ноль не входит) — 6 шагов.',
+    'T = (8 + 6)·60 мс. Вывод 9 — последний в массиве, это pins[7]: во втором цикле i доходит только до 6.']);
+  $('check').addEventListener('click', () => { const T = parse($('ansT').value), k = parse($('ansK').value);
+    if (isNaN(T)) return say('msg', false, 'Введите длительность прохода в миллисекундах.');
+    if (Math.abs(T - 960) < 1) return say('msg', false, '960 мс — это 16 шагов. Второй цикл идёт от 6 до 1: крайние огни не повторяются, иначе они горели бы двойное время.');
+    if (Math.abs(T - 900) < 1) return say('msg', false, '900 мс — 15 шагов. Условие i > 0: при i = 0 второй цикл уже останавливается.');
+    if (Math.abs(T - 480) < 1) return say('msg', false, '480 мс — это только первый цикл (8 шагов). В loop их два.');
+    if (Math.abs(T - 14) < .5) return say('msg', false, '14 — это число шагов. Каждый шаг длится t = 60 мс.');
+    if (Math.abs(T - 840) > 1) return say('msg', false, 'При ' + fmtN(T, 0) + ' мс выходит ' + fmtN(T/60, 1) + ' шагов по 60 мс. Выпишите значения i в обоих циклах.');
+    if (isNaN(k)) return say('msg', false, 'Время верно. Теперь — сколько раз загорается вывод 9.');
+    if (Math.abs(k - 2) < .5) return say('msg', false, 'Вывод 9 — это pins[7], крайний справа. Второй цикл начинается с i = 6 и до него не доходит.');
+    if (Math.abs(k - 1) > .5) return say('msg', false, 'Время верно, число загораний — нет. Найдите, каким индексом в массиве стоит 9.');
+    S.solved = true; say('msg', true, 'Верно: 14 шагов × 60 мс = 840 мс; pins[7] (вывод 9) загорается один раз, а средние — по два.'); $('svo').hidden = false; draw(); });
+
+  // ---------- игра: заголовок for и вопрос по нему; тело — flash(i)
+  const P = i => i + 2;
+  const GEN = [
+    () => { const a = pick([0,1,2]), b = pick([5,6,7,8]), s = pick([1,2,3]), vis = range(a, b, s); return {q:'for (int i = ' + a + '; i < ' + b + '; i' + (s === 1 ? '++' : ' += ' + s) + ') flash(i);  — сколько огней загорится по очереди?', lab:'N =', u:'огней', ans:vis.length, abs:.5, vis}; },
+    () => { const a = pick([7,6,5]), b = pick([0,1,2]), s = pick([1,2]), vis = range(a, b - 1, -s); return {q:'for (int i = ' + a + '; i >= ' + b + '; i' + (s === 1 ? '--' : ' -= ' + s) + ') flash(i);  — сколько огней загорится?', lab:'N =', u:'огней', ans:vis.length, abs:.5, vis}; },
+    () => { const a = pick([0,1,2,3]), s = pick([2,3]), vis = range(a, 8, s); return {q:'for (int i = ' + a + '; i < 8; i += ' + s + ') flash(i);  — на каком выводе загорится последний огонь?', lab:'вывод', u:'(номер пина)', ans:P(vis[vis.length - 1]), abs:.5, vis}; },
+    () => { const c = pick([3,5]); return {q:'for (int i = 7; i < ' + c + '; i++) flash(i);  — сколько огней загорится?', lab:'N =', u:'огней', ans:0, abs:.5, vis:[], why:'Условие 7 < ' + c + ' ложно сразу — тело цикла не выполнится ни разу.'}; },
+    () => { const s = pick([1,2]), t = pick([80,120,150]), vis = range(0, 8, s); return {q:'t = ' + t + ' мс. for (int i = 0; i < 8; i' + (s === 1 ? '++' : ' += 2') + ') flash(i);  — сколько миллисекунд длится этот цикл?', lab:'T =', u:'мс', ans:vis.length*t, abs:1, vis, t}; },
+    () => { const v = pick([['0','<= 8','++', range(0, 8, 1), 'pins[8]'], ['1','< 9','++', range(1, 8, 1), 'pins[8]'], ['0','< 10',' += 2', range(0, 8, 2), 'pins[8]']]);
+      return {q:'for (int i = ' + v[0] + '; i ' + v[1] + '; i' + v[2] + ') flash(i);  — сколько огней загорится?', lab:'N =', u:'огней', ans:null, vis:v[3], ghost:v[4]}; }];
+  function newGame(i){ S.game = (i == null ? pick(GEN) : GEN[i])(); $('gText').textContent = S.game.q; $('gLab').textContent = S.game.lab; $('gU').textContent = S.game.u; $('gA').value = ''; $('gMsg').className = 'msg';
+    S.game.lines = [pinsLine(8), 'void loop() {', '  ' + S.game.q.split('  —')[0], '}']; code(S.game.lines); draw(); }
+  const OOB = 'В массиве из 8 элементов индексы 0…7, а цикл доходит до pins[8]. Такого элемента нет: программа возьмёт из памяти случайное число и дёрнет случайный вывод.';
+  $('gCheck').addEventListener('click', () => { const g = S.game, a = parse($('gA').value);
+    if (g.ans == null){ verdict(false, OOB + ' Правильный ответ — «Ошибка в коде».'); draw(); return; }
+    if (isNaN(a)) return say('gMsg', false, 'Введите число.');
+    const ok = near(a, g); verdict(ok, (ok ? 'Верно. ' : 'Нет, верно ' + g.ans + '. ') + (g.why || 'Индексы: ' + (g.vis.join(', ') || 'ни одного') + '.')); draw(); });
+  $('never').addEventListener('click', () => { const g = S.game; verdict(g.ans == null, g.ans == null ? 'Верно. ' + OOB : 'Ошибки нет: цикл остаётся в пределах 0…7, ответ ' + g.ans + '.'); draw(); });
+  $('gNext').addEventListener('click', () => newGame());
+  window.__game = i => newGame(i); window.__ans = () => S.game.ans; // для автопроверки
+  tabs(m => { if (m === 'game'){ if (!S.game) newGame(); else code(S.game.lines); } else if (m === 'task') taskCode(); else sync(); });
+  sync(); if (!RM) requestAnimationFrame(loopTick);
+
+})();
+</script>
+</body></html>
